@@ -1,0 +1,17 @@
+# Fritbot Ignores #
+###################
+*.pyc
+*.pid
+config.py
+
+# Ignore Logs #
+###############
+*.log
+*.log.*
+
+# OS generated files #
+######################
+.DS_Store?
+ehthumbs.db
+Icon?
+Thumbs.db
