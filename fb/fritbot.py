@@ -111,12 +111,12 @@ class FritBot(object):
     def receivedGroupChat(self, room, user, body):
         '''Triggered when a group chat is recieved in a room the bot is in'''        
         #Validate that the user is NOT the bot itself!
-        if user['nick'].lower() == room['nick'].lower():
+        if user.uid.split('@', 1)[0] == config.JABBER['jid']:
             return
 
         body = body.encode("utf-8")
 
-        log.msg("Group chat: <{0}/{1}>: {2}".format(room.uid, user['nick'], body))
+        log.msg(u"Group chat: <{0}/{1}>: {2}".format(room.uid, user['nick'], body))
 
         wasCommand, message = intent.service.parseMessage(body, room, user)
         if message is not None:
@@ -129,7 +129,7 @@ class FritBot(object):
 
         body = body.encode("utf-8")
 
-        log.msg("Private chat: <{0}>: {1}".format(user['nick'], body))
+        log.msg(u"Private chat: <{0}>: {1}".format(user['nick'], body))
 
         wasCommand, message = intent.service.parseMessage(body, None, user)
         if message is not None:

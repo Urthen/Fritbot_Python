@@ -20,7 +20,7 @@ class JRoom(Room):
         self._interface = interface
         Room.__init__(self, room.name, room.nick)
 
-    def send(self, message):
+    def _send(self, message):
         self._interface.groupChat(self._room.entity_id, message)
 
     def setNick(self, nick):
@@ -31,7 +31,7 @@ class JUser(User):
         self._interface = interface
         User.__init__(self, uid, nick)
 
-    def send(self, message):
+    def _send(self, message):
         self._interface.chat(jid.internJID(self.uid), message)
 
 class JabberInterface(Interface, muc.MUCClient):
@@ -134,7 +134,7 @@ class JabberInterface(Interface, muc.MUCClient):
         if user is None:
             return
 
-        u = db.getRoom(JUser(user.resource, user.nick, self))
+        u = db.getUser(JUser(user.resource, user.nick, self))
 
         self.doNickUpdate(u, room.info, user.nick)
 

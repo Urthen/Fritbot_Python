@@ -43,14 +43,14 @@ class Route(object):
         self.uid = uid
 
     def __repr__(self):
-        return "<{0} {1}>".format(self.TYPE, self.uid)
+        return u"<{0} {1}>".format(self.TYPE, self.uid)
 
     def send(self, message, delay=False):
         '''Attempt to send a message with given delay'''
         time = 0.2
         if delay:
             time = random.random() + 2.0
-        log.msg("Sending <{0}>: {1}".format(self.uid, message))
+        log.msg("Sending <{0}>: {1}".format(self.uid, message.encode('utf-8')))
         reactor.callLater(time, self._send, message)
 
     def _send(self, message):

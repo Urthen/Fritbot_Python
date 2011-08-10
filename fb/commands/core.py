@@ -11,11 +11,11 @@ from fb.db import db
 
 def shutdown(bot, room, user, args):
     if user['admin'] == True:
-        log.msg("Shutting down by request from {0}.".format(user['nick']))
+        log.msg(u"Shutting down by request from {0}.".format(user['nick']))
         bot.shutdown()
-        return "Ok, shutting down momentarily."
+        return u"Ok, shutting down momentarily."
     else:
-        return "Not gonna happen, {0}.".format(user['nick'])
+        return u"Not gonna happen, {0}.".format(user['nick'])
 
 def undo(bot, room, user, args):
     if room is not None:
@@ -24,7 +24,7 @@ def undo(bot, room, user, args):
         stack = user.undostack
 
     if len(stack) == 0:
-        return "Nothing to undo!"
+        return u"Nothing to undo!"
 
     if args is None or len(args) == 0:
         args = ['last']
@@ -41,7 +41,7 @@ def undo(bot, room, user, args):
             try:
                 num = int(args[0])
             except:
-                return "{0} isn't a valid answer!".format(args[0])
+                return u"{0} isn't a valid answer!".format(args[0])
 
         undo = stack[num]
         undone, message = undo['function'](bot, room, user, undo)
@@ -65,28 +65,28 @@ def join(bot, room, user, args):
 
     bot.joinRoom(join, nick)
     bot.addUndo(room, user, {'function': undoJoin, 'message': 'Joined {0}'.format(join), 'room': join})
-    return "Ok, I've jumped into {0}!".format(join)
+    return u"Ok, I've jumped into {0}!".format(join)
 
 def undoJoin(bot, room, user, args):
     '''Undoes [join] by leaving the room.'''
     try:
         bot.leaveRoom(args['room'])
     except:
-        return True, "Looks like I was already gone anyway..."
-    return True, "Ok, backed out of {0}...".format(args['room'])
+        return True, u"Looks like I was already gone anyway..."
+    return True, u"Ok, backed out of {0}...".format(args['room'])
 
 def leave(bot, room, user, args):
     '''Leaves a room. Can be used to leave other rooms with >channel functionality.'''
     bot.leaveRoom(room)
-    user.send("Ok, I've left {0}.".format(room.uid))
+    user.send(u"Ok, I've left {0}.".format(room.uid))
     bot.addUndo(room, user, {'function': undoLeave, 'message': 'Left {0}'.format(room.uid), 'room': room.uid})
 
 def undoLeave(bot, room, user, args):
     try:
         bot.joinRoom(args['room'], args['nick'])
     except:
-        return True, "Something went wrong rejoining the room.. maybe I'm already there?"
-    return True, "Ok, I'm back in {0}!".format(args['room'])
+        return True, u"Something went wrong rejoining the room.. maybe I'm already there?"
+    return True, u"Ok, I'm back in {0}!".format(args['room'])
 
 def quiet(bot, room, user, args):
     '''Squelches the bot for the given room.'''
@@ -109,22 +109,22 @@ def unquiet(bot, room, user, args):
 
 def allow(bot, room, user, args, doundo=False):
     if room is None:
-        ret = (False, "This isn't a chat room!")
+        ret = (False, u"This isn't a chat room!")
     elif len(args) < 1:
-        ret = (False, "Must specify a permission...")
+        ret = (False, u"Must specify a permission...")
     elif user['admin'] == True:
         auths = set(room["auths"]) | set(args)
         room["auths"] = list(auths)
         room.save()
 
         if not doundo:
-            msg = "Allowed {0}".format(repr(args))
+            msg = u"Allowed {0}".format(repr(args))
             undo = {'function': undoAllow, 'args': args, 'room': room, 'message': msg}
             bot.addUndo(room, user, undo)
 
-        ret = (True, "Ok, allowing the following authorizations: {0}".format(repr(args)))
+        ret = (True, u"Ok, allowing the following authorizations: {0}".format(repr(args)))
     else:
-        ret = (False, "Not gonna happen, {0}.".format(user['nick']))
+        ret = (False, u"Not gonna happen, {0}.".format(user['nick']))
 
     if doundo:
         return ret
@@ -136,22 +136,22 @@ def undoAllow(bot, room, user, args):
 
 def disallow(bot, room, user, args, doundo=False):
     if room is None:
-        ret = (False, "This isn't a chat room!")
+        ret = (False, u"This isn't a chat room!")
     elif len(args) < 1:
-        ret = (False, "Must specify a permission...")
+        ret = (False, u"Must specify a permission...")
     elif user['admin'] == True:
         auths = set(room["auths"]) - set(args)
         room["auths"] = list(auths)
         room.save()
 
         if not doundo:
-            msg = "Disallowed {0}".format(repr(args))
+            msg = u"Disallowed {0}".format(repr(args))
             undo = {'function': undoDisallow, 'args': args, 'room': room, 'message': msg}
             bot.addUndo(room, user, undo)
 
-        ret = (True, "Ok, disallowing the following authorizations: {0}".format(repr(args)))
+        ret = (True, u"Ok, disallowing the following authorizations: {0}".format(repr(args)))
     else:
-        ret = (False, "Not gonna happen, {0}.".format(user['nick']))
+        ret = (False, u"Not gonna happen, {0}.".format(user['nick']))
 
     if doundo:
         return ret
@@ -162,4 +162,4 @@ def undoDisallow(bot, room, user, args):
     return allow(bot, args["room"], user, args["args"], True)
 
 def auths(bot, room, user, args):
-    return "I currently have the following authorizations for the {0} room: {1}".format(room.uid, repr(room["auths"]))
+    return u"I currently have the following authorizations for the {0} room: {1}".format(room.uid, repr(room["auths"]))

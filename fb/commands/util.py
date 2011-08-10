@@ -60,5 +60,3 @@ def inRoster(name, room=None, special=None):
         return users
     
     return False
-
-#db.quotes.find({'$or': [{'removed': {'$exists': false}}, {'removed': false}], 'bynick': {'$options': 'i', '$regex': '\\braymonds\\b'}}) 
