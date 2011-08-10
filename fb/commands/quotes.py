@@ -41,7 +41,7 @@ def sayQuotes(bot, room, user, nick, segment, min=1, max=1):
         quotes = util.getSubset(quotes, min, max)
         lines = []
         for quote in quotes:
-            lines.append("<{0}>: {1}".format(quote['user']['nick'], quote['body']))
+            lines.append("<{0}>: {1}".format(quote['user']['nick'], quote['body'].format("utf-8")))
         quotes = '\n'.join(lines)
 
         if room is not None:
@@ -126,11 +126,11 @@ def remember(bot, room, user, args):
             if quote['user']['id'] == user['_id']:
                 return "Sorry, {0}, but you can't quote yourself! Try saying someone funnier and maybe someone else will remember you.".format(user['nick'])
             if "remembered" in quote:
-                return "Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"])
+                return "Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"].format("utf-8"))
             else:
                 quote["remembered"] = {"user": user["_id"], "nick": user["nick"], "time": datetime.datetime.now()}
                 db.db.history.save(quote)
-                return "Ok, {0}, remembering <{1}>: {2}".format(user["nick"], quote['user']['nick'], quote["body"])
+                return "Ok, {0}, remembering <{1}>: {2}".format(user["nick"], quote['user']['nick'], quote["body"].format("utf-8"))
         else:
             return "Sorry, {0}, I haven't heard anything like '{1}' by {2}.".format(user["nick"], text, tuser[0]["nick"])
 

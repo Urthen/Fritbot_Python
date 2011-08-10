@@ -8,7 +8,8 @@ APPLICATION = {
 
 # Jabber connection settings
 JABBER =  {
-    "jid": "user@server.name.com/Resource", 
+    "jid": "user", # as in, user@server.name.com/Resource
+    "resource": "resource",
     "password": "password", 
     "server": "server.name.com"
 }
