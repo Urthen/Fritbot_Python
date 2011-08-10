@@ -7,7 +7,7 @@ from twisted.python import log
 from twisted.internet import reactor
 
 import config
-from db import db
+from fb.db import db
 
 def shutdown(bot, room, user, args):
     if user['admin'] == True:

@@ -3,11 +3,14 @@
 *.pyc
 *.pid
 config.py
+db
+logs
 
 # Ignore Logs #
 ###############
 *.log
 *.log.*
+
 
 # OS generated files #
 ######################

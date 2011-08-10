@@ -2,9 +2,9 @@ import re, datetime
 from twisted.python import log
 
 import config
-from db import db
-from commands import *
-from commands.util import cleanString
+from fb.db import db
+from fb.commands import *
+from fb.commands.util import cleanString
 
 CAPTURE_BEGIN = ['"', "'"] #, '{', '(', '[']
 CAPTURE_END = ['"', "'"] #, '}', ')', ']']

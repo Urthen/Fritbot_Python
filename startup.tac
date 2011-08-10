@@ -3,18 +3,24 @@ launch.tac: Twistd application file used to launch an actual fritbot instance.
 To launch in console mode, run "twistd -ny launch.tac"
 '''
 
+import sys
+
 from twisted.application import service
 from twisted.words.protocols.jabber import jid
 from twisted.python.logfile import DailyLogFile
 from wokkel.client import XMPPClient
 
-from fritbot import FritBot
-from jabber import JabberInterface
+from fb.fritbot import FritBot
+from fb.interface.jabber import JabberInterface
 import config
 
 # Set up twistd application
 application = service.Application(config.APPLICATION["name"])
-logfile = DailyLogFile(config.LOG["filename"], config.LOG["directory"])
+
+try:
+	logfile = DailyLogFile(config.LOG["filename"], config.LOG["directory"])
+except AssertionError:
+	raise AssertionError("Assertion error attempting to open the log file. Does the directory {0} exist?".format(config.LOG["directory"]))
 
 # Set up Fritbot instance
 fritbot = FritBot()

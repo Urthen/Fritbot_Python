@@ -1,7 +1,7 @@
 '''Primary Fritbot class, which acts as the twistd service.
 Connects to and handles all communication with the jabber server.'''
 
-import sys, datetime, random
+import sys, datetime, random, os
 
 from twisted.internet import defer, reactor
 from twisted.words.protocols.jabber import jid
@@ -9,9 +9,9 @@ from twisted.python import log
 
 from wokkel import muc, xmppim
 
-from interface import Room, User, Interface
-from db import db
-import config, intent      
+from fb.interface.interface import Room, User, Interface
+from fb.db import db
+import config, fb.intent as intent  
 
 
 class FritBot(object):
@@ -53,6 +53,17 @@ class FritBot(object):
         if self._connection is not None and self._connection.parent is not None and self._connection.parent.stopService is not None:
             reactor.callLater(1, self._connection.parent.stopService)
         reactor.callLater(2, reactor.stop)
+
+    def restart(self):
+        '''Restart the bot after a 2 second delay.'''
+        if self._connection is not None and self._connection.parent is not None and self._connection.parent.stopService is not None:
+            reactor.callLater(1, self._connection.parent.stopService)
+        reactor.callLater(2, self._restart)
+
+    def _restart(self):
+        '''Internal call to restart the bot.'''
+        path = sys.executable
+        os.execl(python, python, * sys.argv)
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to joining, creating, and leaving rooms.

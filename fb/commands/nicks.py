@@ -1,6 +1,6 @@
 #Nickname Functionsies
 
-from db import db
+from fb.db import db
 
 def ghost(bot, room, user, args):
     newnick = ' '.join(args)

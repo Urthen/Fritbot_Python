@@ -3,7 +3,7 @@ import datetime
 from twisted.internet import defer, reactor
 
 import config
-from db import db
+from fb.db import db
 
 class Route(object):
     '''A valid route for sending messages. Currently, this could be a room or a user.'''

@@ -3,7 +3,7 @@
 import re, random
 
 import config
-from db import db
+from fb.db import db
 
 def cleanString(text):
     return re.sub("[^a-zA-Z0-9 ]", '', text.lower()).strip()

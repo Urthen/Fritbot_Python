@@ -3,7 +3,7 @@ A note to the unfamiliar, this acts as a singleton: All you have to do is call D
 '''
 
 from twisted.python import log
-from pymongo import Connection
+from pymongo import Connection, errors as PyMongoErrors
 
 import config
 
@@ -18,7 +18,11 @@ class Database(object):
     def db(self):
         if self._connection is None:
             log.msg("Establishing connection to database...")
-            self._connection = Connection() #Because that's not ambiguous.
+            try:
+                self._connection = Connection() #Because that's not ambiguous.
+            except PyMongoErrors.AutoReconnect:
+                raise AssertionError("Error connecting to the MongoDB instance. Is mongod running?")
+
             self._db = self._connection[config.DB['name']]
 
         return self._db

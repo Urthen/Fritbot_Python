@@ -10,8 +10,8 @@ from twisted.python import log
 from wokkel import muc, xmppim
 
 from interface import Interface, User, Room
-from db import db
-import config, intent
+from fb.db import db
+import config, fb.intent as intent
 
 class JRoom(Room):
     

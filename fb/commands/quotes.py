@@ -4,7 +4,7 @@ import random, re, datetime
 
 from pymongo import ASCENDING, DESCENDING
 
-from db import db
+from fb.db import db
 import util
 
 def sayQuotes(bot, room, user, nick, segment, min=1, max=1):
