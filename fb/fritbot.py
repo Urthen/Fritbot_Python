@@ -29,7 +29,7 @@ class FritBot(object):
 
     def __init__(self):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
-        print "Initializing bot..."
+        log.msg("Initializing bot...")
 
         # Configure internals
         for uid, nick in config.ROOMS.items():
@@ -38,11 +38,11 @@ class FritBot(object):
         intent.service.link(self)
 
     def registerInterface(self, interface):
-        print "Connecting bot to interface..."
+        log.msg("Connecting bot to interface...")
         self._connection = interface
        
     def connect(self):
-        print "Joining rooms..."
+        log.msg("Joining rooms...")
         roomlist = self.rooms.values()
         self.rooms = {}
         for room in roomlist:
@@ -71,7 +71,7 @@ class FritBot(object):
         
     def initRoom(self, room):
         '''Joined a room, add it to the list.'''    
-        print "Connected to " + room.uid               
+        log.msg("Connected to " + room.uid)
         self.rooms[room.uid] = room
         
     def joinRoom(self, room, nick):

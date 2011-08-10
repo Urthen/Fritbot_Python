@@ -16,9 +16,9 @@ import config, fb.intent as intent
 class JRoom(Room):
     
     def __init__(self, room, interface):
-        Room.__init__(self, room.name, room.nick)
         self._room = room
         self._interface = interface
+        Room.__init__(self, room.name, room.nick)
 
     def send(self, message):
         self._interface.groupChat(self._room.entity_id, message)
@@ -28,8 +28,8 @@ class JRoom(Room):
 
 class JUser(User):
     def __init__(self, uid, nick, interface):
-        User.__init__(self, uid, nick)
         self._interface = interface
+        User.__init__(self, uid, nick)
 
     def send(self, message):
         self._interface.chat(jid.internJID(self.uid), message)
@@ -43,7 +43,7 @@ class JabberInterface(Interface, muc.MUCClient):
 
     def __init__(self, bot):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
-        print "Initializing Jabber interface..."
+        log.msg("Initializing Jabber interface...")
         Interface.__init__(self, bot)
         muc.MUCClient.__init__(self)
 
@@ -60,7 +60,7 @@ class JabberInterface(Interface, muc.MUCClient):
        
     def initialized(self):
         '''Called on connect/reconnect. Attempts to re-join all existing rooms.'''
-        print "Connected to Jabber service."
+        log.msg("Connected to Jabber service.")
 
         # Create xmpp presence subhandler
         self._presence = xmppim.PresenceClientProtocol()
@@ -79,7 +79,7 @@ class JabberInterface(Interface, muc.MUCClient):
         Configure rooms that need to be before others can join.'''
 
 
-        print "Attempting to connect to jabber room " + room.name
+        log.msg("Attempting to connect to jabber room " + room.name)
         r = JRoom(room, self)
         room.info = r
 

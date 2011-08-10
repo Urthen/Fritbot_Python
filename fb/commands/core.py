@@ -11,7 +11,7 @@ from fb.db import db
 
 def shutdown(bot, room, user, args):
     if user['admin'] == True:
-        print "Shutting down by request from {0}.".format(user['nick'])
+        log.msg("Shutting down by request from {0}.".format(user['nick']))
         bot.shutdown()
         return "Ok, shutting down momentarily."
     else:

@@ -7,7 +7,9 @@ import sys
 
 from twisted.application import service
 from twisted.words.protocols.jabber import jid
+from twisted.python.log import ILogObserver, FileLogObserver
 from twisted.python.logfile import DailyLogFile
+from twisted.python import log
 from wokkel.client import XMPPClient
 
 from fb.fritbot import FritBot
@@ -22,11 +24,14 @@ try:
 except AssertionError:
 	raise AssertionError("Assertion error attempting to open the log file. Does the directory {0} exist?".format(config.LOG["directory"]))
 
+application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
+log.startLogging(sys.stdout)
+
 # Set up Fritbot instance
 fritbot = FritBot()
 
 # Connect to XMPP
-xmppclient = XMPPClient(jid.internJID(config.JABBER["jid"]), config.JABBER["password"])
+xmppclient = XMPPClient(jid.internJID(config.JABBER["jid"]), config.JABBER["password"], config.JABBER["server"])
 xmppclient.logTraffic = config.LOG["traffic"]
 
 jinterface = JabberInterface(fritbot)

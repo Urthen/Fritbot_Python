@@ -1,6 +1,7 @@
 import datetime
 
 from twisted.internet import defer, reactor
+from twisted.python import log
 
 import config
 from fb.db import db
@@ -44,7 +45,7 @@ class Route(object):
         time = 0.2
         if delay:
             time = random.random() + 2.0
-        print "Sending <{0}>: {1}".format(self.uid, message)            
+        log.msg("Sending <{0}>: {1}".format(self.uid, message))
         reactor.callLater(time, self._send, message)
 
     def _send(self, message):
@@ -79,11 +80,11 @@ class Room(Route):
 
     def refresh(self):
         #TODO: Implement time locks, if I care.
-        print "Refreshing configuration for room: " + self.uid
+        log.msg("Refreshing configuration for room: " + self.uid)
         mdbRoom = db.db.rooms.find_one({"name": self.uid})
 
         if mdbRoom is None:
-            print "Not found, creating new room in DB."
+            log.msg("Not found, creating new room in DB.")
             mdbRoom = {
                 "name": self.uid,
                 "nick": self['nick'],
@@ -124,11 +125,11 @@ class User(Route):
         Route.__init__(self, uid)
 
     def refresh(self):
-        print "Refreshing configuration for user: " + self.uid
+        log.msg("Refreshing configuration for user: " + self.uid)
         mdbUser= db.db.users.find_one({"resource": self.uid})
 
         if mdbUser is None:
-            print "Not found, creating new user in DB."
+            log.msg("Not found, creating new user in DB.")
             mdbUser = {
                 "resource": self.uid,
                 "nick": self['nick']

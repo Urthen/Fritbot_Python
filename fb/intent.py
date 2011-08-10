@@ -49,14 +49,14 @@ class IntentService(object):
 
     def link(self, bot):
         '''Link the intent service to the bot.'''
-        print "Linking bot to intent service."
+        log.msg("Linking bot to intent service.")
         self._bot = bot
 
     def refreshIntents(self):
         '''Read intents from the database'''
         #refresh according to refresh guidelines
         if self._refreshed is None or (datetime.datetime.now() - self._refreshed) > datetime.timedelta(seconds=config.CONFIG['refresh']):
-            print "Intents need some refreshment..."
+            log.msg("Intents need some refreshment...")
             self._refreshed = datetime.datetime.now()
             self._intents = []
 
@@ -95,7 +95,7 @@ class IntentService(object):
 
         words = cutString(text)
 
-        print "Lets do this command:", words
+        log.msg("Lets do this command:", words)
 
         if words[0][0] == '>':
             newroom = words[0][1:]
@@ -122,7 +122,6 @@ class IntentService(object):
                                 user.send("I can't do '{1}' in the {0} room.".format(room.uid, match.group()))
                                 return True, None
 
-                            print intent
                             if "squelch" in intent and intent["squelch"] and room.squelched:
                                 user.send("I've been shut up in {0} for {2} longer, so I can't do '{1}'.".format(room.uid, match.group(), room.squelched))
                                 return True, None
@@ -141,7 +140,7 @@ class IntentService(object):
                         #Anything left is added to the args
                         args.extend(words[i:])
 
-                        print "Running command {0} with args {1}...".format(intent['function'], args)
+                        log.msg("Running command {0} with args {1}...".format(intent['function'], args))
 
                         out = eval(intent['function'])(self._bot, room, user, args)
                         #Anyway, whether or not it was a satisfactory result, we need to break the loop.

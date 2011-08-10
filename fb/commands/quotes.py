@@ -27,8 +27,6 @@ def sayQuotes(bot, room, user, nick, segment, min=1, max=1):
     if segment is not None:
         query['body'] = {'$regex': '{0}'.format(segment), '$options': 'i'}  
 
-
-    print query
     quotes = db.db.history.find(query)
 
     msg = None
@@ -121,7 +119,7 @@ def remember(bot, room, user, args):
         text = " ".join(args[1:])
 
         query = {"user.id": tuser[0]["_id"], "room": room.info["_id"], "body": {"$regex": text, '$options': 'i'}, "command": False}
-        print query
+
         quote = db.db.history.find_one(query, sort=[("date", DESCENDING)])
 
         if quote:
