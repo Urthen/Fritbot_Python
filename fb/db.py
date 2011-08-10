@@ -2,6 +2,8 @@
 A note to the unfamiliar, this acts as a singleton: All you have to do is call DB and start using it. It will be set up and shared everywhere.
 '''
 
+import datetime
+
 from twisted.python import log
 from pymongo import Connection, errors as PyMongoErrors
 
@@ -9,9 +11,11 @@ import config
 
 class Database(object):
 
-    def __init__(self):
-        self._connection = None
-        self._db = None
+    _connection = None
+    _db = None
+    _roomCache = {}
+    _userCache = {}
+
 
     '''Return the database instance. Create it if it hasn't been yet.'''
     @property
@@ -27,9 +31,31 @@ class Database(object):
 
         return self._db
 
-    '''Get a single user by resource'''
-    def getUserByUID(self, resource):
-        mdbUser = self.db.users.find_one({"resource": resource})
-        return mdbUser
+    def getRoom(self, room):
+        if room.uid in self._roomCache:
+            room = self._roomCache[room.uid]
+            #print "found in cache", room.uid, room._refreshed
+        else:
+            log.msg("Room not found in cache and will be loaded: {0}".format(room.uid))
+            self._roomCache[room.uid] = room
+
+        room.refresh()
+
+        return room
+
+    def getUser(self, user):
+
+        if user.uid in self._userCache:
+            user = self._userCache[user.uid]
+            #print "found in cache", user.uid, user._refreshed
+        else:
+            log.msg("User not found in cache and will be loaded: {0}".format(user.uid))
+            self._userCache[user.uid] = user
+        user.refresh()
+
+        return user
+
+
+    
 
 db = Database()

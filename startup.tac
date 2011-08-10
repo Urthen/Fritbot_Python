@@ -31,7 +31,8 @@ log.startLogging(sys.stdout)
 fritbot = FritBot()
 
 # Connect to XMPP
-xmppclient = XMPPClient(jid.internJID(config.JABBER["jid"]), config.JABBER["password"], config.JABBER["server"])
+bot_jid = "{0}@{1}/{2}".format(config.JABBER["jid"], config.JABBER["server"], config.JABBER["resource"])
+xmppclient = XMPPClient(jid.internJID(bot_jid), config.JABBER["password"], config.JABBER["server"])
 xmppclient.logTraffic = config.LOG["traffic"]
 
 jinterface = JabberInterface(fritbot)

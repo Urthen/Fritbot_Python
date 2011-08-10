@@ -80,7 +80,7 @@ class JabberInterface(Interface, muc.MUCClient):
 
 
         log.msg("Attempting to connect to jabber room " + room.name)
-        r = JRoom(room, self)
+        r = db.getRoom(JRoom(room, self))
         room.info = r
 
         if int(room.status) == muc.STATUS_CODE_CREATED:
@@ -115,11 +115,11 @@ class JabberInterface(Interface, muc.MUCClient):
             
     def userUpdatedStatus(self, room, user, show, status):
         '''Called when a user changes their nickname'''
-        u = JUser(user.resource, user.nick, self)
+        u = db.getUser(JUser(user.resource, user.nick, self))
         if hasattr(room, 'info'):
             r = room.info
         else:
-            r = JRoom(room, self)
+            r = db.getRoom(JRoom(room, self))
         
         self.doNickUpdate(u, r, user.nick)
 
@@ -134,7 +134,7 @@ class JabberInterface(Interface, muc.MUCClient):
         if user is None:
             return
 
-        u = JUser(user.resource, user.nick, self)
+        u = db.getRoom(JUser(user.resource, user.nick, self))
 
         self.doNickUpdate(u, room.info, user.nick)
 
@@ -150,6 +150,6 @@ class JabberInterface(Interface, muc.MUCClient):
         resource = user_jid.userhost()
         nick = user_jid.userhost().split('@', 1)[0]
 
-        user = JUser(resource, nick, self)
+        user = db.getUser(JUser(resource, nick, self))
 
         self.bot.receivedPrivateChat(user, unicode(msg.body))

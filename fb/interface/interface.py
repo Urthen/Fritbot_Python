@@ -20,6 +20,12 @@ class Route(object):
 
     _collection = None
     '''MongoDB Collection representing all objects for this route type.'''
+
+    _refreshed = None
+    '''When was this route last refreshed?'''
+
+    undostack = []
+    '''Undo stack for this route.'''
     
     def __getitem__(self, key):
         '''Getter for contained MongoDB info object. Returns None if key is not found.'''
@@ -35,7 +41,6 @@ class Route(object):
     def __init__(self, uid):
         '''Initialize a route with given unique identifier.'''
         self.uid = uid
-        self.refresh()
 
     def __repr__(self):
         return "<{0} {1}>".format(self.TYPE, self.uid)
@@ -52,6 +57,12 @@ class Route(object):
         '''Template to actually send a message via this route. Must be implemented in a subclass.'''
         raise NotImplementedError("_send() is not implemented in this Route instance.")
 
+    def needsRefresh(self):
+        if self._refreshed is None:
+            return True
+        else:
+            return (datetime.datetime.now() - self._refreshed) > datetime.timedelta(seconds=config.CONFIG["refresh"])
+
     def refresh(self):
         '''Template to refresh the mongodb information for this route. Must be implemented in a subclass.'''
         raise NotImplementedError("refresh() is not implemented in this Route instance.")
@@ -62,6 +73,10 @@ class Route(object):
             self._collection.save(self.info)
         else:
             raise NotImplementedError("save() cannot be run when _collection is not set. It should be set by the subclass.")
+    
+    def addUndo(self, undo):
+        self.undostack.append(undo)
+
 
 class Room(Route):
 
@@ -70,17 +85,16 @@ class Room(Route):
     roster = {}
     '''Dict of User objects currently in this room, by uid'''
 
-    undostack = []
-    '''Undo stack for this room.'''
-
     def __init__(self, uid, nick=config.CONFIG["name"]):
         self['nick'] = nick
         self._collection = db.db.rooms
         Route.__init__(self, uid)
 
     def refresh(self):
-        #TODO: Implement time locks, if I care.
-        log.msg("Refreshing configuration for room: " + self.uid)
+        if not self.needsRefresh():
+            return
+
+        self._refreshed = datetime.datetime.now()
         mdbRoom = db.db.rooms.find_one({"name": self.uid})
 
         if mdbRoom is None:
@@ -93,6 +107,8 @@ class Room(Route):
             
             db.db.rooms.insert(mdbRoom)
 
+        self.info = mdbRoom
+
         if "squelched" in self.info and self["squelched"] > datetime.datetime.now():
             seconds = (self["squelched"] - datetime.datetime.now()).seconds
             minutes = int(seconds / 60)
@@ -103,11 +119,6 @@ class Room(Route):
                 self.squelched = "{0} second(s)".format(seconds)
         else:
             self.squelched = False
-
-        self.info = mdbRoom
-    
-    def addUndo(self, undo):
-        self.undostack.append(undo)
 
     def setNick(self, nick):
         raise NotImplementedError("setNick() must be implemented by a sub-class.")
@@ -125,7 +136,9 @@ class User(Route):
         Route.__init__(self, uid)
 
     def refresh(self):
-        log.msg("Refreshing configuration for user: " + self.uid)
+        if not self.needsRefresh():
+            return
+
         mdbUser= db.db.users.find_one({"resource": self.uid})
 
         if mdbUser is None:
@@ -135,7 +148,7 @@ class User(Route):
                 "nick": self['nick']
             }
             
-            db.db.rooms.insert(mdbUser)
+            db.db.users.insert(mdbUser)
 
         self.info = mdbUser 
 
