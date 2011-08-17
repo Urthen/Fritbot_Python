@@ -1,6 +1,6 @@
 # -*- test-case-name: wokkel.test.test_client -*-
 #
-# Copyright (c) 2003-2007 Ralph Meijer
+# Copyright (c) Ralph Meijer.
 # See LICENSE for details.
 
 """
@@ -11,16 +11,12 @@ that should probably eventually move there.
 """
 
 from twisted.application import service
-from twisted.internet import defer, protocol, reactor
+from twisted.internet import reactor
 from twisted.names.srvconnect import SRVConnector
 from twisted.words.protocols.jabber import client, sasl, xmlstream
 
-try:
-    from twisted.words.xish.xmlstream import XmlStreamFactoryMixin
-except ImportError:
-    from wokkel.compat import XmlStreamFactoryMixin
-
-from wokkel.subprotocols import StreamManager, XMPPHandler
+from wokkel import generic
+from wokkel.subprotocols import StreamManager
 
 class CheckAuthInitializer(object):
     """
@@ -83,12 +79,14 @@ def HybridClientFactory(jid, password):
     return xmlstream.XmlStreamFactory(a)
 
 
+
 class XMPPClient(StreamManager, service.Service):
     """
     Service that initiates an XMPP client connection.
     """
 
     def __init__(self, jid, password, host=None, port=5222):
+        self.jid = jid
         self.domain = jid.host
         self.host = host
         self.port = port
@@ -97,16 +95,31 @@ class XMPPClient(StreamManager, service.Service):
 
         StreamManager.__init__(self, factory)
 
+
     def startService(self):
         service.Service.startService(self)
 
         self._connection = self._getConnection()
+
 
     def stopService(self):
         service.Service.stopService(self)
 
         self.factory.stopTrying()
         self._connection.disconnect()
+
+
+    def _authd(self, xs):
+        """
+        Called when the stream has been initialized.
+
+        Save the JID that we were assigned by the server, as the resource might
+        differ from the JID we asked for. This is stored on the authenticator
+        by its constituent initializers.
+        """
+        self.jid = self.factory.authenticator.jid
+        StreamManager._authd(self, xs)
+
 
     def initializationFailed(self, reason):
         """
@@ -118,42 +131,31 @@ class XMPPClient(StreamManager, service.Service):
         self.stopService()
         reason.raiseException()
 
+
     def _getConnection(self):
         if self.host:
             return reactor.connectTCP(self.host, self.port, self.factory)
         else:
-            c = SRVConnector(reactor, 'xmpp-client', self.domain, self.factory)
+            c = XMPPClientConnector(reactor, self.domain, self.factory)
             c.connect()
             return c
 
 
-class DeferredClientFactory(XmlStreamFactoryMixin, protocol.ClientFactory):
-    protocol = xmlstream.XmlStream
+
+class DeferredClientFactory(generic.DeferredXmlStreamFactory):
 
     def __init__(self, jid, password):
-        self.authenticator = client.XMPPAuthenticator(jid, password)
-        XmlStreamFactoryMixin.__init__(self, self.authenticator)
-
-        deferred = defer.Deferred()
-        self.deferred = deferred
-
-        self.addBootstrap(xmlstream.INIT_FAILED_EVENT, deferred.errback)
-
-        class ConnectionInitializedHandler(XMPPHandler):
-            def connectionInitialized(self):
-                deferred.callback(None)
-
+        authenticator = client.XMPPAuthenticator(jid, password)
+        generic.DeferredXmlStreamFactory.__init__(self, authenticator)
         self.streamManager = StreamManager(self)
-        self.addHandler(ConnectionInitializedHandler())
 
-    def clientConnectionFailed(self, connector, reason):
-        self.deferred.errback(reason)
 
     def addHandler(self, handler):
         """
         Add a subprotocol handler to the stream manager.
         """
         self.streamManager.addHandler(handler)
+
 
     def removeHandler(self, handler):
         """
@@ -162,8 +164,25 @@ class DeferredClientFactory(XmlStreamFactoryMixin, protocol.ClientFactory):
         self.streamManager.removeHandler(handler)
 
 
+
+class XMPPClientConnector(SRVConnector):
+    def __init__(self, reactor, domain, factory):
+        SRVConnector.__init__(self, reactor, 'xmpp-client', domain, factory)
+
+
+    def pickServer(self):
+        host, port = SRVConnector.pickServer(self)
+
+        if not self.servers and not self.orderedServers:
+            # no SRV record, fall back..
+            port = 5222
+
+        return host, port
+
+
+
 def clientCreator(factory):
     domain = factory.authenticator.jid.host
-    c = SRVConnector(reactor, 'xmpp-client', domain, factory)
+    c = XMPPClientConnector(reactor, domain, factory)
     c.connect()
     return factory.deferred

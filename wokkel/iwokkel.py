@@ -15,7 +15,7 @@ class IXMPPHandler(Interface):
     handle of (part of) an XMPP extension protocol.
     """
 
-    manager = Attribute("""XML stream manager""")
+    parent = Attribute("""XML stream manager for this handler""")
     xmlstream = Attribute("""The managed XML stream""")
 
     def setHandlerParent(parent):
@@ -25,12 +25,14 @@ class IXMPPHandler(Interface):
         @type parent: L{IXMPPHandlerCollection}
         """
 
+
     def disownHandlerParent(parent):
         """
         Remove the parent of the handler.
 
         @type parent: L{IXMPPHandlerCollection}
         """
+
 
     def makeConnection(xs):
         """
@@ -45,6 +47,7 @@ class IXMPPHandler(Interface):
         @type xs: L{XmlStream<twisted.words.protocols.jabber.XmlStream>}
         """
 
+
     def connectionMade():
         """
         Called after a connection has been established.
@@ -53,6 +56,7 @@ class IXMPPHandler(Interface):
         authenticator or the stream manager prior to stream initialization
         (including authentication).
         """
+
 
     def connectionInitialized():
         """
@@ -63,6 +67,7 @@ class IXMPPHandler(Interface):
         used to setup observers for incoming stanzas.
         """
 
+
     def connectionLost(reason):
         """
         The XML stream has been closed.
@@ -72,6 +77,7 @@ class IXMPPHandler(Interface):
 
         @type reason: L{twisted.python.failure.Failure}
         """
+
 
 
 class IXMPPHandlerCollection(Interface):
@@ -86,6 +92,7 @@ class IXMPPHandlerCollection(Interface):
         Get an iterator over all child handlers.
         """
 
+
     def addHandler(handler):
         """
         Add a child handler.
@@ -93,12 +100,14 @@ class IXMPPHandlerCollection(Interface):
         @type handler: L{IXMPPHandler}
         """
 
+
     def removeHandler(handler):
         """
         Remove a child handler.
 
         @type handler: L{IXMPPHandler}
         """
+
 
 
 class IDisco(Interface):
@@ -269,7 +278,9 @@ class IPubSubService(Interface):
                              C{list} of L{domish.Element})
         """
 
-    def notifyDelete(service, nodeIdentifier, subscriptions):
+
+    def notifyDelete(service, nodeIdentifier, subscribers,
+                     redirectURI=None):
         """
         Send out node deletion notifications.
 
@@ -277,9 +288,12 @@ class IPubSubService(Interface):
         @type service: L{jid.JID}
         @param nodeIdentifier: The identifier of the node that was deleted.
         @type nodeIdentifier: C{unicode}
-        @param subscriptions: The subscriptions for which a notification should
-                              be sent out.
-        @type subscriptions: C{list} of L{jid.JID}
+        @param subscribers: The subscribers for which a notification should
+                            be sent out.
+        @type subscribers: C{list} of L{jid.JID}
+        @param redirectURI: Optional XMPP URI of another node that subscribers
+                            are redirected to.
+        @type redirectURI: C{str}
         """
 
     def publish(requestor, service, nodeIdentifier, items):
@@ -386,11 +400,11 @@ class IPubSubService(Interface):
         by option name. The value of each entry represents the specifics for
         that option in a dictionary:
 
-        - C{'type'} (C{str}): The option's type (see
-          L{Field<wokkel.data_form.Field>}'s doc string for possible values).
-        - C{'label'} (C{unicode}): A human readable label for this option.
-        - C{'options'} (C{dict}): Optional list of possible values for this
-          option.
+         - C{'type'} (C{str}): The option's type (see
+           L{Field<wokkel.data_form.Field>}'s doc string for possible values).
+         - C{'label'} (C{unicode}): A human readable label for this option.
+         - C{'options'} (C{dict}): Optional list of possible values for this
+           option.
 
         Example::
 
@@ -413,7 +427,7 @@ class IPubSubService(Interface):
         @rtype: C{dict}.
         """
 
-    def getDefaultConfiguration(requestor, service):
+    def getDefaultConfiguration(requestor, service, nodeType):
         """
         Called when a default node configuration request has been received.
 
@@ -421,6 +435,9 @@ class IPubSubService(Interface):
         @type requestor: L{jid.JID}
         @param service: The entity the request was addressed to.
         @type service: L{jid.JID}
+        @param nodeType: The type of node for which the configuration is
+                         retrieved, C{'leaf'} or C{'collection'}.
+        @type nodeType: C{str}
         @return: A deferred that fires with a C{dict} representing the default
                  node configuration. Keys are C{str}s that represent the
                  field name. Values can be of types C{unicode}, C{int} or
@@ -512,6 +529,247 @@ class IPubSubService(Interface):
         """
 
 
+
+class IPubSubResource(Interface):
+
+    def locateResource(request):
+        """
+        Locate a resource that will handle the request.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        """
+
+
+    def getInfo(requestor, service, nodeIdentifier):
+        """
+        Get node type and meta data.
+
+        @param requestor: The entity the request originated from.
+        @type requestor: L{jid.JID}
+        @param service: The publish-subscribe service entity.
+        @type service: L{jid.JID}
+        @param nodeIdentifier: Identifier of the node to request the info for.
+        @type nodeIdentifier: L{unicode}
+        @return: A deferred that fires with a dictionary. If not empty,
+                 it must have the keys C{'type'} and C{'meta-data'} to keep
+                 respectively the node type and a dictionary with the meta
+                 data for that node.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def getNodes(requestor, service, nodeIdentifier):
+        """
+        Get all nodes contained by this node.
+
+        @param requestor: The entity the request originated from.
+        @type requestor: L{jid.JID}
+        @param service: The publish-subscribe service entity.
+        @type service: L{jid.JID}
+        @param nodeIdentifier: Identifier of the node to request the childs for.
+        @type nodeIdentifier: L{unicode}
+        @return: A deferred that fires with a list of child node identifiers.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def getConfigurationOptions():
+        """
+        Retrieve all known node configuration options.
+
+        The returned dictionary holds the possible node configuration options
+        by option name. The value of each entry represents the specifics for
+        that option in a dictionary:
+
+         - C{'type'} (C{str}): The option's type (see
+           L{Field<wokkel.data_form.Field>}'s doc string for possible values).
+         - C{'label'} (C{unicode}): A human readable label for this option.
+         - C{'options'} (C{dict}): Optional list of possible values for this
+           option.
+
+        Example::
+
+            {
+            "pubsub#persist_items":
+                {"type": "boolean",
+                 "label": "Persist items to storage"},
+            "pubsub#deliver_payloads":
+                {"type": "boolean",
+                 "label": "Deliver payloads with event notifications"},
+            "pubsub#send_last_published_item":
+                {"type": "list-single",
+                 "label": "When to send the last published item",
+                 "options": {
+                     "never": "Never",
+                     "on_sub": "When a new subscription is processed"}
+                }
+            }
+
+        @rtype: C{dict}.
+        """
+
+
+    def publish(request):
+        """
+        Called when a publish request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: deferred that fires on success.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def subscribe(request):
+        """
+        Called when a subscribe request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with a
+                 L{Subscription<wokkel.pubsub.Subscription>}.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def unsubscribe(request):
+        """
+        Called when a subscribe request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with C{None} when unsubscription has
+                 succeeded.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def subscriptions(request):
+        """
+        Called when a subscriptions retrieval request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with a C{list} of subscriptions as
+                 L{Subscription<wokkel.pubsub.Subscription>}.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def affiliations(request):
+        """
+        Called when a affiliations retrieval request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with a C{list} of affiliations as
+                 C{tuple}s of (node identifier as C{unicode}, affiliation state
+                 as C{str}). The affiliation can be C{'owner'}, C{'publisher'},
+                 or C{'outcast'}.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def create(request):
+        """
+        Called when a node creation request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with a C{unicode} that represents
+                 the identifier of the new node.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def default(request):
+        """
+        Called when a default node configuration request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with a C{dict} representing the default
+                 node configuration. Keys are C{str}s that represent the
+                 field name. Values can be of types C{unicode}, C{int} or
+                 C{bool}.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def configureGet(request):
+        """
+        Called when a node configuration retrieval request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with a C{dict} representing the node
+                 configuration. Keys are C{str}s that represent the field name.
+                 Values can be of types C{unicode}, C{int} or C{bool}.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def configureSet(request):
+        """
+        Called when a node configuration change request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with C{None} when the node's
+                 configuration has been changed.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def items(request):
+        """
+        Called when a items retrieval request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with a C{list} of L{pubsub.Item}.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def retract(request):
+        """
+        Called when a item retraction request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with C{None} when the given items have
+                 been retracted.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def purge(request):
+        """
+        Called when a node purge request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with C{None} when the node has been
+                 purged.
+        @rtype: L{defer.Deferred}
+        """
+
+
+    def delete(request):
+        """
+        Called when a node deletion request has been received.
+
+        @param request: The publish-subscribe request.
+        @type request: L{wokkel.pubsub.PubSubRequest}
+        @return: A deferred that fires with C{None} when the node has been
+                 deleted.
+        @rtype: L{defer.Deferred}
+        """
+
+
+
 class IMUCClient(Interface):
     """
     Multi-User Chat Client
@@ -533,125 +791,215 @@ class IMUCClient(Interface):
         """
 
 
-    def receivedHistory(room, user, message, history, frm=None):
+    def receivedHistory(room, user, message):
         """
         Past messages from a chat room has been received. This occurs when you join a room.
-
-
-        """
-
-    
-    def disco(entity, type='info'):
-        """Send disco queries to a XMPP entity
-
-        @param entity: A XMPP entity to send the disco request to.
-        @type entity: C{unicode}
-
-        @param type: Optional argument to determine the type of discovery being done.
-        @type type: C{str}
-
-        """
-
-        
-
-    def configure(room_jid, fields=[]):
-        """Configure a room. When a user has administration privledges they can configure 
-        a room. 
-
-        @param room_jid: A XMPP entity for the room.
-        @type room_jid: L{jid.JID}
-
-        @param fields: A list of fields to change or add to the room's configuration.
-        @type fields: C{list}
-
-        """
-
-    def getConfigureForm(room_jid):
-        """
-        In order to know the fields to change in a room you will need to get the form.
-        
-        @param room_jid: The room you want the configuration form from.
-        @type room_jid: L{jid.JID}
-
-        """
-
-    def join(server, room, nick):
-        """
-        Join a multi-user chat room. 
-
-        @param server: The server the room is on.
-        @type server: C{str}
-
-        @param room: The room name.
-        @type room: C{str}
-        
-        @param nick: The nick name you want when you join the room.
-        @type nick: C{str}
-
         """
 
 
-    def leave(room_jid):
+    def configure(roomJID, options):
         """
-        Leave a multi-user chat room.
+        Configure a room.
 
-        @param room_jid: The room you want the configuration form from.
-        @type room_jid: L{jid.JID}
+        @param roomJID: The room to configure.
+        @type roomJID: L{jid.JID}
 
+        @param options: A mapping of field names to values, or C{None} to cancel.
+        @type options: C{dict}
         """
+
+
+    def getConfiguration(roomJID):
+        """
+        Grab the configuration from the room.
+
+        This sends an iq request to the room.
+
+        @param roomJID: The bare JID of the room.
+        @type roomJID: L{jid.JID}
+
+        @return: A deferred that fires with the room's configuration form as
+            a L{data_form.Form} or C{None} if there are no configuration
+            options available.
+        """
+
+
+    def join(service, roomIdentifier, nick, history=None):
+        """
+        Join a MUC room by sending presence to it.
+
+        @param server: The server where the room is located.
+        @type server: C{unicode}
+
+        @param room: The room name the entity is joining.
+        @type room: C{unicode}
+
+        @param nick: The nick name for the entitity joining the room.
+        @type nick: C{unicode}
+
+        @param history: The maximum number of history stanzas you would like.
+
+        @return: A deferred that fires when the entity is in the room or an
+                 error has occurred.
+        """
+
+
+    def nick(roomJID, nick):
+        """
+        Change an entity's nick name in a MUC room.
+
+        See: http://xmpp.org/extensions/xep-0045.html#changenick
+
+        @param roomJID: The JID of the room, i.e. without a resource.
+        @type roomJID: L{jid.JID}
+
+        @param nick: The new nick name within the room.
+        @type nick: C{unicode}
+        """
+
+
+    def leave(roomJID):
+        """
+        Leave a MUC room.
+
+        See: http://xmpp.org/extensions/xep-0045.html#exit
+
+        @param roomJID: The Room JID of the room to leave.
+        @type roomJID: L{jid.JID}
+        """
+
 
     def userJoinedRoom(room, user):
-        """User has joined the room.
+        """
+        User has joined a MUC room.
+
+        This method will need to be modified inorder for clients to
+        do something when this event occurs.
 
         @param room: The room the user joined.
         @type  room: L{muc.Room}
 
         @param user: The user that joined the room.
         @type  user: L{muc.User}
-
-        """
-   
-
-    def groupChat(to, message, children=None):
-        """Send a groupchat message to a room.
-
         """
 
 
-    def chat(to, message, children=None):
+    def groupChat(roomJID, body, children=None):
         """
-
-        """
-
-
-    def password(to, password):
-        """
-        """
-    
-    def register(to, fields=[]):
-        """
+        Send a groupchat message.
         """
 
 
-    def subject(to, subject):
+    def chat(occupantJID, body, children=None):
         """
-        """
+        Send a private chat message to a user in a MUC room.
 
-    def voice(to):
-        """
-        """
+        See: http://xmpp.org/extensions/xep-0045.html#privatemessage
 
-
-    def history(to, message_list):
-        """
-        """
-
-    def ban(to, ban_jid, frm, reason=None):
-        """
+        @param occupantJID: The Room JID of the other user.
+        @type occupantJID: L{jid.JID}
         """
 
 
-    def kick(to, kick_jid, frm, reason=None):
+    def password(roomJID, password):
         """
+        Send a password to a room so the entity can join.
+
+        See: http://xmpp.org/extensions/xep-0045.html#enter-pw
+
+        @param roomJID: The bare JID of the room.
+        @type roomJID: L{jid.JID}
+
+        @param password: The MUC room password.
+        @type password: C{unicode}
         """
 
+
+    def register(roomJID, options):
+        """
+        Send a request to register for a room.
+
+        @param roomJID: The bare JID of the room.
+        @type roomJID: L{jid.JID}
+
+        @param options: A mapping of field names to values, or C{None} to
+            cancel.
+        @type options: C{dict}
+        """
+
+
+    def subject(roomJID, subject):
+        """
+        Change the subject of a MUC room.
+
+        See: http://xmpp.org/extensions/xep-0045.html#subject-mod
+
+        @param roomJID: The bare JID of the room.
+        @type roomJID: L{jid.JID}
+
+        @param subject: The subject you want to set.
+        @type subject: C{unicode}
+        """
+
+
+    def voice(roomJID):
+        """
+        Request voice for a moderated room.
+
+        @param roomJID: The room jabber/xmpp entity id.
+        @type roomJID: L{jid.JID}
+        """
+
+
+    def history(roomJID, messages):
+        """
+        Send history to create a MUC based on a one on one chat.
+
+        See: http://xmpp.org/extensions/xep-0045.html#continue
+
+        @param roomJID: The room jabber/xmpp entity id.
+        @type roomJID: L{jid.JID}
+
+        @param messages: The history to send to the room as an ordered list of
+                         message, represented by a dictionary with the keys
+                         C{'stanza'}, holding the original stanza a
+                         L{domish.Element}, and C{'timestamp'} with the
+                         timestamp.
+        @type messages: L{list} of L{domish.Element}
+        """
+
+
+    def ban(roomJID, entity, reason=None, sender=None):
+        """
+        Ban a user from a MUC room.
+
+        @param roomJID: The bare JID of the room.
+        @type roomJID: L{jid.JID}
+
+        @param entity: The bare JID of the entity to be banned.
+        @type entity: L{jid.JID}
+
+        @param reason: The reason for banning the entity.
+        @type reason: C{unicode}
+
+        @param sender: The entity sending the request.
+        @type sender: L{jid.JID}
+        """
+
+
+    def kick(roomJID, nick, reason=None, sender=None):
+        """
+        Kick a user from a MUC room.
+
+        @param roomJID: The bare JID of the room.
+        @type roomJID: L{jid.JID}
+
+        @param nick: The occupant to be banned.
+        @type nick: L{jid.JID} or C{unicode}
+
+        @param reason: The reason given for the kick.
+        @type reason: C{unicode}
+
+        @param sender: The entity sending the request.
+        @type sender: L{jid.JID}
+        """

@@ -31,7 +31,7 @@ def getSubset(cursor, min, max=None):
 def inRoster(name, room=None, special=None):
 
     if special=="quotes":
-        query = {'user.nick': {'$regex': '\\b{0}\\b'.format(name), '$options': 'i'}}
+        query = {'user.nick': {'$regex': '{0}'.format(name), '$options': 'i'}}
         quotes = db.db.history.find(query)
         if quotes.count() > 0:
             return True
@@ -41,17 +41,17 @@ def inRoster(name, room=None, special=None):
             return [room.roster[name].info]
         
         for u in room.roster:
-            if re.search('\\b{0}\\b'.format(name), u, flags=re.IGNORECASE):
+            if re.search('{0}'.format(name), u, flags=re.IGNORECASE):
                 return [room.roster[u].info]
 
     user = db.db.users.find_one({'nick': name})
     if user:
         return [user]
 
-    user = db.db.users.find({'nick': {'$regex': '\\b{0}\\b'.format(name), '$options': 'i'}})
+    user = db.db.users.find({'nick': {'$regex': '{0}'.format(name), '$options': 'i'}})
 
     if user.count() == 0:
-        user = db.db.users.find({'nicks.nicks': {'$regex': '\\b{0}\\b'.format(name), '$options': 'i'}})
+        user = db.db.users.find({'nicks.nicks': {'$regex': '{0}'.format(name), '$options': 'i'}})
     
     if user.count() > 0:
         users = []

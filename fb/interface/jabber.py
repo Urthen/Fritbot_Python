@@ -7,67 +7,63 @@ from twisted.internet import defer, reactor
 from twisted.words.protocols.jabber import jid
 from twisted.python import log
 
-from wokkel import muc, xmppim
+from wokkel import muc, xmppim, ping
 
 from interface import Interface, User, Room
 from fb.db import db
 import config, fb.intent as intent
+
+
+CHAT = muc.MESSAGE + '[@type="chat"]'
+STATUS_CODE_CREATED = 201
 
 class JRoom(Room):
     
     def __init__(self, room, interface):
         self._room = room
         self._interface = interface
-        Room.__init__(self, room.name, room.nick)
+        Room.__init__(self, room.roomIdentifier, room.nick)
 
     def _send(self, message):
-        self._interface.groupChat(self._room.entity_id, message)
+        self._interface.groupChat(self._room.occupantJID.userhostJID(), message)
 
     def setNick(self, nick):
-        self._interface.nick(self._room.entity_id, nick)
+        self._interface.nick(self._room.occupantJID, nick)
 
 class JUser(User):
-    def __init__(self, uid, nick, interface):
+    def __init__(self, user, nick, interface):
         self._interface = interface
-        User.__init__(self, uid, nick)
+        User.__init__(self, user, nick)
 
     def _send(self, message):
         self._interface.chat(jid.internJID(self.uid), message)
 
 class JabberInterface(Interface, muc.MUCClient):
-    '''Connect to a Jabber server.'''
+    '''Handles connections to individual rooms'''
 
-    '''----------------------------------------------------------------------------------------------------------------------------------------
-    The following functions relate to the initialization or shutdown of the bot.
-    -----------------------------------------------------------------------------------------------------------------------------------------'''
+    interface = None
 
     def __init__(self, bot):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
         log.msg("Initializing Jabber interface...")
         Interface.__init__(self, bot)
+
+        self._presence = xmppim.PresenceClientProtocol()
+        self._ping = ping.PingHandler()
         muc.MUCClient.__init__(self)
 
-    def connectionInitialized(self):
-        '''Add observers to the XML stream for some custom fritbotty nonsense not supported by default on wokkel'''
-        self.xmlstream.addObserver(muc.PRESENCE+"[not(@type) or @type='available']/x", self._onXPresence)
-        self.xmlstream.addObserver(muc.PRESENCE+"[@type='unavailable']", self._onUnavailablePresence)
-        self.xmlstream.addObserver(muc.PRESENCE+"[@type='error']", self._onPresenceError)
-        self.xmlstream.addObserver(muc.GROUPCHAT, self._onGroupChat)
-        self.xmlstream.addObserver(muc.SUBJECT, self._onSubject)
-        self.xmlstream.addObserver(muc.CHAT_BODY, self.receivedPrivateChat)
-
-        self.initialized()
+    def setHandlerParent(self, parent):
+        '''Set handler parent of subhandlers'''
+        muc.MUCClient.setHandlerParent(self, parent)
+        self._presence.setHandlerParent(parent)
+        self._presence.available(statuses={None: config.CONFIG["status"]})
+        self._ping.setHandlerParent(parent)
        
     def initialized(self):
         '''Called on connect/reconnect. Attempts to re-join all existing rooms.'''
-        log.msg("Connected to Jabber service.")
-
-        # Create xmpp presence subhandler
-        self._presence = xmppim.PresenceClientProtocol()
-        self._presence.setHandlerParent(self.parent)
-        self._presence.available(statuses={None: config.CONFIG["status"]})
-
-        self.bot.connect()
+        log.msg("MUC Connected.")
+        self.xmlstream.addObserver(CHAT, self.receivedPrivateChat)
+        self.bot.connected()
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to joining, creating, and leaving rooms.
@@ -79,12 +75,12 @@ class JabberInterface(Interface, muc.MUCClient):
         Configure rooms that need to be before others can join.'''
 
 
-        log.msg("Attempting to connect to jabber room " + room.name)
+        log.msg("Attempting to connect to jabber room " + room.roomIdentifier)
         r = db.getRoom(JRoom(room, self))
         room.info = r
 
-        if int(room.status) == muc.STATUS_CODE_CREATED:
-            log.msg("New room created: " + room.name)
+        if int(room.status) == STATUS_CODE_CREATED:
+            log.msg("New room created: " + room.roomIdentifier)
             userhost = rjid(room).userhost()
             config_form = yield self.getConfigureForm(userhost)
             
@@ -115,7 +111,7 @@ class JabberInterface(Interface, muc.MUCClient):
             
     def userUpdatedStatus(self, room, user, show, status):
         '''Called when a user changes their nickname'''
-        u = db.getUser(JUser(user.resource, user.nick, self))
+        u = db.getUser(JUser(user.user, user.nick, self))
         if hasattr(room, 'info'):
             r = room.info
         else:
@@ -128,21 +124,21 @@ class JabberInterface(Interface, muc.MUCClient):
     The following functions directly relate to sending and recieving messages.
     -----------------------------------------------------------------------------------------------------------------------------------------'''
 
-    def receivedGroupChat(self, room, user, body):
+    def receivedGroupChat(self, room, user, message):
         '''Triggered when a group chat is recieved in a room the bot is in'''        
         #Validate that the user exists (catches some edge cases)
         if user is None:
             return
 
-        u = db.getUser(JUser(user.resource, user.nick, self))
+        u = db.getUser(JUser(user.user, user.nick, self))
 
         self.doNickUpdate(u, room.info, user.nick)
 
-        self.bot.receivedGroupChat(room.info, u, body)
+        self.bot.receivedGroupChat(room.info, u, message.body)
 
     def receivedPrivateChat(self, msg):
         '''Triggered when someone messages the bot directly.'''
-        if not msg.hasAttribute('from'):
+        if not msg.hasAttribute('from') or msg.body is None:
             return
 
         user_jid = jid.internJID(msg.getAttribute('from', ''))

@@ -1,6 +1,6 @@
 # -*- test-case-name: wokkel.test.test_generic -*-
 #
-# Copyright (c) 2003-2008 Ralph Meijer
+# Copyright (c) Ralph Meijer.
 # See LICENSE for details.
 
 """
@@ -9,12 +9,17 @@ Generic XMPP protocol helpers.
 
 from zope.interface import implements
 
-from twisted.internet import defer
-from twisted.words.protocols.jabber import error
+from twisted.internet import defer, protocol
+from twisted.python import reflect
+from twisted.words.protocols.jabber import error, jid, xmlstream
 from twisted.words.protocols.jabber.xmlstream import toResponse
-from twisted.words.xish import domish
+from twisted.words.xish import domish, utility
 
-from wokkel import disco
+try:
+    from twisted.words.xish.xmlstream import BootstrapMixin
+except ImportError:
+    from wokkel.compat import BootstrapMixin
+
 from wokkel.iwokkel import IDisco
 from wokkel.subprotocols import XMPPHandler
 
@@ -114,9 +119,179 @@ class VersionHandler(XMPPHandler):
         info = set()
 
         if not node:
+            from wokkel import disco
             info.add(disco.DiscoFeature(NS_VERSION))
 
         return defer.succeed(info)
 
     def getDiscoItems(self, requestor, target, node):
         return defer.succeed([])
+
+
+
+class XmlPipe(object):
+    """
+    XML stream pipe.
+
+    Connects two objects that communicate stanzas through an XML stream like
+    interface. Each of the ends of the pipe (sink and source) can be used to
+    send XML stanzas to the other side, or add observers to process XML stanzas
+    that were sent from the other side.
+
+    XML pipes are usually used in place of regular XML streams that are
+    transported over TCP. This is the reason for the use of the names source
+    and sink for both ends of the pipe. The source side corresponds with the
+    entity that initiated the TCP connection, whereas the sink corresponds with
+    the entity that accepts that connection. In this object, though, the source
+    and sink are treated equally.
+
+    Unlike Jabber
+    L{XmlStream<twisted.words.protocols.jabber.xmlstream.XmlStream>}s, the sink
+    and source objects are assumed to represent an eternal connected and
+    initialized XML stream. As such, events corresponding to connection,
+    disconnection, initialization and stream errors are not dispatched or
+    processed.
+
+    @ivar source: Source XML stream.
+    @ivar sink: Sink XML stream.
+    """
+
+    def __init__(self):
+        self.source = utility.EventDispatcher()
+        self.sink = utility.EventDispatcher()
+        self.source.send = lambda obj: self.sink.dispatch(obj)
+        self.sink.send = lambda obj: self.source.dispatch(obj)
+
+
+
+class Stanza(object):
+    """
+    Abstract representation of a stanza.
+
+    @ivar sender: The sending entity.
+    @type sender: L{jid.JID}
+    @ivar recipient: The receiving entity.
+    @type recipient: L{jid.JID}
+    """
+
+    recipient = None
+    sender = None
+    stanzaKind = None
+    stanzaID = None
+    stanzaType = None
+
+    def __init__(self, recipient=None, sender=None):
+        self.recipient = recipient
+        self.sender = sender
+
+
+    @classmethod
+    def fromElement(Class, element):
+        stanza = Class()
+        stanza.parseElement(element)
+        return stanza
+
+
+    def parseElement(self, element):
+        if element.hasAttribute('from'):
+            self.sender = jid.internJID(element['from'])
+        if element.hasAttribute('to'):
+            self.recipient = jid.internJID(element['to'])
+        self.stanzaType = element.getAttribute('type')
+        self.stanzaID = element.getAttribute('id')
+
+        # Save element
+        stripNamespace(element)
+        self.element = element
+
+        # accumulate all childHandlers in the class hierarchy of Class 
+        handlers = {}
+        reflect.accumulateClassDict(self.__class__, 'childParsers', handlers)
+
+        for child in element.elements():
+            try:
+                handler = handlers[child.uri, child.name]
+            except KeyError:
+                pass
+            else:
+                getattr(self, handler)(child)
+
+
+    def toElement(self):
+        element = domish.Element((None, self.stanzaKind))
+        if self.sender is not None:
+            element['from'] = self.sender.full()
+        if self.recipient is not None:
+            element['to'] = self.recipient.full()
+        if self.stanzaType:
+            element['type'] = self.stanzaType
+        if self.stanzaID:
+            element['id'] = self.stanzaID
+        return element
+
+
+
+class ErrorStanza(Stanza):
+
+    def parseElement(self, element):
+        Stanza.parseElement(self, element)
+        self.exception = error.exceptionFromStanza(element)
+
+
+class Request(Stanza):
+    """
+    IQ request stanza.
+
+    This is a base class for IQ get or set stanzas, to be used with
+    L{wokkel.subprotocols.StreamManager.request}.
+    """
+
+    stanzaKind = 'iq'
+    stanzaType = 'get'
+    timeout = None
+
+    def __init__(self, recipient=None, sender=None, stanzaType='get'):
+        Stanza.__init__(self, recipient=recipient, sender=sender)
+        self.stanzaType = stanzaType
+
+
+    def toElement(self):
+        element = Stanza.toElement(self)
+
+        if not self.stanzaID:
+            element.addUniqueId()
+            self.stanzaID = element['id']
+
+        return element
+
+
+
+class DeferredXmlStreamFactory(BootstrapMixin, protocol.ClientFactory):
+    protocol = xmlstream.XmlStream
+
+    def __init__(self, authenticator):
+        BootstrapMixin.__init__(self)
+
+        self.authenticator = authenticator
+
+        deferred = defer.Deferred()
+        self.deferred = deferred
+        self.addBootstrap(xmlstream.STREAM_AUTHD_EVENT, self.deferred.callback)
+        self.addBootstrap(xmlstream.INIT_FAILED_EVENT, deferred.errback)
+
+
+    def buildProtocol(self, addr):
+        """
+        Create an instance of XmlStream.
+
+        A new authenticator instance will be created and passed to the new
+        XmlStream. Registered bootstrap event observers are installed as well.
+        """
+        xs = self.protocol(self.authenticator)
+        xs.factory = self
+        self.installBootstraps(xs)
+        return xs
+
+
+    def clientConnectionFailed(self, connector, reason):
+        self.deferred.errback(reason)

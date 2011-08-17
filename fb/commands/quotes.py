@@ -16,7 +16,7 @@ def sayQuotes(bot, room, user, nick, segment, min=1, max=1):
 
     query = {'remembered': {'$exists': True}}
     if nick is not None:
-        nickq = {'user.nick': {'$regex': '\\b{0}\\b'.format(nick), '$options': 'i'}}
+        nickq = {'user.nick': {'$regex': '{0}'.format(nick), '$options': 'i'}}
         ids = util.inRoster(nick)
         if ids:
             idq = {'user.id': {'$in': map(lambda x: x['_id'], ids)}}
@@ -115,7 +115,9 @@ def remember(bot, room, user, args):
         return u"Remember what, exactly?"
 
     tuser = util.inRoster(args[0], room)
-    if tuser and len(tuser) == 1:
+
+    print tuser
+    if tuser and len(tuser) >= 1:
         text = " ".join(args[1:])
 
         query = {"user.id": tuser[0]["_id"], "room": room.info["_id"], "body": {"$regex": text, '$options': 'i'}, "command": False}

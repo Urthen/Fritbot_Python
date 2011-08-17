@@ -35,6 +35,9 @@ def callMe(bot, room, user, args):
     if len(newnick) < 1:
         return u"I can't call you nothing!"
 
+    if newnick == user.info['nick']:
+        return u"Thats your name already, {0}!".format(newnick)
+
     existing = db.db.users.find_one({"nick": newnick})
 
     if existing is not None:
@@ -45,3 +48,6 @@ def callMe(bot, room, user, args):
     user.save()
 
     return u"Ok then, I now know you as {0}.".format(newnick)
+
+def myname(bot, room, user, args):
+    return "Your name is {0}".format(user['nick'])

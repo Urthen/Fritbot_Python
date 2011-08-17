@@ -150,7 +150,7 @@ class User(Route):
             
             db.db.users.insert(mdbUser)
 
-        self.info = mdbUser 
+        self.info = mdbUser
 
 class Interface(object):
     

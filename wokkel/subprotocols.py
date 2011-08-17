@@ -1,6 +1,6 @@
 # -*- test-case-name: wokkel.test.test_subprotocols -*-
 #
-# Copyright (c) 2001-2007 Twisted Matrix Laboratories.
+# Copyright (c) Twisted Matrix Laboratories.
 # See LICENSE for details.
 
 """
@@ -10,41 +10,71 @@ XMPP subprotocol support.
 from zope.interface import implements
 
 from twisted.internet import defer
-from twisted.python import log
+from twisted.internet.error import ConnectionDone
+from twisted.python import failure, log
 from twisted.words.protocols.jabber import error, xmlstream
+from twisted.words.protocols.jabber.xmlstream import toResponse
 from twisted.words.xish import xpath
 from twisted.words.xish.domish import IElement
-
-try:
-    from twisted.words.protocols.jabber.xmlstream import toResponse
-except ImportError:
-    from wokkel.compat import toResponse
 
 from wokkel.iwokkel import IXMPPHandler, IXMPPHandlerCollection
 
 class XMPPHandler(object):
+    """
+    XMPP protocol handler.
+
+    Classes derived from this class implement (part of) one or more XMPP
+    extension protocols, and are referred to as a subprotocol implementation.
+    """
+
     implements(IXMPPHandler)
+
+    def __init__(self):
+        self.parent = None
+        self.xmlstream = None
+
 
     def setHandlerParent(self, parent):
         self.parent = parent
         self.parent.addHandler(self)
 
+
     def disownHandlerParent(self, parent):
         self.parent.removeHandler(self)
         self.parent = None
+
 
     def makeConnection(self, xs):
         self.xmlstream = xs
         self.connectionMade()
 
+
     def connectionMade(self):
-        pass
+        """
+        Called after a connection has been established.
+
+        Can be overridden to perform work before stream initialization.
+        """
+
 
     def connectionInitialized(self):
-        pass
+        """
+        The XML stream has been initialized.
+
+        Can be overridden to perform work after stream initialization, e.g. to
+        set up observers and start exchanging XML stanzas.
+        """
+
 
     def connectionLost(self, reason):
+        """
+        The XML stream has been closed.
+
+        This method can be extended to inspect the C{reason} argument and
+        act on it.
+        """
         self.xmlstream = None
+
 
     def send(self, obj):
         """
@@ -64,6 +94,19 @@ class XMPPHandler(object):
         self.parent.send(obj)
 
 
+    def request(self, request):
+        """
+        Send an IQ request and track the response.
+
+        This passes the request to the parent for sending and response
+        tracking.
+
+        @see: L{StreamManager.request}.
+        """
+        return self.parent.request(request)
+
+
+
 class XMPPHandlerCollection(object):
     """
     Collection of XMPP subprotocol handlers.
@@ -71,8 +114,6 @@ class XMPPHandlerCollection(object):
     This allows for grouping of subprotocol handlers, but is not an
     L{XMPPHandler} itself, so this is not recursive.
 
-    @ivar xmlstream: Currently managed XML stream.
-    @type xmlstream: L{XmlStream}
     @ivar handlers: List of protocol handlers.
     @type handlers: L{list} of objects providing
                       L{IXMPPHandler}
@@ -82,8 +123,7 @@ class XMPPHandlerCollection(object):
 
     def __init__(self):
         self.handlers = []
-        self.xmlstream = None
-        self._initialized = False
+
 
     def __iter__(self):
         """
@@ -91,30 +131,23 @@ class XMPPHandlerCollection(object):
         """
         return iter(self.handlers)
 
+
     def addHandler(self, handler):
         """
         Add protocol handler.
 
         Protocol handlers are expected to provide L{IXMPPHandler}.
-
-        When an XML stream has already been established, the handler's
-        C{connectionInitialized} will be called to get it up to speed.
         """
-
         self.handlers.append(handler)
 
-        # get protocol handler up to speed when a connection has already
-        # been established
-        if self.xmlstream and self._initialized:
-            handler.makeConnection(self.xmlstream)
-            handler.connectionInitialized()
 
     def removeHandler(self, handler):
         """
         Remove protocol handler.
         """
-
         self.handlers.remove(handler)
+
+
 
 class StreamManager(XMPPHandlerCollection):
     """
@@ -125,16 +158,34 @@ class StreamManager(XMPPHandlerCollection):
     L{IXMPPHandler} (like subclasses of L{XMPPHandler}), and added
     using L{addHandler}.
 
+    @ivar xmlstream: currently managed XML stream
+    @type xmlstream: L{XmlStream}
     @ivar logTraffic: if true, log all traffic.
     @type logTraffic: L{bool}
+    @ivar _initialized: Whether the stream represented by L{xmlstream} has
+                        been initialized. This is used when caching outgoing
+                        stanzas.
+    @type _initialized: C{bool}
     @ivar _packetQueue: internal buffer of unsent data. See L{send} for details.
     @type _packetQueue: L{list}
+    @ivar timeout: Default IQ request timeout in seconds.
+    @type timeout: C{int}
+    @ivar _reactor: A provider of L{IReactorTime} to track timeouts.
     """
+    timeout = None
+    _reactor = None
 
     logTraffic = False
 
-    def __init__(self, factory):
-        self.handlers = []
+    def __init__(self, factory, reactor=None):
+        """
+        Construct a stream manager.
+
+        @param factory: The stream factory to connect with.
+        @param reactor: A provider of L{IReactorTime} to track timeouts.
+            If not provided, the global reactor will be used.
+        """
+        XMPPHandlerCollection.__init__(self)
         self.xmlstream = None
         self._packetQueue = []
         self._initialized = False
@@ -146,7 +197,39 @@ class StreamManager(XMPPHandlerCollection):
         factory.addBootstrap(xmlstream.STREAM_END_EVENT, self._disconnected)
         self.factory = factory
 
+        if reactor is None:
+            from twisted.internet import reactor
+        self._reactor = reactor
+
+        # Set up IQ response tracking
+        self._iqDeferreds = {}
+
+
+    def addHandler(self, handler):
+        """
+        Add protocol handler.
+
+        When an XML stream has already been established, the handler's
+        C{connectionInitialized} will be called to get it up to speed.
+        """
+        XMPPHandlerCollection.addHandler(self, handler)
+
+        # get protocol handler up to speed when a connection has already
+        # been established
+        if self.xmlstream:
+            handler.makeConnection(self.xmlstream)
+        if self._initialized:
+            handler.connectionInitialized()
+
+
     def _connected(self, xs):
+        """
+        Called when the transport connection has been established.
+
+        Here we optionally set up traffic logging (depending on L{logTraffic})
+        and call each handler's C{makeConnection} method with the L{XmlStream}
+        instance.
+        """
         def logDataIn(buf):
             log.msg("RECV: %r" % buf)
 
@@ -159,10 +242,21 @@ class StreamManager(XMPPHandlerCollection):
 
         self.xmlstream = xs
 
-        for e in self:
+        for e in list(self):
             e.makeConnection(xs)
 
+
     def _authd(self, xs):
+        """
+        Called when the stream has been initialized.
+
+        Send out cached stanzas and call each handler's
+        C{connectionInitialized} method.
+        """
+
+        xs.addObserver('/iq[@type="result"]', self._onIQResponse)
+        xs.addObserver('/iq[@type="error"]', self._onIQResponse)
+
         # Flush all pending packets
         for p in self._packetQueue:
             xs.send(p)
@@ -171,8 +265,9 @@ class StreamManager(XMPPHandlerCollection):
 
         # Notify all child services which implement
         # the IService interface
-        for e in self:
+        for e in list(self):
             e.connectionInitialized()
+
 
     def initializationFailed(self, reason):
         """
@@ -187,15 +282,52 @@ class StreamManager(XMPPHandlerCollection):
         @type reason: L{failure.Failure}
         """
 
-    def _disconnected(self, _):
+
+    def _disconnected(self, reason):
+        """
+        Called when the stream has been closed.
+
+        From this point on, the manager doesn't interact with the
+        L{XmlStream} anymore and notifies each handler that the connection
+        was lost by calling its C{connectionLost} method.
+        """
         self.xmlstream = None
         self._initialized = False
 
+        # Twisted versions before 11.0 passed an XmlStream here.
+        if not hasattr(reason, 'trap'):
+            reason = failure.Failure(ConnectionDone())
+
         # Notify all child services which implement
         # the IService interface
-        for e in self:
-            e.xmlstream = None
-            e.connectionLost(None)
+        for e in list(self):
+            e.connectionLost(reason)
+
+        # This errbacks all deferreds of iq's for which no response has
+        # been received with a L{ConnectionLost} failure. Otherwise, the
+        # deferreds will never be fired.
+        iqDeferreds = self._iqDeferreds
+        self._iqDeferreds = {}
+        for d in iqDeferreds.itervalues():
+            d.errback(reason)
+
+
+    def _onIQResponse(self, iq):
+        """
+        Handle iq response by firing associated deferred.
+        """
+        try:
+            d = self._iqDeferreds[iq["id"]]
+        except KeyError:
+            return
+
+        del self._iqDeferreds[iq["id"]]
+        iq.handled = True
+        if iq['type'] == 'error':
+            d.errback(error.exceptionFromStanza(iq))
+        else:
+            d.callback(iq)
+
 
     def send(self, obj):
         """
@@ -207,11 +339,73 @@ class StreamManager(XMPPHandlerCollection):
         @param obj: data to be sent over the XML stream. See
                     L{xmlstream.XmlStream.send} for details.
         """
-
         if self._initialized:
             self.xmlstream.send(obj)
         else:
             self._packetQueue.append(obj)
+
+
+    def request(self, request):
+        """
+        Send an IQ request and track the response.
+
+        A request is an IQ L{generic.Stanza} of type C{'get'} or C{'set'}. It
+        will have its C{toElement} called to render to a L{domish.Element}
+        which is then sent out over the current stream. If there is no such
+        stream (yet), it is queued and sent whenever a connection is
+        established and initialized, just like L{send}.
+
+        If the request doesn't have an identifier, it will be assigned a fresh
+        one, so the response can be tracked.
+
+        The deferred that is returned will fire with the L{domish.Element}
+        representation of the response if it is a result iq. If the response
+        is an error iq, a corresponding L{error.StanzaError} will be errbacked.
+
+        If the connection is closed before a response was received, the deferred
+        will be errbacked with the reason failure.
+
+        A request may also have a timeout, either by setting a default timeout
+        in L{StreamManager.timeout} or on the C{timeout} attribute of the
+        request.
+
+        @param request: The IQ request.
+        @type request: L{generic.Request}
+        """
+        if (request.stanzaKind != 'iq' or
+            request.stanzaType not in ('get', 'set')):
+            return defer.fail(ValueError("Not a request"))
+
+        element = request.toElement()
+
+        # Make sure we have a trackable id on the stanza
+        if not request.stanzaID:
+            element.addUniqueId()
+            request.stanzaID = element['id']
+
+        # Set up iq response tracking
+        d = defer.Deferred()
+        self._iqDeferreds[element['id']] = d
+
+        timeout = getattr(request, 'timeout', self.timeout)
+
+        if timeout is not None:
+            def onTimeout():
+                del self._iqDeferreds[element['id']]
+                d.errback(xmlstream.TimeoutError("IQ timed out"))
+
+            call = self._reactor.callLater(timeout, onTimeout)
+
+            def cancelTimeout(result):
+                if call.active():
+                    call.cancel()
+
+                return result
+
+            d.addBoth(cancelTimeout)
+        self.send(element)
+        return d
+
 
 
 class IQHandlerMixin(object):

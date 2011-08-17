@@ -41,7 +41,7 @@ class FritBot(object):
         log.msg("Connecting bot to interface...")
         self._connection = interface
        
-    def connect(self):
+    def connected(self):
         log.msg("Joining rooms...")
         roomlist = self.rooms.values()
         self.rooms = {}
@@ -108,7 +108,7 @@ class FritBot(object):
 
         db.db.history.insert(history)
 
-    def receivedGroupChat(self, room, user, body):
+    def receivedGroupChat(self, room, user, body, history=False):
         '''Triggered when a group chat is recieved in a room the bot is in'''        
         #Validate that the user is NOT the bot itself!
         if user.uid.split('@', 1)[0] == config.JABBER['jid']:
