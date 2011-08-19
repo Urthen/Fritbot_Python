@@ -81,7 +81,7 @@ class FritBot(object):
     def leaveRoom(self, room):
         '''Leave a room'''
         self._connection.leaveRoom(room)
-        del self.rooms[room]
+        del self.rooms[room.uid]
 
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
@@ -94,11 +94,11 @@ class FritBot(object):
         else:
             user.undostack.append(undo)
 
-    def addHistory(self, room, user, body, command):
+    def addHistory(self, room, user, nick, body, command):
         history = {
             "body": body,
             "user": {
-                "nick": user['nick'],
+                "nick": nick,
                 "id": user["_id"]},
             "date": datetime.datetime.now(),
             "command": command
@@ -108,21 +108,22 @@ class FritBot(object):
 
         db.db.history.insert(history)
 
-    def receivedGroupChat(self, room, user, body, history=False):
+    def receivedGroupChat(self, room, user, body, nick=None, history=False):
         '''Triggered when a group chat is recieved in a room the bot is in'''        
         #Validate that the user is NOT the bot itself!
         if user.uid.split('@', 1)[0] == config.JABBER['jid']:
             return
 
-        body = body.encode("utf-8")
+        if nick is None:
+            nick = user['nick']
 
-        log.msg(u"Group chat: <{0}/{1}>: {2}".format(room.uid, user['nick'], body))
+        log.msg(u"Group chat: <{0}/{1}>: {2}".format(room.uid, nick, body))
 
         wasCommand, message = intent.service.parseMessage(body, room, user)
         if message is not None:
            room.send(message)
 
-        self.addHistory(room, user, body, wasCommand)
+        self.addHistory(room, user, nick, body, wasCommand)
 
     def receivedPrivateChat(self, user, body):
         '''Triggered when someone messages the bot directly.'''
@@ -135,4 +136,4 @@ class FritBot(object):
         if message is not None:
             user.send(message)
 
-        self.addHistory(None, user, body, wasCommand)
+        self.addHistory(None, user, user['nick'], body, wasCommand)

@@ -28,7 +28,7 @@ class JRoom(Room):
         self._interface.groupChat(self._room.occupantJID.userhostJID(), message)
 
     def setNick(self, nick):
-        self._interface.nick(self._room.occupantJID, nick)
+        self._interface.nick(self._room.occupantJID.userhostJID(), nick)
 
 class JUser(User):
     def __init__(self, user, nick, interface):
@@ -46,6 +46,7 @@ class JabberInterface(Interface, muc.MUCClient):
     def __init__(self, bot):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
         log.msg("Initializing Jabber interface...")
+
         Interface.__init__(self, bot)
 
         self._presence = xmppim.PresenceClientProtocol()
@@ -98,7 +99,7 @@ class JabberInterface(Interface, muc.MUCClient):
         
     def leaveRoom(self, room):
         '''Leave a room'''
-        self.leave(room._room.entity_id)
+        self.leave(room._room.occupantJID.userhostJID())
 
         
     '''----------------------------------------------------------------------------------------------------------------------------------------
@@ -134,7 +135,7 @@ class JabberInterface(Interface, muc.MUCClient):
 
         self.doNickUpdate(u, room.info, user.nick)
 
-        self.bot.receivedGroupChat(room.info, u, message.body)
+        self.bot.receivedGroupChat(room.info, u, message.body, nick=user.nick)
 
     def receivedPrivateChat(self, msg):
         '''Triggered when someone messages the bot directly.'''

@@ -38,4 +38,5 @@ CONFIG = {
     "nicknames": ["fb"],
     "status": "Angriest Bot Ever", # Status message
     "refresh": 1, # Minimum refresh time, in seconds.
+    "racy": False, #Whether or not to include racy/NSFW content in searches
 }

@@ -4,13 +4,13 @@
 *.pid
 config.py
 db
-logs
+twisted_env
 
 # Ignore Logs #
 ###############
 *.log
 *.log.*
-
+logs
 
 # OS generated files #
 ######################

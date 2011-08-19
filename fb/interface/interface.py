@@ -77,6 +77,15 @@ class Route(object):
     def addUndo(self, undo):
         self.undostack.append(undo)
 
+    def allowed(self, permissions):
+        if type(permissions) == type([]):
+            return len(set(self.info["auths"]) & set(permissions)) > 0
+        else:
+            return permissions in self["auths"]
+
+    def disallowed(self, permissions):
+        return not self.allowed(permissions)
+
 
 class Room(Route):
 

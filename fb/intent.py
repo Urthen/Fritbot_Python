@@ -118,7 +118,7 @@ class IntentService(object):
                     if match is not None:
                         #We've found it! But... are we authorized to use it here?
                         if room is not None:
-                            if len(set(room["auths"]) & set(intent["auth"])) == 0:
+                            if room.disallowed(intent["auth"]):
                                 user.send("I can't do '{1}' in the {0} room.".format(room.uid, match.group()))
                                 return True, None
 
@@ -149,12 +149,12 @@ class IntentService(object):
             if room.squelched:
                 user.send("I've been shut up in {0} for {2} longer, but I have no idea what '{1}' meant anyway.".format(room.uid, text, room.squelched))
                 return False, None
-            elif "vanity" not in room['auths']:
-                user.send("I can't be spammy in {0}, but I have no idea what '{1}' meant anyway.".format(room.uid, text))
-                return False, None
-            return False, "[wat]"
+            elif room.allowed("mean"):
+                return False, "I'm sorry, {0}, I don't know what '{1}' means.".format(user['nick'], text)
+            else:
+                return False, "[wat]"
         else:
-            return False, "[wat]"
+            return False, "I'm sorry, I don't know what '{0}' means.".format(text)
 
 
 service = IntentService()

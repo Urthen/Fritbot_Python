@@ -16,7 +16,7 @@ def sayQuotes(bot, room, user, nick, segment, min=1, max=1):
 
     query = {'remembered': {'$exists': True}}
     if nick is not None:
-        nickq = {'user.nick': {'$regex': '{0}'.format(nick), '$options': 'i'}}
+        nickq = {'user.nick': {'$regex': nick, '$options': 'i'}}
         ids = util.inRoster(nick)
         if ids:
             idq = {'user.id': {'$in': map(lambda x: x['_id'], ids)}}
@@ -25,7 +25,7 @@ def sayQuotes(bot, room, user, nick, segment, min=1, max=1):
             query.update(nickq)
 
     if segment is not None:
-        query['body'] = {'$regex': '{0}'.format(segment), '$options': 'i'}  
+        query['body'] = {'$regex': segment, '$options': 'i'}  
 
     quotes = db.db.history.find(query)
 

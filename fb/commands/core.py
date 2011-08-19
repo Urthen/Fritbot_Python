@@ -77,6 +77,11 @@ def undoJoin(bot, room, user, args):
 
 def leave(bot, room, user, args):
     '''Leaves a room. Can be used to leave other rooms with >channel functionality.'''
+    if len(args):
+        if args[0] in bot.rooms:
+            room = bot.rooms[args[0]]
+        else:
+            return "I'm not in {0}...".format(args[0])
     bot.leaveRoom(room)
     user.send(u"Ok, I've left {0}.".format(room.uid))
     bot.addUndo(room, user, {'function': undoLeave, 'message': 'Left {0}'.format(room.uid), 'room': room.uid})
