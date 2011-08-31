@@ -41,17 +41,20 @@ def inRoster(name, room=None, special=None):
             return [room.roster[name].info]
         
         for u in room.roster:
+            users = []
             if re.search('{0}'.format(name), u, flags=re.IGNORECASE):
-                return [room.roster[u].info]
+                users.append(room.roster[u].info)
+
+            if len(users) > 0:
+                return users
 
     user = db.db.users.find_one({'nick': name})
     if user:
         return [user]
 
-    user = db.db.users.find({'nick': {'$regex': name, '$options': 'i'}})
-
-    if user.count() == 0:
-        user = db.db.users.find({'nicks.nicks': {'$regex': name, '$options': 'i'}})
+    user = db.db.users.find({'$or': 
+        [{'nick': {'$regex': name, '$options': 'i'}}, 
+        {'nicks.nicks': {'$regex': name, '$options': 'i'}}]})
     
     if user.count() > 0:
         users = []

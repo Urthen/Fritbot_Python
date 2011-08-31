@@ -125,14 +125,14 @@ def remember(bot, room, user, args):
         quote = db.db.history.find_one(query, sort=[("date", DESCENDING)])
 
         if quote:
-            if quote['user']['id'] == user['_id']:
-                return u"Sorry, {0}, but you can't quote yourself! Try saying someone funnier and maybe someone else will remember you.".format(user['nick'])
+            #if quote['user']['id'] == user['_id']:
+            #    return u"Sorry, {0}, but you can't quote yourself! Try saying someone funnier and maybe someone else will remember you.".format(user['nick'])
             if "remembered" in quote:
-                return u"Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"].encode("utf-8"))
+                return u"Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"])
             else:
                 quote["remembered"] = {"user": user["_id"], "nick": user["nick"], "time": datetime.datetime.now()}
                 db.db.history.save(quote)
-                return u"Ok, {0}, remembering <{1}>: {2}".format(user["nick"], quote['user']['nick'], quote["body"].encode("utf-8"))
+                return u"Ok, {0}, remembering <{1}>: {2}".format(user["nick"], quote['user']['nick'], quote["body"])
         else:
             return u"Sorry, {0}, I haven't heard anything like '{1}' by {2}.".format(user["nick"], text, tuser[0]["nick"])
 

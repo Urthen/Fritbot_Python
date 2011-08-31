@@ -19,6 +19,13 @@ ROOMS = {
     "Room": "Nickname"
 }
 
+CONFLUENCE = {
+    "enabled": False,
+#    "url": "https://www.example.com/confluence/rpc/xmlrpc",
+#    "username": "username",
+#    "password": "password"
+}
+
 # Logging settings
 LOG = {
     "filename": APPLICATION["name"] + ".log",
