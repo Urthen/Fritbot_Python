@@ -116,7 +116,7 @@ def remember(bot, room, user, args):
 
     tuser = util.inRoster(args[0], room)
 
-    print "tuser:", tuser
+    #print "tuser:", tuser
     if tuser and len(tuser) >= 1:
         text = " ".join(args[1:])
 

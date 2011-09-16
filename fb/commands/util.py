@@ -48,15 +48,15 @@ def inRoster(name, room=None, special=None):
     users = db.db.users.find()
     for user in users:
         names.append((user['nick'], user))
-        print "-----"
-        print user
+        #print "-----"
+        #print user
         for r in user['nicks']:
-            print r
+            #print r
             for n in r['nicks']:
-                print n
+                #print n
                 names.append((n, user))
 
-    print "Names Found!", names
+    #print "Names Found!", names
 
     results = []
 
@@ -72,13 +72,11 @@ def inRoster(name, room=None, special=None):
         v = 0
         n = item[0]
         if name in n:
-            print name, "in", n
+            #print name, "in", n
             v = compare(name, n)
         elif name.lower() in n.lower():
-            print name, "lower in", n
+            #print name, "lower in", n
             v = compare(name.lower(), n.lower()) * MULT_CASE_WRONG
-        else:
-            print name, "not in", n
         if v > 0:
             results.append((item[1], v))
 
