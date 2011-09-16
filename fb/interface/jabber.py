@@ -49,6 +49,11 @@ class JabberInterface(Interface, muc.MUCClient):
 
         Interface.__init__(self, bot)
 
+        try:
+            import OpenSSL
+        except:
+            log.msg("Error importing OpenSSL, you may (or may not) have trouble connecting to Jabber servers. Try installing OpenSSL for python.")
+
         self._presence = xmppim.PresenceClientProtocol()
         self._ping = ping.PingHandler()
         muc.MUCClient.__init__(self)
