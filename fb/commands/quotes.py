@@ -44,10 +44,7 @@ def sayQuotes(bot, room, user, nick, segment, min=1, max=1):
             lines.append(u"<{0}>: {1}".format(quote['user']['nick'], quote['body']))
         quotes = '\n'.join(lines)
 
-        if room is not None:
-            room.send(quotes)
-        else:
-            user.send(quotes)
+        util.sendMsg(room, user, quotes)
 
     return msg
 

@@ -35,6 +35,12 @@ def getSubset(cursor, min, max=None):
 
     return out
 
+def sendMsg(room, user, message):
+    if room is not None:
+        room.send(message)
+    else:
+        user.send(message)
+
 def inRoster(name, room=None, special=None):
 
     if special=="quotes":

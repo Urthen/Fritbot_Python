@@ -111,6 +111,7 @@ class FritBot(object):
     def receivedGroupChat(self, room, user, body, nick=None, history=False):
         '''Triggered when a group chat is recieved in a room the bot is in'''        
         #Validate that the user is NOT the bot itself!
+        wasCommand = False
         if user.uid.split('@', 1)[0] != config.JABBER['jid']:
             if nick is None:
                 nick = user['nick']

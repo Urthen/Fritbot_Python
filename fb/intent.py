@@ -1,10 +1,10 @@
-import re, datetime
+import re, datetime, random
 from twisted.python import log
 
 import config
 from fb.db import db
 from fb.commands import *
-from fb.commands.util import cleanString
+from fb.commands.util import cleanString, sendMsg
 
 CAPTURE_BEGIN = ['"', "'"] #, '{', '(', '[']
 CAPTURE_END = ['"', "'"] #, '}', ')', ']']
@@ -43,7 +43,8 @@ def cutString(text):
 class IntentService(object):
 
     def __init__(self):
-        self._refreshed = None
+        self._intentsrefreshed = None
+        self._responsesrefreshed = None
         self._intents = []
         self._bot = None
 
@@ -54,10 +55,10 @@ class IntentService(object):
 
     def refreshIntents(self):
         '''Read intents from the database'''
-        #refresh according to refresh guidelines
-        if self._refreshed is None or (datetime.datetime.now() - self._refreshed) > datetime.timedelta(seconds=config.CONFIG['refresh']):
+        #refresh intents according to refresh guidelines
+        if self._intentsrefreshed is None or (datetime.datetime.now() - self._intentsrefreshed) > datetime.timedelta(seconds=config.CONFIG['refresh']):
             log.msg("Intents need some refreshment...")
-            self._refreshed = datetime.datetime.now()
+            self._intentsrefreshed = datetime.datetime.now()
             self._intents = []
 
             for command in db.db.commands.find():
@@ -66,6 +67,15 @@ class IntentService(object):
                     command['rexx'].append(re.compile("^" + crex + "$"))
 
                 self._intents.append(command)
+
+    def refreshResponses(self):
+        if self._responsesrefreshed is None or (datetime.datetime.now() - self._responsesrefreshed) > datetime.timedelta(seconds=config.CONFIG['refresh']):
+            log.msg("Responses need some refreshment...")
+            self._responsesrefreshed = datetime.datetime.now()
+            self._responses = []
+
+            for response in db.db.intents.find():
+                self._responses.append(response)
 
     def addressedToBot(self, text, room=None):
         '''Attempts to determine if a piece of text is addressed to the bot, as in, prefixed with its nickname.'''
@@ -83,11 +93,58 @@ class IntentService(object):
         '''Parse an incoming message.'''
         address = self.addressedToBot(body, room)
 
+        iscommand = False
+        out = None
+
         if address is not None:
-            return self.fetchCommand(address, room, user)
+            iscommand, out = self.fetchCommand(address, room, user)
         elif room is None:
-            return self.fetchCommand(body, room, user)
-        return False, None
+            iscommand, out = self.fetchCommand(body, room, user)
+
+        if not iscommand:
+            print "Checking responses"
+            response = self.fetchResponse(body, room, user)
+            if response is not None:
+                out = response
+
+        return iscommand, out
+
+    def fetchResponse(self, body, room, user):
+        '''Attempt to negotiate a response based on context.'''
+        self.refreshResponses()
+
+        options = []
+
+        for response in self._responses:
+            #Do we meet the preconditions of this response?
+            for trigger in response['triggers']:
+                if type(trigger) == type(u''):
+                    match = re.search(trigger, body, re.I)
+                    if match is not None:
+                        options.append((match, response))
+                elif type(trigger) == type({}):
+                    print "Dictionary triggers not implemented yet."
+                else:
+                    print "Type of trigger", choice, "was not recognized."
+            
+        selections = []
+        length = 0            
+        for option in options:
+            optlen = len(option[0].group(0))
+            if optlen > length:
+                selections = [option]
+                length = optlen
+            elif optlen == length:
+                selections.append(option)
+
+        if len(selections) > 0:
+            selection = random.choice(selections)
+            actionset = random.choice(selection[1]['actions']) 
+            for action in actionset['list']:
+                for key in action:
+                    if key == "say":
+                        sendMsg(room, user, action[key])
+            
 
     def fetchCommand(self, text, room, user):
         '''Attempt to execute something that looks like a command.'''
