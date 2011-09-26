@@ -27,7 +27,7 @@ except AssertionError:
 application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
 log.startLogging(sys.stdout)
 
-# Set up Fritbot instance
+# Set up Fritbot chat instance
 fritbot = FritBot()
 
 # Connect to XMPP
@@ -35,6 +35,15 @@ bot_jid = "{0}@{1}/{2}".format(config.JABBER["jid"], config.JABBER["server"], co
 xmppclient = XMPPClient(jid.internJID(bot_jid), config.JABBER["password"], config.JABBER["server"])
 xmppclient.logTraffic = config.LOG["traffic"]
 
+# Hook chat instance into main app
 jinterface = JabberInterface(fritbot)
 jinterface.setHandlerParent(xmppclient)
 xmppclient.setServiceParent(application)
+
+# Start up the web service
+try:
+	import jinja
+except:
+	print "Cannot import Jinja. Try installing it with 'easy_install jinja' or 'pip install jinja'."
+	sys.exit(1)
+#whoops i lied.
