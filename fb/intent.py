@@ -102,10 +102,9 @@ class IntentService(object):
             iscommand, out = self.fetchCommand(body, room, user)
 
         if not iscommand:
-            print "Checking responses"
             response = self.fetchResponse(body, room, user)
-            if response is not None:
-                out = response
+            if response is True:
+                out = None
 
         return iscommand, out
 
@@ -114,9 +113,15 @@ class IntentService(object):
         self.refreshResponses()
 
         options = []
+        if room is None:
+            route = user
+        else:
+            route = room
 
         for response in self._responses:
-            #Do we meet the preconditions of this response?
+            if route.disallowed(response['auths']):
+                continue
+
             for trigger in response['triggers']:
                 if type(trigger) == type(u''):
                     match = re.search(trigger, body, re.I)
@@ -143,7 +148,10 @@ class IntentService(object):
             for action in actionset['list']:
                 for key in action:
                     if key == "say":
-                        sendMsg(room, user, action[key])
+                        route.send(action[key])
+            return True
+        else:
+            return False
             
 
     def fetchCommand(self, text, room, user):
