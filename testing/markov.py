@@ -1,69 +1,66 @@
 import re, random
 from pymongo import Connection, errors as PyMongoErrors
 
+rooms = ['offtopic', 'design', 'support_analyst']
+
 connection = Connection()
 db = connection["fritbot"]
-history = db.history
-markov = db.markov
+roomsreturned = db.rooms.find({'name': {'$in': rooms}})
+roomids = []
+for room in roomsreturned:
+	roomids.append(room['_id'])
 
-log = history.find()
+log = db.history.find({'room': {'$in': roomids}})
 
 stats = {}
 
 splitter = re.compile("([,\.!\?-_:;]+( +|$))|(-)|([^,!\?\-_:;\(\)\" ]+)")
-punc = re.compile("[,\.!\?-_:;]( +|$)")
 
 END = "__end__"
-SUM = "__sum__"
+
+lines = log.count()
+done = 0
+print "Reading {0} lines".format(lines)
 
 for line in log:
-	last = ""
+	history = [""]
 	text = line["body"].lower()
+	#print "*** " + text
 	segments = map(lambda x: ''.join(x), splitter.findall(text))
 	segments.append(END)
 
 	for segment in segments:
-		if last not in stats:
-			stats[last] = {}
-		if segment not in stats[last]:
-			stats[last][segment] = 1
-		else:
-			stats[last][segment] += 1
+		#print "** " + segment
+		for delay in range(len(history)):
+			word = history[delay]
+			if word not in stats:
+				stats[word] = {}
+			if segment not in stats[word]:
+				stats[word][segment] = [0, 0, 0]
+			
+			stats[word][segment][delay] += 1
+			#print u"{0}-{1}->{2}: {3}".format(word, delay, segment, stats[word][segment][delay])
+		history.insert(0, segment)
+		history = history[0:3]
 
-		#print last, segment, stats[last][segment]
-		last = segment
-		
-for stat in stats.values():
-	stat[SUM] = reduce(lambda a, b: a + b, stat.values())
+	done += 1
+	if done % 2500 == 0:
+		print "{0}/{1}".format(done, lines)
 
-state = ""
-output = []
-while len(output) < 20:
-	stat = stats[state]
-	total = stat[SUM]
-	rand = random.randrange(total)
-	#print state, total, rand
-	for seg in stat:
-		if seg == SUM:
-			continue
-		rand -= stat[seg]
-		#print seg, stat[seg], rand
-		if rand <= 0:
-			break
-	if seg == END:
-		if len(output) > 5:
-			break
-		else:
-			state = ""
-	else:
-		output.append(seg)
-		state = seg
 
-string = ""
-for out in output:
-	if punc.match(out):
-		string += out.rstrip()
-	else:
-		string += " " + out
+done = 0
+print "Clearing...."
+db.markov.remove({})
+print "Writing {0} words.".format(len(stats))
+for wordFrom in stats:
+	statsFrom = stats[wordFrom]
+	for wordTo in statsFrom:
+		statsTo = statsFrom[wordTo]
+		doc = {"from": wordFrom, "to": wordTo, "stats": statsTo}
+		db.markov.insert(doc)
+	
+	done += 1
+	if done % 2500 == 0:
+		print "{0}/{1}".format(done, len(stats))
 
-print string.lstrip()
+print doc
