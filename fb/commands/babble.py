@@ -1,5 +1,6 @@
 from __future__ import division
 import re, random, math
+from twisted.internet import reactor
 
 from fb.db import db
 import util
@@ -19,7 +20,7 @@ def doMarkov(room, user):
 		total = 0.
 		for delay in range(min(len(state), maximum)): #len(state)):
 			if state[delay] not in cache:
-				cursor =  db.markov.find({'from': state[delay]})
+				cursor =  db.db.markov.find({'from': state[delay]})
 				cache[state[delay]] = {}
 				data = cache[state[delay]]
 				for word in cursor:
@@ -51,8 +52,6 @@ def doMarkov(room, user):
 		else:
 			output.append(seg)
 			state.insert(0, seg)
-
-		print "."
 
 	string = ""
 	for out in output:

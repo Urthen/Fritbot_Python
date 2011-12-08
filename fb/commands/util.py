@@ -56,11 +56,12 @@ def inRoster(name, room=None, special=None):
         names.append((user['nick'], user))
         #print "-----"
         #print user
-        for r in user['nicks']:
-            #print r
-            for n in r['nicks']:
-                #print n
-                names.append((n, user))
+        if 'nicks' in user:
+            for r in user['nicks']:
+                #print r
+                for n in r['nicks']:
+                    #print n
+                    names.append((n, user))
 
     #print "Names Found!", names
 

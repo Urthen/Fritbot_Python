@@ -1,7 +1,7 @@
 import re, random
 from pymongo import Connection, errors as PyMongoErrors
 
-rooms = ['offtopic', 'design', 'support_analyst']
+rooms = ['offtopic']
 
 connection = Connection()
 db = connection["fritbot"]
