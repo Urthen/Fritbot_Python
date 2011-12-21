@@ -45,7 +45,7 @@ def tokenLogin(token, user):
 			del _tokens[token]
 			return None
 	else:
-		log.msg("User %s attempted to login with invalid or expired token, %s" % (user.uuid, token))
+		log.msg("User %s attempted to login with invalid or expired token, %s" % (user.uid, token))
 		return False
 
 def cancelLogin(token):

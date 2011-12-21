@@ -6,6 +6,14 @@ APPLICATION = {
     "name": "fritbot"
 }
 
+# API Settings, comment entire section out to disable the API.
+API = {
+    "debug": True, # If set to True, will display a rich error message instead of a default json error message when server errors occur.
+    "default_limit": 100,
+    "port": 4886,
+    "login_timeout": 5 # minutes until login token expires
+}
+
 # Jabber connection settings
 JABBER =  {
     "jid": "user", # as in, user@server.name.com/Resource
