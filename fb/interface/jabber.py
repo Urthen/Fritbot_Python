@@ -9,6 +9,7 @@ from twisted.python import log
 
 from wokkel import muc, xmppim, ping
 
+from fb.fritbot import FritBot
 from interface import Interface, User, Room
 from fb.db import db
 import config, fb.intent as intent
@@ -43,11 +44,11 @@ class JabberInterface(Interface, muc.MUCClient):
 
     interface = None
 
-    def __init__(self, bot):
+    def __init__(self):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
         log.msg("Initializing Jabber interface...")
 
-        Interface.__init__(self, bot)
+        Interface.__init__(self)
 
         try:
             import OpenSSL
@@ -69,7 +70,7 @@ class JabberInterface(Interface, muc.MUCClient):
         '''Called on connect/reconnect. Attempts to re-join all existing rooms.'''
         log.msg("MUC Connected.")
         self.xmlstream.addObserver(CHAT, self.receivedPrivateChat)
-        self.bot.connected()
+        FritBot().connected()
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to joining, creating, and leaving rooms.
@@ -96,7 +97,7 @@ class JabberInterface(Interface, muc.MUCClient):
         
     def fbInitRoom(self, room):
         '''Joined a room, get the configuration or create default configuration'''
-        self.bot.initRoom(room)
+        FritBot().initRoom(room)
         
     def joinRoom(self, room, nick):
         '''Join a room'''
@@ -140,7 +141,7 @@ class JabberInterface(Interface, muc.MUCClient):
 
         self.doNickUpdate(u, room.info, user.nick)
 
-        self.bot.receivedGroupChat(room.info, u, message.body, nick=user.nick)
+        FritBot().receivedGroupChat(room.info, u, message.body, nick=user.nick)
 
     def receivedPrivateChat(self, msg):
         '''Triggered when someone messages the bot directly.'''
@@ -154,4 +155,4 @@ class JabberInterface(Interface, muc.MUCClient):
 
         user = db.getUser(JUser(resource, nick, self))
 
-        self.bot.receivedPrivateChat(user, unicode(msg.body))
+        FritBot().receivedPrivateChat(user, unicode(msg.body))

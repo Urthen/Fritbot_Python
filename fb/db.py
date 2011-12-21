@@ -5,15 +5,23 @@ A note to the unfamiliar, this acts as a singleton: All you have to do is call D
 import datetime
 
 from twisted.python import log
+import pymongo
 from pymongo import Connection, errors as PyMongoErrors
+from pymongo.objectid import ObjectId
 
 import config
+
+ASCENDING = pymongo.ASCENDING
+DESCENDING = pymongo.DESCENDING
+
+OID = ObjectId
 
 class Database(object):
 
     _connection = None
     _db = None
     _roomCache = {}
+    _roomIDCache = {}
     _userCache = {}
 
 
@@ -31,6 +39,9 @@ class Database(object):
 
         return self._db
 
+    def __getattr__(self, collection):
+        return getattr(self.db, collection)
+
     def getRoom(self, room):
         if room.uid in self._roomCache:
             room = self._roomCache[room.uid]
@@ -43,6 +54,34 @@ class Database(object):
 
         return room
 
+    def getRoomByUID(self, uid):
+        if uid in self._roomCache:
+            room = self._roomCache[uid]
+            room.refresh()
+            return room
+        else:
+            return None
+
+    def getRoomInfo(self, rid):
+        info = None
+        if rid in self._roomIDCache:
+            info = self._roomIDCache[rid]
+            if (datetime.datetime.now() - info['_refreshed']) > datetime.timedelta(seconds=config.CONFIG["refresh"]):
+                info = self._db.rooms.find_one({'_id': rid})
+                if info:
+                    info['_refreshed'] = datetime.datetime.now()
+                    self._roomIDCache[rid] = info
+                else:
+                    del self._roomIDCache[rid]
+        else:
+            info = self._db.rooms.find_one({'_id': rid})
+            if info:
+                info['_refreshed'] = datetime.datetime.now()
+                self._roomIDCache[rid] = info
+        
+        return info
+
+
     def getUser(self, user):
 
         if user.uid in self._userCache:
@@ -53,9 +92,6 @@ class Database(object):
             self._userCache[user.uid] = user
         user.refresh()
 
-        return user
-
-
-    
+        return user  
 
 db = Database()

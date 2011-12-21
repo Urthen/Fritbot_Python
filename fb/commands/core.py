@@ -167,4 +167,6 @@ def undoDisallow(bot, room, user, args):
     return allow(bot, args["room"], user, args["args"], True)
 
 def auths(bot, room, user, args):
+    if room is None:
+        return u"Users don't have individual permissions within the context of Fritbot."
     return u"I currently have the following authorizations for the {0} room: {1}".format(room.uid, repr(room["auths"]))

@@ -26,6 +26,8 @@ class Route(object):
 
     undostack = []
     '''Undo stack for this route.'''
+
+    active = False
     
     def __getitem__(self, key):
         '''Getter for contained MongoDB info object. Returns None if key is not found.'''
@@ -47,6 +49,10 @@ class Route(object):
 
     def send(self, message, delay=False):
         '''Attempt to send a message with given delay'''
+        if not self.active:
+            log.warn("Attempted to send a message to inactive %s: %s", self.TYPE, self.uid)
+            return
+
         time = 0.2
         if delay:
             time = random.random() + 2.0
@@ -139,6 +145,9 @@ class User(Route):
     undostack = []
     '''Undo stack for this user.'''
 
+    active = True
+    '''Always assume we can talk to the user. Probably not the best assumption, but whatever.'''
+
     def __init__(self, uid, nick):
         self['nick'] = nick
         self._collection = db.db.users
@@ -160,14 +169,16 @@ class User(Route):
             db.db.users.insert(mdbUser)
 
         self.info = mdbUser
+    
+    def allowed(self, permissions):
+        return True #everything's allowed when you're having fun alone
 
 class Interface(object):
     
-    bot = None
 
-    def __init__(self, bot):
-        self.bot = bot
-        bot.registerInterface(self)
+    def __init__(self):
+        from fb.fritbot import FritBot
+        FritBot().registerInterface(self)
 
     def doNickUpdate(self, user, room, nick):
         '''Update user and room nicknames, if appropriate.

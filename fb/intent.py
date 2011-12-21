@@ -86,7 +86,7 @@ class IntentService(object):
 
         out = text.split(' ', 1)
 
-        if cleanString(out[0]) in nicknames:
+        if cleanString(out[0]) in nicknames and len(out) > 1:
             return out[1]
 
     def parseMessage(self, body, room, user):

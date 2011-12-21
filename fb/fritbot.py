@@ -11,8 +11,7 @@ from wokkel import muc, xmppim
 
 from fb.interface.interface import Room, User, Interface
 from fb.db import db
-import config, fb.intent as intent  
-
+import config, fb.intent as intent
 
 class FritBot(object):
     '''Main fritbot class, handles connecting to the server as well as input/output.'''
@@ -23,9 +22,18 @@ class FritBot(object):
     _connection = None
     """Connection to an IM interface"""
 
+    _instance = None
+
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to the initialization or shutdown of the bot.
     -----------------------------------------------------------------------------------------------------------------------------------------'''
+
+    def __new__(cls, *args, **kwargs):
+        '''Simple implementation of the singleton pattern'''
+        if not cls._instance:
+            cls._instance = super(FritBot, cls).__new__(
+                                cls, *args, **kwargs)
+        return cls._instance
 
     def __init__(self):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
@@ -72,6 +80,7 @@ class FritBot(object):
     def initRoom(self, room):
         '''Joined a room, add it to the list.'''    
         log.msg("Connected to " + room.uid)
+        room.active = True
         self.rooms[room.uid] = room
         
     def joinRoom(self, room, nick):
@@ -80,7 +89,9 @@ class FritBot(object):
         
     def leaveRoom(self, room):
         '''Leave a room'''
+        log.msg("Left " + room.uid)
         self._connection.leaveRoom(room)
+        room.active = False
         del self.rooms[room.uid]
 
 
