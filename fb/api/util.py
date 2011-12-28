@@ -1,6 +1,7 @@
 import json
 
 from twisted.web.resource import Resource
+from twisted.web.server import NOT_DONE_YET
 
 from fb import db
 import config
@@ -19,6 +20,7 @@ def parseSortOptions(options):
 
 def returnjson(f):
 	def jsonResponse(self, request):
+		request.setHeader('Access-Control-Allow-Origin', '*')
 		request.setHeader("Content-Type", "application/json")
 		try:
 			out = f(self, request)
@@ -27,7 +29,11 @@ def returnjson(f):
 				raise
 			else:
 				out = self.error(request)
-		return json.dumps(out)
+		
+		if out == NOT_DONE_YET:
+			return out
+		else:
+			return json.dumps(out)
 
 	return jsonResponse
 
@@ -56,6 +62,7 @@ class APIResponse(Resource):
 		403: "Provided API key does not have sufficient permissions for this request.",
 		404: "Requested resource not found.",
 		405: "Request method is not allowed at this URI.",
+		410: "Gone! I know what you're talking about, but it isn't here anymore.",
 		418: "I'm a little teapot, short and stout.",
 		429: "API Key threshold exceeded, try again in a few seconds.",
 		500: "Server error, request cannot be completed at this time."

@@ -30,22 +30,21 @@ class KeyRequest(APIResponse):
 			return self.error(request, self.BAD_REQUEST, "You must specify an application name for your request.")
 
 class KeyListener(APIResponse):
+	isLeaf=True
 
 	def responded(self, user=None, key=None):
 		if user is None or key is None:
 			self.request.setResponseCode(self.GONE)
-			self.request.setHeader("Content-Type", "application/json")
 			self.request.write(json.dumps({'errors': True, 'error': "Token not accepted by any user."}))
 		else:
-			self.request.setHeader("Content-Type", "application/json")
 			self.request.write(json.dumps({'key': key, 'user': user.uid, 'nick': user['nick']}))
 
 		self.request.finish()
 
+	@returnjson
 	def render_GET(self, request):
-		if 'token' in request.args:
-			if security.listenForLogin(request.args['token'][0], self.responded):
+		if len(request.postpath) == 1:
+			if security.listenForLogin(request.postpath[0], self.responded):
 				self.request = request
 				return NOT_DONE_YET
-		request.setHeader("Content-Type", "application/json")
-		return json.dumps(self.error(request, self.BAD_REQUEST, "Token not specified, not recognized, or expired."))
+		return self.error(request, self.NOT_FOUND, "Token not specified, not recognized, or expired.")
