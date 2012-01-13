@@ -1,3 +1,5 @@
+var login_response_xhr = undefined;
+
 function processLogin(key, name, user) {
 	createCookie("bot_key", key, 30);
 	createCookie("bot_name", name, 30);
@@ -28,14 +30,17 @@ function showUnauthorized(jq, status, thrown) {
 }
 
 function retrieveToken() {
+	if (login_response_xhr != undefined) {
+		login_response_xhr.abort()
+	}
 	$.ajax("http://localhost:4886/auth/request?application=web%20admin%20panel", {
 		"success": function(data, status, jq) {
 			console.log(data, data.token)
 			$("#token-time").html(data.timeout);
-			$("#login-popin").show("blind");
+			$("#login-popin:hidden").show("blind");
 			$("#token-input").val("authorize " + data.token).focus().select();
 
-			$.getJSON("http://localhost:4886/auth/response/" + data.token, loggedIn);},
+			login_response_xhr = $.getJSON("http://localhost:4886/auth/response/" + data.token, loggedIn);},
 
 		"error": loggedOut,
 		}
