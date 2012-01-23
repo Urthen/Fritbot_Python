@@ -1,4 +1,4 @@
-primport re, datetime, random
+import re, datetime, random
 from twisted.python import log
 
 import config
@@ -299,5 +299,5 @@ class IntentService(object):
         else:
             return False, "I'm sorry, I don't know what '{0}' means.".format(text)
 
-
 service = IntentService()
+
