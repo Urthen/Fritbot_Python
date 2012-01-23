@@ -9,7 +9,7 @@ from twisted.python import log
 
 from wokkel import muc, xmppim, ping
 
-from fb.fritbot import FritBot
+import fb.fritbot as FritBot
 from interface import Interface, User, Room
 from fb.db import db
 import config, fb.intent as intent
@@ -70,7 +70,7 @@ class JabberInterface(Interface, muc.MUCClient):
         '''Called on connect/reconnect. Attempts to re-join all existing rooms.'''
         log.msg("MUC Connected.")
         self.xmlstream.addObserver(CHAT, self.receivedPrivateChat)
-        FritBot().connected()
+        FritBot.bot.connected()
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to joining, creating, and leaving rooms.
@@ -97,7 +97,7 @@ class JabberInterface(Interface, muc.MUCClient):
         
     def fbInitRoom(self, room):
         '''Joined a room, get the configuration or create default configuration'''
-        FritBot().initRoom(room)
+        FritBot.bot.initRoom(room)
         
     def joinRoom(self, room, nick):
         '''Join a room'''
@@ -141,7 +141,7 @@ class JabberInterface(Interface, muc.MUCClient):
 
         self.doNickUpdate(u, room.info, user.nick)
 
-        FritBot().receivedGroupChat(room.info, u, message.body, nick=user.nick)
+        FritBot.bot.receivedGroupChat(room.info, u, message.body, nick=user.nick)
 
     def receivedPrivateChat(self, msg):
         '''Triggered when someone messages the bot directly.'''
@@ -155,4 +155,4 @@ class JabberInterface(Interface, muc.MUCClient):
 
         user = db.getUser(JUser(resource, nick, self))
 
-        FritBot().receivedPrivateChat(user, unicode(msg.body))
+        FritBot.bot.receivedPrivateChat(user, unicode(msg.body))

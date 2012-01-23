@@ -43,15 +43,125 @@ def cutString(text):
 class IntentService(object):
 
     def __init__(self):
-        self._intentsrefreshed = None
-        self._responsesrefreshed = None
-        self._intents = []
+        self._modules = {}
+
+        self._listeners = []
+        self._commands = []
+
         self._bot = None
+
+        #TODO: Deprecate these.
+        self._intentsrefreshed = None
+        self._listeners_oldrefreshed = None
+        self._intents = []
+        self._commands_old = []
+        self._listeners_old = []
 
     def link(self, bot):
         '''Link the intent service to the bot.'''
         log.msg("Linking bot to intent service.")
         self._bot = bot
+
+    def registerModule(self, module, name):
+        log.msg("Registering module:", name)
+        moduleobject = module.module
+        self._modules[name] = moduleobject
+        moduleobject.register()
+
+    def registerCommand(self, keywords, function, module, name, description):
+        if type(keywords) != type([]):
+            keywords = [keywords]
+
+        rexwords = []
+        for word in keywords:
+            rexwords.append(re.compile('^' + word + "$", re.I))
+
+        command = {'keywords': rexwords, 'function': function, 'name': name, 'description': description, 'module': module}
+        self._commands.append(command)
+
+    def registerListener(self, patterns, function, module, name, description):
+        if type(patterns) != type([]):
+            patterns = [patterns]
+
+        rexwords = []
+        for word in patterns:
+            rexwords.append(re.compile('^' + word + "$", re.I))
+
+        listener = {'patterns': rexwords, 'function': function, 'name': name, 'description': description, 'module': module}
+        self._listeners.append(listener)
+
+    def addressedToBot(self, text, room=None):
+        '''Attempts to determine if a piece of text is addressed to the bot, as in, prefixed with its nickname.'''
+        #TODO: Fix this so it works with multiple-work nicknames!
+        nicknames = [cleanString(config.CONFIG['name'])]
+        nicknames.extend(config.CONFIG['nicknames'])
+        if room is not None:
+            nicknames.append(room["nick"])
+
+        out = text.split(' ', 1)
+
+        if cleanString(out[0]) in nicknames and len(out) > 1:
+            return out[1]
+
+    def parseMessage(self, body, room, user):
+        '''Parse an incoming message.'''
+        address = self.addressedToBot(body, room)
+
+        if address is not None:
+            body = address
+        
+        #Check to see if this is a command
+        if address is not None or room is None:
+            words = cutString(body)
+
+            for command in self._commands:
+                for rex in command['keywords']:
+                    for i in reversed(range(1, len(words) + 1)):
+                        match = rex.search(cleanString(' '.join(words[:i])))
+
+                        if match is not None:
+                            #Pull out any matched groups...
+                            args = []
+                            for x in range(1, 5):
+                                try:
+                                    arg = match.group('arg' + str(x))
+                                except:
+                                    #No arguments left (if there were any to begin with)
+                                    break
+                                
+                                ars.append(arg)
+
+                            #Anything left is added to the args
+                            args.extend(words[i:])
+                            handled = command['function'](self._bot, room, user, args)
+                            if handled:
+                                return True, None
+
+        for listener in self._listeners:
+            for rex in listener['patterns']:
+                print body, rex
+                match = rex.search(cleanString(body))
+
+                if match is not None:
+                    handled = listener['function'](self._bot, room, user, match)
+                    if handled:
+                        return False, None
+
+        # Support for existing commands.
+        iscommand = False
+        out = None
+
+        if address is not None:
+            iscommand, out = self.fetchCommand(address, room, user)
+        elif room is None:
+            iscommand, out = self.fetchCommand(body, room, user)
+
+        return iscommand, out
+
+
+#####################################################################################################################################################################
+# Everything below this line is going to be removed once new-style commands are finished.
+#####################################################################################################################################################################
 
     def refreshIntents(self):
         '''Read intents from the database'''
@@ -69,44 +179,13 @@ class IntentService(object):
                 self._intents.append(command)
 
     def refreshResponses(self):
-        if self._responsesrefreshed is None or (datetime.datetime.now() - self._responsesrefreshed) > datetime.timedelta(seconds=config.CONFIG['refresh']):
+        if self._listeners_oldrefreshed is None or (datetime.datetime.now() - self._listeners_oldrefreshed) > datetime.timedelta(seconds=config.CONFIG['refresh']):
             log.msg("Responses need some refreshment...")
-            self._responsesrefreshed = datetime.datetime.now()
-            self._responses = []
+            self._listeners_oldrefreshed = datetime.datetime.now()
+            self._listeners_old = []
 
             for response in db.db.intents.find():
-                self._responses.append(response)
-
-    def addressedToBot(self, text, room=None):
-        '''Attempts to determine if a piece of text is addressed to the bot, as in, prefixed with its nickname.'''
-        nicknames = [cleanString(config.CONFIG['name'])]
-        nicknames.extend(config.CONFIG['nicknames'])
-        if room is not None:
-            nicknames.append(room["nick"])
-
-        out = text.split(' ', 1)
-
-        if cleanString(out[0]) in nicknames and len(out) > 1:
-            return out[1]
-
-    def parseMessage(self, body, room, user):
-        '''Parse an incoming message.'''
-        address = self.addressedToBot(body, room)
-
-        iscommand = False
-        out = None
-
-        if address is not None:
-            iscommand, out = self.fetchCommand(address, room, user)
-        elif room is None:
-            iscommand, out = self.fetchCommand(body, room, user)
-
-        if not iscommand:
-            response = self.fetchResponse(body, room, user)
-            if response is True:
-                out = None
-
-        return iscommand, out
+                self._listeners_old.append(response)
 
     def fetchResponse(self, body, room, user):
         '''Attempt to negotiate a response based on context.'''
@@ -118,7 +197,7 @@ class IntentService(object):
         else:
             route = room
 
-        for response in self._responses:
+        for response in self._listeners_old:
             if route.disallowed(response['auths']):
                 continue
 

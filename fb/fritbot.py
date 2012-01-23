@@ -23,27 +23,33 @@ class FritBot(object):
     """Connection to an IM interface"""
 
     _instance = None
+    _initialized = False
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to the initialization or shutdown of the bot.
     -----------------------------------------------------------------------------------------------------------------------------------------'''
 
-    def __new__(cls, *args, **kwargs):
-        '''Simple implementation of the singleton pattern'''
-        if not cls._instance:
-            cls._instance = super(FritBot, cls).__new__(
-                                cls, *args, **kwargs)
-        return cls._instance
-
     def __init__(self):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
+        if self._initialized:
+            raise Exception("Bot already initialized!")
+        self._initialized = True
         log.msg("Initializing bot...")
 
         # Configure internals
         for uid, nick in config.ROOMS.items():
             room = Room(uid, nick)
             self.rooms[uid] = room
+
         intent.service.link(self)
+
+        # Import and register configured modules.
+        for name in config.APPLICATION['modules']:
+            log.msg("Loading module {0}...".format(name))
+            fullname = "fb.modules." + name
+            __import__(fullname, globals(), locals(), [], -1)
+            module = sys.modules[fullname]
+            intent.service.registerModule(module, name)
 
     def registerInterface(self, interface):
         log.msg("Connecting bot to interface...")
@@ -147,3 +153,5 @@ class FritBot(object):
             user.send(message)
 
         self.addHistory(None, user, user['nick'], body, wasCommand)
+
+bot = FritBot()

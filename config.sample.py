@@ -4,6 +4,7 @@
 # Twistd application settings
 APPLICATION = {
     "name": "fritbot"
+    "modules": ['hello']
 }
 
 # API Settings, comment entire section out to disable the API.

@@ -177,8 +177,8 @@ class Interface(object):
     
 
     def __init__(self):
-        from fb.fritbot import FritBot
-        FritBot().registerInterface(self)
+        import fb.fritbot as FritBot
+        FritBot.bot.registerInterface(self)
 
     def doNickUpdate(self, user, room, nick):
         '''Update user and room nicknames, if appropriate.
