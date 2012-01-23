@@ -1,4 +1,4 @@
-import re, datetime, random
+primport re, datetime, random
 from twisted.python import log
 
 import config
@@ -139,7 +139,6 @@ class IntentService(object):
 
         for listener in self._listeners:
             for rex in listener['patterns']:
-                print body, rex
                 match = rex.search(cleanString(body))
 
                 if match is not None:
