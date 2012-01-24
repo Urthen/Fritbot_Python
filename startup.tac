@@ -24,6 +24,11 @@ except AssertionError:
 application.setComponent(ILogObserver, FileLogObserver(logfile).emit)
 log.startLogging(sys.stdout)
 
+try:
+	from OpenSSL import SSL
+except:
+	log.msg("Warning, we can't import SSL. You may have trouble connecting to some servers. If so, try installing pyOpenSSL.")
+
 # Set up Fritbot chat instance
 
 if config.JABBER:
