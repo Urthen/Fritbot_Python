@@ -81,8 +81,8 @@ class IntentService(object):
 
     def loadModules(self):
         log.msg("Loading modules...")
-        #import the config, in case it's changed since we started
-        import config
+        #reload the config, in case it's changed since we started
+        reload(config)
 
         old_listeners = self._listeners
         self._listeners = []
