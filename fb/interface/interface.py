@@ -124,19 +124,21 @@ class Room(Route):
 
         self.info = mdbRoom
 
-        if "squelched" in self.info and self["squelched"] > datetime.datetime.now():
+    def setNick(self, nick):
+        raise NotImplementedError("setNick() must be implemented by a sub-class.")
+
+    @property
+    def squelched(self):
+        if self["squelched"] > datetime.datetime.now():
             seconds = (self["squelched"] - datetime.datetime.now()).seconds
             minutes = int(seconds / 60)
             seconds = seconds - (minutes * 60)
             if minutes > 0:
-                self.squelched = "{0} minute(s)".format(minutes)
+                return "{0} minute(s)".format(minutes)
             else:
-                self.squelched = "{0} second(s)".format(seconds)
+                return "{0} second(s)".format(seconds)
         else:
-            self.squelched = False
-
-    def setNick(self, nick):
-        raise NotImplementedError("setNick() must be implemented by a sub-class.")
+            return False
 
 class User(Route):
 

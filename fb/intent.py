@@ -67,16 +67,41 @@ class IntentService(object):
         self._modules[name] = moduleobject
         moduleobject.register()
 
-    def registerCommand(self, keywords, function, module, name, description):
+    def registerCommand(self, keywords=None, function=None, module=None, name=None, description='No description provided.', core=False):
+        assert keywords is not None, "Command registration called without keywords."
+        assert function is not None, "Command registration called without function."
+        assert module is not None, "Command registration called without module."
+        
         if type(keywords) != type([]):
             keywords = [keywords]
+
+        if name is None:
+            name = keywords[0]
 
         rexwords = []
         for word in keywords:
             rexwords.append(re.compile('^' + word + "$", re.I))
 
-        command = {'keywords': rexwords, 'function': function, 'name': name, 'description': description, 'module': module}
+        command = {'keywords': rexwords, 'function': function, 'name': name, 'description': description, 'module': module, 'core': core}
         self._commands.append(command)
+
+    def registerListener(self, patterns=None, function=None, module=None, name=None, description='No description provided.'):
+        assert patterns is not None, "Listener registration called without pattern(s)"
+        assert function is not None, "Listener registration called without function"
+        assert module is not None, "Listener registration called without module"
+
+        if type(patterns) != type([]):
+            patterns = [patterns]
+
+        if name is None:
+            name = patterns[0]
+
+        rexwords = []
+        for word in patterns:
+            rexwords.append(re.compile(word, re.I))
+
+        listener = {'patterns': rexwords, 'function': function, 'name': name, 'description': description, 'module': module}
+        self._listeners.append(listener)
     
 
     def loadModules(self):
@@ -109,17 +134,6 @@ class IntentService(object):
             if fullname in sys.modules:
                 module = sys.modules[fullname]
                 self.registerModule(module, name)
-
-    def registerListener(self, patterns, function, module, name, description):
-        if type(patterns) != type([]):
-            patterns = [patterns]
-
-        rexwords = []
-        for word in patterns:
-            rexwords.append(re.compile('^' + word + "$", re.I))
-
-        listener = {'patterns': rexwords, 'function': function, 'name': name, 'description': description, 'module': module}
-        self._listeners.append(listener)
 
     def addressedToBot(self, text, room=None):
         '''Attempts to determine if a piece of text is addressed to the bot, as in, prefixed with its nickname.'''
@@ -162,20 +176,25 @@ class IntentService(object):
                                 
                                 ars.append(arg)
 
-                            #Anything left is added to the args
-                            args.extend(words[i:])
-                            handled = command['function'](self._bot, room, user, args)
-                            if handled:
-                                return True, None
+                            if room is not None and room.squelched and command['core'] == False:
+                                user.send("I'm sorry, I can't do '{0}' right now as I am shut up in {2} for the next {1}.".format(command['name'], room.squelched, room.uid))
+                                return True, None #Since we got a valid function we should say we handled it.
+                            else:   
+                                #Anything left is added to the args
+                                args.extend(words[i:])
+                                handled = command['function'](self._bot, room, user, args)
+                                if handled:
+                                    return True, None
 
-        for listener in self._listeners:
-            for rex in listener['patterns']:
-                match = rex.search(cleanString(body))
+        if room is None or (room is not None and room.squelched == False):
+            for listener in self._listeners:
+                for rex in listener['patterns']:
+                    match = rex.search(cleanString(body))
 
-                if match is not None:
-                    handled = listener['function'](self._bot, room, user, match)
-                    if handled:
-                        return False, None
+                    if match is not None:
+                        handled = listener['function'](self._bot, room, user, match)
+                        if handled:
+                            return False, None
 
         # Support for existing commands.
         iscommand = False

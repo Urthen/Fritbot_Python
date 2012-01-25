@@ -93,24 +93,24 @@ def undoLeave(bot, room, user, args):
         return True, u"Something went wrong rejoining the room.. maybe I'm already there?"
     return True, u"Ok, I'm back in {0}!".format(args['room'])
 
-def quiet(bot, room, user, args):
-    '''Squelches the bot for the given room.'''
+# def quiet(bot, room, user, args):
+#     '''Squelches the bot for the given room.'''
 
-    if room is None:
-        return "This isn't a chat room!"
+#     if room is None:
+#         return "This isn't a chat room!"
 
-    room["squelched"] = datetime.datetime.now() + datetime.timedelta(minutes=5);
-    room.save()
-    return "Shut up for 5 minutes."
+#     room["squelched"] = datetime.datetime.now() + datetime.timedelta(minutes=5);
+#     room.save()
+#     return "Shut up for 5 minutes."
 
-def unquiet(bot, room, user, args):
+# def unquiet(bot, room, user, args):
 
-    if room is None:
-        return "This isn't a chat room!"
+#     if room is None:
+#         return "This isn't a chat room!"
 
-    room["squelched"] = datetime.datetime.now() - datetime.timedelta(minutes=5);
-    room.save()
-    return "And we're back."
+#     room["squelched"] = datetime.datetime.now() - datetime.timedelta(minutes=5);
+#     room.save()
+#     return "And we're back."
 
 # def allow(bot, room, user, args, doundo=False):
 #     if room is None:

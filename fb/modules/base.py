@@ -36,7 +36,7 @@ def room_only(f):
 			return f(self, bot, room, user, args)
 		else:
 			user.send("That function only works in a room.")
-			return False
+			return True
 
 	return roomcheck
 
@@ -46,7 +46,7 @@ def user_only(f):
 			return f(self, bot, room, user, args)
 		else:
 			user.send("That function only works directly with me, not in a room. Why don't you try it now?")
-			return False
+			return True
 
 	return roomcheck
 
