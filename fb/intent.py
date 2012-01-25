@@ -1,4 +1,4 @@
-import re, datetime, random
+import re, datetime, random, sys
 from twisted.python import log
 
 import config
@@ -45,10 +45,9 @@ class IntentService(object):
     def __init__(self):
         self._modules = {}
 
+        self._bot = None
         self._listeners = []
         self._commands = []
-
-        self._bot = None
 
         #TODO: Deprecate these.
         self._intentsrefreshed = None
@@ -78,6 +77,38 @@ class IntentService(object):
 
         command = {'keywords': rexwords, 'function': function, 'name': name, 'description': description, 'module': module}
         self._commands.append(command)
+    
+
+    def loadModules(self):
+        log.msg("Loading modules...")
+        #import the config, in case it's changed since we started
+        import config
+
+        old_listeners = self._listeners
+        self._listeners = []
+        old_commands = self._commands
+        self._commands = []
+
+        # Import and register configured modules.
+        for name in config.APPLICATION['modules']:
+            log.msg("Loading module {0}...".format(name))
+            fullname = "fb.modules." + name            
+                
+            try:
+                if fullname in sys.modules:
+                    reload(sys.modules[fullname])
+                else:
+                    __import__(fullname, globals(), locals(), [], -1)
+            except:
+                log.msg("Error loading module:")
+                self._listeners = old_listeners
+                self._commands = old_commands
+                log.msg("Old listeners and commands have been restored; modules NOT reloaded.")
+                raise
+
+            if fullname in sys.modules:
+                module = sys.modules[fullname]
+                self.registerModule(module, name)
 
     def registerListener(self, patterns, function, module, name, description):
         if type(patterns) != type([]):

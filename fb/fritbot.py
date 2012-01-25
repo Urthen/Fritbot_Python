@@ -42,14 +42,7 @@ class FritBot(object):
             self.rooms[uid] = room
 
         intent.service.link(self)
-
-        # Import and register configured modules.
-        for name in config.APPLICATION['modules']:
-            log.msg("Loading module {0}...".format(name))
-            fullname = "fb.modules." + name
-            __import__(fullname, globals(), locals(), [], -1)
-            module = sys.modules[fullname]
-            intent.service.registerModule(module, name)
+        intent.service.loadModules()
 
     def registerInterface(self, interface):
         log.msg("Connecting bot to interface...")

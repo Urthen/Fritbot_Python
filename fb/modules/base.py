@@ -19,6 +19,36 @@ def response(f):
 
 	return responder
 
+def admin(f):
+	def admincheck(self, bot, room, user, args):
+		if user['admin']:
+			return f(self, bot, room, user, args)
+		else:
+			user.send("That function requires you to be an administrator. You aren't.")
+			return False
+
+	return admincheck
+
+def room_only(f):
+	def roomcheck(self, bot, room, user, args):
+		if room is not None:
+			return f(self, bot, room, user, args)
+		else:
+			user.send("That function only works in a room.")
+			return False
+
+	return roomcheck
+
+def user_only(f):
+	def roomcheck(self, bot, room, user, args):
+		if room is None:
+			return f(self, bot, room, user, args)
+		else:
+			user.send("That function only works directly with me, not in a room. Why don't you try it now?")
+			return False
+
+	return roomcheck
+
 class FritbotModule(object):
 	
 	name="Basic Module"

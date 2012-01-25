@@ -112,61 +112,61 @@ def unquiet(bot, room, user, args):
     room.save()
     return "And we're back."
 
-def allow(bot, room, user, args, doundo=False):
-    if room is None:
-        ret = (False, u"This isn't a chat room!")
-    elif len(args) < 1:
-        ret = (False, u"Must specify a permission...")
-    elif user['admin'] == True:
-        auths = set(room["auths"]) | set(args)
-        room["auths"] = list(auths)
-        room.save()
+# def allow(bot, room, user, args, doundo=False):
+#     if room is None:
+#         ret = (False, u"This isn't a chat room!")
+#     elif len(args) < 1:
+#         ret = (False, u"Must specify a permission...")
+#     elif user['admin'] == True:
+#         auths = set(room["auths"]) | set(args)
+#         room["auths"] = list(auths)
+#         room.save()
 
-        if not doundo:
-            msg = u"Allowed {0}".format(repr(args))
-            undo = {'function': undoAllow, 'args': args, 'room': room, 'message': msg}
-            bot.addUndo(room, user, undo)
+#         if not doundo:
+#             msg = u"Allowed {0}".format(repr(args))
+#             undo = {'function': undoAllow, 'args': args, 'room': room, 'message': msg}
+#             bot.addUndo(room, user, undo)
 
-        ret = (True, u"Ok, allowing the following authorizations: {0}".format(repr(args)))
-    else:
-        ret = (False, u"Not gonna happen, {0}.".format(user['nick']))
+#         ret = (True, u"Ok, allowing the following authorizations: {0}".format(repr(args)))
+#     else:
+#         ret = (False, u"Not gonna happen, {0}.".format(user['nick']))
 
-    if doundo:
-        return ret
-    else:
-        return ret[1]
+#     if doundo:
+#         return ret
+#     else:
+#         return ret[1]
 
-def undoAllow(bot, room, user, args):
-    return disallow(bot, args["room"], user, args["args"], True)
+# def undoAllow(bot, room, user, args):
+#     return disallow(bot, args["room"], user, args["args"], True)
 
-def disallow(bot, room, user, args, doundo=False):
-    if room is None:
-        ret = (False, u"This isn't a chat room!")
-    elif len(args) < 1:
-        ret = (False, u"Must specify a permission...")
-    elif user['admin'] == True:
-        auths = set(room["auths"]) - set(args)
-        room["auths"] = list(auths)
-        room.save()
+# def disallow(bot, room, user, args, doundo=False):
+#     if room is None:
+#         ret = (False, u"This isn't a chat room!")
+#     elif len(args) < 1:
+#         ret = (False, u"Must specify a permission...")
+#     elif user['admin'] == True:
+#         auths = set(room["auths"]) - set(args)
+#         room["auths"] = list(auths)
+#         room.save()
 
-        if not doundo:
-            msg = u"Disallowed {0}".format(repr(args))
-            undo = {'function': undoDisallow, 'args': args, 'room': room, 'message': msg}
-            bot.addUndo(room, user, undo)
+#         if not doundo:
+#             msg = u"Disallowed {0}".format(repr(args))
+#             undo = {'function': undoDisallow, 'args': args, 'room': room, 'message': msg}
+#             bot.addUndo(room, user, undo)
 
-        ret = (True, u"Ok, disallowing the following authorizations: {0}".format(repr(args)))
-    else:
-        ret = (False, u"Not gonna happen, {0}.".format(user['nick']))
+#         ret = (True, u"Ok, disallowing the following authorizations: {0}".format(repr(args)))
+#     else:
+#         ret = (False, u"Not gonna happen, {0}.".format(user['nick']))
 
-    if doundo:
-        return ret
-    else:
-        return ret[1]
+#     if doundo:
+#         return ret
+#     else:
+#         return ret[1]
 
-def undoDisallow(bot, room, user, args):
-    return allow(bot, args["room"], user, args["args"], True)
-
-def auths(bot, room, user, args):
-    if room is None:
-        return u"Users don't have individual permissions within the context of Fritbot."
-    return u"I currently have the following authorizations for the {0} room: {1}".format(room.uid, repr(room["auths"]))
+# def undoDisallow(bot, room, user, args):
+#     return allow(bot, args["room"], user, args["args"], True)
+    
+# def auths(bot, room, user, args):
+#     if room is None:
+#         return u"Users don't have individual permissions within the context of Fritbot."
+#     return u"I currently have the following authorizations for the {0} room: {1}".format(room.uid, repr(room["auths"]))
