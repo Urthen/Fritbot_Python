@@ -2,7 +2,7 @@ import fb.intent as intent
 from fb.modules.base import FritbotModule, response
 
 # requirements
-import urllib, simplejson
+import urllib#, simplejson
 
 class WeatherModule(FritbotModule):
 
@@ -10,9 +10,7 @@ class WeatherModule(FritbotModule):
         description="Functions for returning weather"
         author="Kyle Varga (kyle.varga@bazaarvoice.com)"
 
-	wundergroundapikey = 'http://api.wunderground.com/api/83f199a422e382c3/conditions/q/TX/Austin.json'
 	wundergroundapikey = '83f199a422e382c3'
-
 
         def register(self):
                 intent.service.registerCommand("weather", self.getWeather, self, "Get Current Weather", "Gets the current weather.")
@@ -20,7 +18,11 @@ class WeatherModule(FritbotModule):
         @response
         def getWeather(self, bot, room, user, args):
 		url = 'http://api.wunderground.com/api/' + self.wundergroundapikey + '/conditions/q/TX/Austin.json'
-		result = simplejson.load(urllib.urlopen(url))
+		#result = simplejson.load(urllib.urlopen(url))
+		f = urllib.urlopen(url)
+    		buff = f.read().replace('\\/', '/')
+    		f.close()
+    		result = eval(buff)
 		current = result['current_observation']
 		return 'Current Weather in Austin, TX: ' + current['weather'] + ', ' + current['temperature_string']
 		#if 'Error' in result:
