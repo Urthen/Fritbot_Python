@@ -24,8 +24,9 @@ def admin(f):
 		if user['admin']:
 			return f(self, bot, room, user, args)
 		else:
+			log.msg("User {0} attempted to run a function without authorization.".format(user['nick']))
 			user.send("That function requires you to be an administrator. You aren't.")
-			return False
+			return True
 
 	return admincheck
 
