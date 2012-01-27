@@ -129,7 +129,7 @@ class Room(Route):
 
     @property
     def squelched(self):
-        if self["squelched"] > datetime.datetime.now():
+        if 'squelched' in self.info and self["squelched"] > datetime.datetime.now():
             seconds = (self["squelched"] - datetime.datetime.now()).seconds
             minutes = int(seconds / 60)
             seconds = seconds - (minutes * 60)
