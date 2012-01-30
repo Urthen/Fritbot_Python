@@ -29,7 +29,6 @@ ROOMS = {
 }
 
 CONFLUENCE = {
-    "enabled": False,
 #    "url": "https://www.example.com/confluence/rpc/xmlrpc",
 #    "username": "username",
 #    "password": "password"

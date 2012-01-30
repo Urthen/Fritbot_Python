@@ -17,7 +17,7 @@ class GoogleSearchModule(FritbotModule):
 
 	def register(self):
 		intent.service.registerCommand("google", self.google, self, "Google Search", "Returns Google 'I'm feeling lucky' result. Use 'google more' to return multiple ranked results.")
-		intent.service.registerCommand("youtube", self.youtube, self, "YouTube Search", "Returns YouTube search result. Use 'youtube more' to return multiple ranked results.")
+		intent.service.registerCommand("youtube", self.youtube, self, "YouTube Search", "Returns YouTube search result. Use 'youtube more' to return up to 5 ranked results.")
 
 	@response
 	def google(self, bot, room, user, args):
@@ -72,7 +72,7 @@ class GoogleSearchModule(FritbotModule):
 		if len(feed.entry):
 			if more:
 				lines = []
-				for num in xrange(0, 4):
+				for num in xrange(0, 5):
 					lines.append('{0}: {1} - {2}'.format(num + 1, feed.entry[num].media.title.text, feed.entry[num].media.player.url))
 
 				return '\n'.join(lines)

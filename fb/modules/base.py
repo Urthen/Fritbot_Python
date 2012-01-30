@@ -57,5 +57,5 @@ class FritbotModule(object):
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 	requirements = []
 
-	def register(self, bot):
+	def register(self):
 		raise NotImplementedError("register must be overridden by a subclass!")

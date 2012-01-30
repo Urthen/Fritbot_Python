@@ -83,36 +83,36 @@ except:
 # 	else:
 # 		return "Sorry {0}, I can't find any videos for that query.".format(user['nick'])
 
-def confluence(bot, room, user, args):
-	if not config.CONFLUENCE["enabled"]:
-		return "Confluence search is not enabled, contact your {0} admin.".format(config.CONFIG['name'])
+# def confluence(bot, room, user, args):
+# 	if not config.CONFLUENCE["enabled"]:
+# 		return "Confluence search is not enabled, contact your {0} admin.".format(config.CONFIG['name'])
 
-	more = False
-	results = 1
-	if args[0] == "more":
-		more = True
-		results = 3
-		args = args[1:]
+# 	more = False
+# 	results = 1
+# 	if args[0] == "more":
+# 		more = True
+# 		results = 3
+# 		args = args[1:]
 
-	s = xmlrpclib.Server(config.CONFLUENCE["url"])
-	try:
-		token = s.confluence1.login(config.CONFLUENCE["username"], config.CONFLUENCE["password"])
-	except xmlrpclib.Fault:
-		return "Login failure, cannot search Confluence. Contact your {0} admin.".format(config.CONFIG['name'])
+# 	s = xmlrpclib.Server(config.CONFLUENCE["url"])
+# 	try:
+# 		token = s.confluence1.login(config.CONFLUENCE["username"], config.CONFLUENCE["password"])
+# 	except xmlrpclib.Fault:
+# 		return "Login failure, cannot search Confluence. Contact your {0} admin.".format(config.CONFIG['name'])
 
-	search = s.confluence1.search(token, ' '.join(args), results)
+# 	search = s.confluence1.search(token, ' '.join(args), results)
 
-	if len(search) > 0:
-		if more:
-			lines = []
-			line = 1
-			for l in search:
-				lines += "{0}: {1} - {2}".format(line, l['title'], l['url'])
-			return '\n'.join(lines)
-		else:
-			return "{0} - {1}".format(search[0]['title'], search[0]['url'])
-	else:
-		return "Sorry {0}, Confluence reports no results for that query.".format(user['nick'])
+# 	if len(search) > 0:
+# 		if more:
+# 			lines = []
+# 			line = 1
+# 			for l in search:
+# 				lines += "{0}: {1} - {2}".format(line, l['title'], l['url'])
+# 			return '\n'.join(lines)
+# 		else:
+# 			return "{0} - {1}".format(search[0]['title'], search[0]['url'])
+# 	else:
+# 		return "Sorry {0}, Confluence reports no results for that query.".format(user['nick'])
 
 
 def history(bot, room, user, args):
