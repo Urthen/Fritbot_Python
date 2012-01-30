@@ -4,7 +4,7 @@
 # Twistd application settings
 APPLICATION = {
     "name": "fritbot"
-    "modules": ['core']
+    "modules": ['core', 'weather', 'google']
 }
 
 # API Settings, comment entire section out to disable the API.
@@ -54,6 +54,6 @@ CONFIG = {
     "nicknames": ["fb"],
     "status": "Angriest Bot Ever", # Status message
     "refresh": 1, # Minimum refresh time, in seconds.
-    "language": "en",
+    "language": "en", #Default languages. Currently, only english is supported.
     "racy": False, #Whether or not to include racy/NSFW content in searches
 }
