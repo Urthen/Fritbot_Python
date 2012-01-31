@@ -17,20 +17,23 @@ class WeatherModule(FritbotModule):
 			
 	@response
 	def getWeather(self, bot, room, user, args):
+
 		defaultLoc = 'TX/Austin' 
 		if len(args) > 0:
 			defaultLoc = urllib.quote_plus(' '.join(args))
 
 		url = 'http://api.wunderground.com/api/' + self.wundergroundapikey + '/conditions/q/' + defaultLoc + '.json'
 		f = urllib.urlopen(url)
+
 		buff = f.read().replace('\\/', '/')
 		f.close()
 		result = json.loads(buff)
+
 		try:
 			current = result['current_observation']
 		except KeyError:
 			return 'No Weather Found for ' + defaultLoc
 
 		return 'Current Weather in ' + current['display_location']['full'] + ': ' + current['weather'] + ', ' + current['temperature_string']
-		
+
 module = WeatherModule()
