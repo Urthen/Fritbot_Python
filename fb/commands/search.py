@@ -9,15 +9,6 @@ from pymongo import ASCENDING, DESCENDING
 import config
 from fb.db import db
 
-gdata_supported = False
-
-try:
-	import gdata.youtube.service
-	gdata_supported = True
-except:
-	log.msg("gdata.youtube.service not found, did you install the python google data api library? Running without it for now.")
-
-
 # def google(bot, room, user, args):
 # 	if args[0] == "more":
 # 		more = True

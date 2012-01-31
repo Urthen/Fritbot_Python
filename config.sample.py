@@ -4,7 +4,7 @@
 # Twistd application settings
 APPLICATION = {
     "name": "fritbot"
-    "modules": ['core', 'weather', 'google']
+    "modules": ['core', 'weather', 'google', 'nicks']
 }
 
 # API Settings, comment entire section out to disable the API.
