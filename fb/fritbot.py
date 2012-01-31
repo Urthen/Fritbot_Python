@@ -121,6 +121,9 @@ class FritBot(object):
     def receivedGroupChat(self, room, user, body, nick=None, history=False):
         '''Triggered when a group chat is recieved in a room the bot is in'''        
 
+        if body is None:
+            return
+
         body = body.encode('utf-8')
 
         #Validate that the user is NOT the bot itself!
@@ -139,6 +142,9 @@ class FritBot(object):
 
     def receivedPrivateChat(self, user, body):
         '''Triggered when someone messages the bot directly.'''
+
+        if body is None:
+            return
 
         body = body.encode("utf-8")
 

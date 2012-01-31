@@ -58,6 +58,13 @@ class Route(object):
             log.warn("Attempted to send a message to inactive %s: %s", self.TYPE, self.uid)
             return
 
+        if message is None or message == "":
+            log.warn("Attempted to send an empty messsage")
+            return
+
+        if type(message) == type(u""):
+            message = message.encode('utf-8')
+
         time = 0.2
         if delay:
             time = random.random() + 2.0
@@ -181,7 +188,6 @@ class User(Route):
         return True #everything's allowed when you're having fun alone
 
 class Interface(object):
-    
 
     def __init__(self):
         import fb.fritbot as FritBot
