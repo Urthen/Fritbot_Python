@@ -27,5 +27,6 @@ class UASModule(FritbotModule):
         if len(returnStr) == 0:
             returnStr = 'Not a valid user authentication string'        
         
-        return returnStr            	
+        return returnStr     
+               	
 module = UASModule()
