@@ -4,7 +4,7 @@
 # Twistd application settings
 APPLICATION = {
     "name": "fritbot"
-    "modules": ['hello']
+    "modules": ['core', 'weather', 'google', 'nicks']
 }
 
 # API Settings, comment entire section out to disable the API.
@@ -29,7 +29,6 @@ ROOMS = {
 }
 
 CONFLUENCE = {
-    "enabled": False,
 #    "url": "https://www.example.com/confluence/rpc/xmlrpc",
 #    "username": "username",
 #    "password": "password"
@@ -54,5 +53,6 @@ CONFIG = {
     "nicknames": ["fb"],
     "status": "Angriest Bot Ever", # Status message
     "refresh": 1, # Minimum refresh time, in seconds.
+    "language": "en", #Default languages. Currently, only english is supported.
     "racy": False, #Whether or not to include racy/NSFW content in searches
 }

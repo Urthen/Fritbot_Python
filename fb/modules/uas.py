@@ -16,5 +16,5 @@ class UASModule(FritbotModule):
         else:
             return 'no auth string passed'
         return uas[32:].decode('hex')
-    	
+            	
 module = UASModule()

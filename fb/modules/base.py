@@ -24,8 +24,9 @@ def admin(f):
 		if user['admin']:
 			return f(self, bot, room, user, args)
 		else:
+			log.msg("User {0} attempted to run a function without authorization.".format(user['nick']))
 			user.send("That function requires you to be an administrator. You aren't.")
-			return False
+			return True
 
 	return admincheck
 
@@ -35,7 +36,7 @@ def room_only(f):
 			return f(self, bot, room, user, args)
 		else:
 			user.send("That function only works in a room.")
-			return False
+			return True
 
 	return roomcheck
 
@@ -45,7 +46,7 @@ def user_only(f):
 			return f(self, bot, room, user, args)
 		else:
 			user.send("That function only works directly with me, not in a room. Why don't you try it now?")
-			return False
+			return True
 
 	return roomcheck
 
@@ -56,5 +57,5 @@ class FritbotModule(object):
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 	requirements = []
 
-	def register(self, bot):
+	def register(self):
 		raise NotImplementedError("register must be overridden by a subclass!")
