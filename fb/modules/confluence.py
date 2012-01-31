@@ -43,10 +43,10 @@ class ConfluenceModule(FritbotModule):
 				line = 0
 				for l in search:
 					line +=1 
-					lines.append(u"{0}: {1} - {2}".format(line, unicode(l['title']), unicode(l['url'])))
+					lines.append("{0}: {1} - {2}".format(line, unicode(l['title']), unicode(l['url'])))
 				return '\n'.join(lines)
 			else:
-				return u"{0} - {1}".format(unicode(search[0]['title']), unicode(search[0]['url']))
+				return "{0} - {1}".format(unicode(search[0]['title']), unicode(search[0]['url']))
 		else:
 			return "Sorry {0}, Confluence reports no results for that query.".format(user['nick'])
 

@@ -38,12 +38,12 @@ class GoogleSearchModule(FritbotModule):
 				msg = ''
 				num = 1
 				for result in data['results']:
-					msg += u"{0}: {1} - {2}\n".format(str(num), result['titleNoFormatting'], result['url'])
+					msg += "{0}: {1} - {2}\n".format(str(num), result['titleNoFormatting'], result['url'])
 					num += 1
 
 				msg += "For more results, see %s" % data['cursor']['moreResultsUrl']
 			else:
-				msg = u"{0} - {1}\n".format(data['results'][0]['titleNoFormatting'], data['results'][0]['url'])
+				msg = "{0} - {1}\n".format(data['results'][0]['titleNoFormatting'], data['results'][0]['url'])
 		else:
 			msg = "Sorry, {0}, Google doesn't seem to know anything about that.".format(user['nick'])
 		return msg

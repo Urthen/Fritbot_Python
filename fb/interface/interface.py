@@ -32,7 +32,12 @@ class Route(object):
     def __getitem__(self, key):
         '''Getter for contained MongoDB info object. Returns None if key is not found.'''
         if key in self.info:
-            return self.info[key]
+            data = self.info[key]
+
+            if type(data) == type("") or type(data) == type(u""):
+                return data.encode('utf-8')
+            else:
+                return data
         else:
             return None
 
@@ -45,7 +50,7 @@ class Route(object):
         self.uid = uid
 
     def __repr__(self):
-        return u"<{0} {1}>".format(self.TYPE, self.uid)
+        return "<{0} {1}>".format(self.TYPE, self.uid)
 
     def send(self, message, delay=False):
         '''Attempt to send a message with given delay'''
@@ -56,8 +61,8 @@ class Route(object):
         time = 0.2
         if delay:
             time = random.random() + 2.0
-        log.msg("Sending <{0}>: {1}".format(self.uid, message.encode('utf-8')))
-        reactor.callLater(time, self._send, message)
+        log.msg("Sending <{0}>: {1}".format(self.uid, message))
+        reactor.callLater(time, self._send, unicode(message, 'utf-8'))
 
     def _send(self, message):
         '''Template to actually send a message via this route. Must be implemented in a subclass.'''

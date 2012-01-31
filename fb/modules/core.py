@@ -38,7 +38,7 @@ class CoreCommandsModule(base.FritbotModule):
 				nick = args[1]
 
 		bot.joinRoom(join, nick)
-		return u"Ok, I've jumped into {0}!".format(join)
+		return "Ok, I've jumped into {0}!".format(join)
 
 	def leave(self, bot, room, user, args):
 		'''Leaves a room.'''
@@ -76,31 +76,31 @@ class CoreCommandsModule(base.FritbotModule):
 	@base.response
 	def allow(self, bot, room, user, args):
 		if len(args) < 1:
-			return u"Must specify a permission..."
+			return "Must specify a permission..."
 		else:
 			auths = set(room["auths"]) | set(args)
 			room["auths"] = list(auths)
 			room.save()
 
-			return u"Ok, allowing the following authorizations: {0}".format(', '.join(args))
+			return "Ok, allowing the following authorizations: {0}".format(', '.join(args))
 
 	@base.admin
 	@base.room_only
 	@base.response
 	def disallow(self, bot, room, user, args):
 		if len(args) < 1:
-			return u"Must specify a permission..."
+			return "Must specify a permission..."
 		else:
 			auths = set(room["auths"]) - set(args)
 			room["auths"] = list(auths)
 			room.save()
 
-			return u"Ok, disallowing the following authorizations: {0}".format(', '.join(args))
+			return "Ok, disallowing the following authorizations: {0}".format(', '.join(args))
 
 	@base.room_only
 	@base.response
 	def auths(self, bot, room, user, args):
-		return u"I currently have the following authorizations for the {0} room: {1}".format(room.uid, ', '.join(room["auths"]))
+		return "I currently have the following authorizations for the {0} room: {1}".format(room.uid, ', '.join(room["auths"]))
 
 	@base.room_only
 	@base.response
@@ -122,8 +122,8 @@ class CoreCommandsModule(base.FritbotModule):
 	@base.admin
 	@base.response
 	def shutdown(self, bot, room, user, args):
-		log.msg(u"Shutting down by request from {0}.".format(user['nick']))
+		log.msg("Shutting down by request from {0}.".format(user['nick']))
 		bot.shutdown()
-		return u"Ok, shutting down momentarily."
+		return "Ok, shutting down momentarily."
 
 module = CoreCommandsModule()

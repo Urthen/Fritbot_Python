@@ -38,7 +38,7 @@ CONFLUENCE = {
 LOG = {
     "filename": APPLICATION["name"] + ".log",
     "directory": "logs",
-    "traffic": True # Do we want to log all XMPP traffic?
+    "traffic": False # Do we want to log all XMPP traffic? Probably not neccesary for most people, just internal debugging.
 }
 
 # MongoDB settings

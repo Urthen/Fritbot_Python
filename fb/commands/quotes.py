@@ -31,17 +31,17 @@ def sayQuotes(bot, room, user, nick, segment, min=1, max=1):
 
     msg = None
     if quotes.count() == 0:
-        msg = u"I can't find any quotes"
+        msg = "I can't find any quotes"
         if nick is not None:
-            msg += u" for user {0}".format(nick)
+            msg += " for user {0}".format(nick)
 
         if segment is not None:
-            msg += u" with string '{0}'".format(segment)
+            msg += " with string '{0}'".format(segment)
     else:        
         quotes = util.getSubset(quotes, min, max)
         lines = []
         for quote in quotes:
-            lines.append(u"<{0}>: {1}".format(quote['user']['nick'], quote['body']))
+            lines.append("<{0}>: {1}".format(quote['user']['nick'], quote['body']))
         quotes = '\n'.join(lines)
 
         util.sendMsg(room, user, quotes)
@@ -106,10 +106,10 @@ def quotemash(bot, room, user, args):
 
 def remember(bot, room, user, args):
     if room is None:
-        return u"Can't remember private conversations!"
+        return "Can't remember private conversations!"
 
     if len(args) == 0:
-        return u"Remember what, exactly?"
+        return "Remember what, exactly?"
 
     tuser = util.inRoster(args[0], room)
 
@@ -124,17 +124,17 @@ def remember(bot, room, user, args):
 
             if quote:
                 if quote['user']['id'] == user['_id']:
-                    return u"Sorry, {0}, but you can't quote yourself! Try saying someone funnier and maybe someone else will remember you.".format(user['nick'])
+                    return "Sorry, {0}, but you can't quote yourself! Try saying someone funnier and maybe someone else will remember you.".format(user['nick'])
                 if "remembered" in quote:
-                    return u"Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"])
+                    return "Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"])
                 else:
                     quote["remembered"] = {"user": user["_id"], "nick": user["nick"], "time": datetime.datetime.now()}
                     db.db.history.save(quote)
-                    return u"Ok, {0}, remembering <{1}>: {2}".format(user["nick"], quote['user']['nick'], quote["body"])
+                    return "Ok, {0}, remembering <{1}>: {2}".format(user["nick"], quote['user']['nick'], quote["body"])
 
-        return u"Sorry, {0}, I haven't heard anything like '{1}' by anyone named {2}.".format(user["nick"], text, args[0])
+        return "Sorry, {0}, I haven't heard anything like '{1}' by anyone named {2}.".format(user["nick"], text, args[0])
 
     elif not tuser:
-        return u"Hrm, the name {0} doesn't ring any bells.".format(args[0])
+        return "Hrm, the name {0} doesn't ring any bells.".format(args[0])
     else:
-        return u"Sorry, {0} isn't unique enough. Too many users matched!".format(args[0])
+        return "Sorry, {0} isn't unique enough. Too many users matched!".format(args[0])
