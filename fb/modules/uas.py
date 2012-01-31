@@ -11,10 +11,22 @@ class UASModule(FritbotModule):
         
     @response
     def decodeUAS(self, bot, room, user, args):
+        if room.uid == 'offtopic':
+            return 'WTF ARE YOU DOING?! THIS IS OFF TOPIC!!!'
         if len(args) > 0:
             uas = args[0]
         else:
             return 'no auth string passed'
-        return uas[32:].decode('hex')
-            	
+        
+        
+        try:
+            returnStr = uas[32:].decode('hex')
+        except:
+            returnStr = 'Not a valid user authentication string'        
+        
+        if len(returnStr) == 0:
+            returnStr = 'Not a valid user authentication string'        
+        
+        return returnStr     
+               	
 module = UASModule()
