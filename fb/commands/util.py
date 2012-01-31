@@ -12,9 +12,6 @@ MULT_PART_WORD = 0.8
 MULT_PART_FIRST = 0.6
 MULT_PART_OTHER = 0.4
 
-def cleanString(text):
-    return re.sub("[^a-zA-Z0-9 ]", '', text.lower()).strip()
-
 def getRandom(cursor):
     count = cursor.count()
     return cursor[random.randrange(count)]

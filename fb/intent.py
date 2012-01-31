@@ -4,10 +4,12 @@ from twisted.python import log
 import config
 from fb.db import db
 from fb.commands import *
-from fb.commands.util import cleanString, sendMsg
 
 CAPTURE_BEGIN = ['"', "'"] #, '{', '(', '[']
 CAPTURE_END = ['"', "'"] #, '}', ')', ']']
+
+def cleanString(text):
+    return re.sub("[^a-zA-Z0-9 ]", '', text.lower()).strip()
 
 def cutString(text):
     words = text.split()
