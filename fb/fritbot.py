@@ -98,12 +98,6 @@ class FritBot(object):
     The following functions directly relate to sending and recieving messages.
     -----------------------------------------------------------------------------------------------------------------------------------------'''
 
-    def addUndo(self, room, user, undo):
-        if room is not None:
-            room.undostack.append(undo)
-        else:
-            user.undostack.append(undo)
-
     def addHistory(self, room, user, nick, body, command):
         history = {
             "body": body,

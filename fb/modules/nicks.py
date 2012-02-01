@@ -22,14 +22,11 @@ class NicknameModule(base.FritbotModule):
 			return "You can't call me nothing!"
 
 		if room is None:
-			return "This isn't a chat room, dumbass!"
+			return "This isn't a chat room!"
 
 		msg = "Changed nick from {0} to {1}".format(room['nick'], newnick)
-		undo = {'function': undoGhost, 'original': room['nick'], 'message': msg}
-
 		try:
 			room.setNick(newnick)
-			bot.addUndo(room, user, undo)
 			return "Behold! By the power of {0}, I am now {1}!".format(user['nick'], newnick)
 		except:
 			return "Something went haywire, there's probably already someone by that name!"

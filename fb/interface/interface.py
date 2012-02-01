@@ -24,9 +24,6 @@ class Route(object):
     _refreshed = None
     '''When was this route last refreshed?'''
 
-    undostack = []
-    '''Undo stack for this route.'''
-
     active = False
     
     def __getitem__(self, key):
@@ -91,9 +88,6 @@ class Route(object):
             self._collection.save(self.info)
         else:
             raise NotImplementedError("save() cannot be run when _collection is not set. It should be set by the subclass.")
-    
-    def addUndo(self, undo):
-        self.undostack.append(undo)
 
     def allowed(self, permissions):
         if type(permissions) == type([]):
@@ -155,9 +149,6 @@ class Room(Route):
 class User(Route):
 
     TYPE = "User"
-
-    undostack = []
-    '''Undo stack for this user.'''
 
     active = True
     '''Always assume we can talk to the user. Probably not the best assumption, but whatever.'''
