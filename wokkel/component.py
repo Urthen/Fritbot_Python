@@ -14,18 +14,6 @@ from twisted.words.protocols.jabber.jid import internJID as JID
 from twisted.words.protocols.jabber import component, error, xmlstream
 from twisted.words.xish import domish
 
-try:
-    #from twisted.words.protocols.jabber.xmlstream import XMPPHandler
-    from twisted.words.protocols.jabber.xmlstream import XMPPHandlerCollection
-except ImportError:
-    #from wokkel.subprotocols import XMPPHandler
-    from wokkel.subprotocols import XMPPHandlerCollection
-
-try:
-    from twisted.words.protocols.jabber.xmlstream import XmlStreamServerFactory
-except ImportError:
-    from wokkel.compat import XmlStreamServerFactory
-
 from wokkel.generic import XmlPipe
 from wokkel.subprotocols import StreamManager
 
@@ -78,7 +66,7 @@ class Component(StreamManager, service.Service):
 
 
 
-class InternalComponent(XMPPHandlerCollection, service.Service):
+class InternalComponent(xmlstream.XMPPHandlerCollection, service.Service):
     """
     Component service that connects directly to a router.
 
@@ -87,11 +75,11 @@ class InternalComponent(XMPPHandlerCollection, service.Service):
     allows for one-process XMPP servers.
 
     @ivar domains: Domains (as C{str}) this component will handle traffic for.
-    @type domains: L{set}
+    @type domains: C{set}
     """
 
     def __init__(self, router, domain=None):
-        XMPPHandlerCollection.__init__(self)
+        xmlstream.XMPPHandlerCollection.__init__(self)
 
         self._router = router
         self.domains = set()
@@ -137,7 +125,7 @@ class InternalComponent(XMPPHandlerCollection, service.Service):
         """
         Add a new handler and connect it to the stream.
         """
-        XMPPHandlerCollection.addHandler(self, handler)
+        xmlstream.XMPPHandlerCollection.addHandler(self, handler)
 
         if self.xmlstream:
             handler.makeConnection(self.xmlstream)
@@ -262,9 +250,8 @@ class Router(object):
     specific route exists, will be routed to this default route.
 
     @ivar routes: Routes based on the host part of JIDs. Maps host names to the
-                  L{EventDispatcher<utility.EventDispatcher>}s that should
-                  receive the traffic. A key of C{None} means the default
-                  route.
+        L{EventDispatcher<twisted.words.xish.utility.EventDispatcher>}s that
+        should receive the traffic. A key of C{None} means the default route.
     @type routes: C{dict}
     """
 
@@ -282,9 +269,11 @@ class Router(object):
 
         @param destination: Destination of the route to be added as a host name
                             or C{None} for the default route.
-        @type destination: C{str} or C{NoneType}.
+        @type destination: C{str} or C{NoneType}
+
         @param xs: XML Stream to register the route for.
-        @type xs: L{EventDispatcher<utility.EventDispatcher>}.
+        @type xs:
+            L{EventDispatcher<twisted.words.xish.utility.EventDispatcher>}
         """
         self.routes[destination] = xs
         xs.addObserver('/*', self.route)
@@ -296,8 +285,10 @@ class Router(object):
 
         @param destination: Destination of the route that should be removed.
         @type destination: C{str}.
+
         @param xs: XML Stream to remove the route for.
-        @type xs: L{EventDispatcher<utility.EventDispatcher>}.
+        @type xs:
+            L{EventDispatcher<twisted.words.xish.utility.EventDispatcher>}
         """
         xs.removeObserver('/*', self.route)
         if (xs == self.routes[destination]):
@@ -322,7 +313,7 @@ class Router(object):
 
 
 
-class XMPPComponentServerFactory(XmlStreamServerFactory):
+class XMPPComponentServerFactory(xmlstream.XmlStreamServerFactory):
     """
     XMPP Component Server factory.
 
@@ -340,7 +331,7 @@ class XMPPComponentServerFactory(XmlStreamServerFactory):
         def authenticatorFactory():
             return ListenComponentAuthenticator(self.secret)
 
-        XmlStreamServerFactory.__init__(self, authenticatorFactory)
+        xmlstream.XmlStreamServerFactory.__init__(self, authenticatorFactory)
         self.addBootstrap(xmlstream.STREAM_CONNECTED_EVENT,
                           self.makeConnection)
         self.addBootstrap(xmlstream.STREAM_AUTHD_EVENT,

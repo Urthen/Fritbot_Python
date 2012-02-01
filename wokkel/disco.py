@@ -7,7 +7,7 @@
 XMPP Service Discovery.
 
 The XMPP service discovery protocol is documented in
-U{XEP-0030<http://www.xmpp.org/extensions/xep-0030.html>}.
+U{XEP-0030<http://xmpp.org/extensions/xep-0030.html>}.
 """
 
 from twisted.internet import defer
@@ -209,7 +209,7 @@ class DiscoInfo(object):
             elif (child.uri, child.name) == (data_form.NS_X_DATA, 'x'):
                 item = data_form.Form.fromElement(child)
 
-            if item:
+            if item is not None:
                 info.append(item)
 
         return info
@@ -455,9 +455,10 @@ class DiscoHandler(XMPPHandler, IQHandlerMixin):
     """
     Protocol implementation for XMPP Service Discovery.
 
-    This handler will listen to XMPP service discovery requests and
-    query the other handlers in L{parent} (see L{XMPPHandlerContainer}) for
-    their identities, features and items according to L{IDisco}.
+    This handler will listen to XMPP service discovery requests and query the
+    other handlers in C{parent} (see
+    L{twisted.words.protocols.jabber.xmlstream.XMPPHandlerCollection})
+    for their identities, features and items according to L{IDisco}.
     """
 
     iqHandlers = {DISCO_INFO: '_onDiscoInfo',

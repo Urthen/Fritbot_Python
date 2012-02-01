@@ -14,11 +14,7 @@ from zope.interface import implements
 
 from twisted.words.protocols.jabber.error import StanzaError
 from twisted.words.protocols.jabber.xmlstream import IQ, toResponse
-
-try:
-    from twisted.words.protocols.xmlstream import XMPPHandler
-except ImportError:
-    from wokkel.subprotocols import XMPPHandler
+from twisted.words.protocols.jabber.xmlstream import XMPPHandler
 
 from wokkel import disco, iwokkel
 
@@ -37,13 +33,13 @@ class PingClientProtocol(XMPPHandler):
         Send out a ping request and wait for a response.
 
         @param entity: Entity to be pinged.
-        @type entity: L{jid.JID}
+        @type entity: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @return: A deferred that fires upon receiving a response.
-        @rtype: L{defer.Deferred}
+        @rtype: L{Deferred<twisted.internet.defer.Deferred>}
 
         @param sender: Optional sender address.
-        @type sender: L{jid.JID}
+        @type sender: L{JID<twisted.words.protocols.jabber.jid.JID>}
         """
         def cb(response):
             return None

@@ -7,7 +7,7 @@
 XMPP publish-subscribe protocol.
 
 This protocol is specified in
-U{XEP-0060<http://www.xmpp.org/extensions/xep-0060.html>}.
+U{XEP-0060<http://xmpp.org/extensions/xep-0060.html>}.
 """
 
 from zope.interface import implements
@@ -168,10 +168,10 @@ class Item(domish.Element):
     def __init__(self, id=None, payload=None):
         """
         @param id: optional item identifier
-        @type id: L{unicode}
+        @type id: C{unicode}
         @param payload: optional item payload. Either as a domish element, or
                         as serialized XML.
-        @type payload: object providing L{domish.IElement} or L{unicode}.
+        @type payload: object providing L{domish.IElement} or C{unicode}.
         """
 
         domish.Element.__init__(self, (None, 'item'))
@@ -193,35 +193,46 @@ class PubSubRequest(generic.Stanza):
     a variable is not applicable or not passed in the request, its value is
     C{None}.
 
-    @ivar verb: The type of publish-subscribe request. See L{_requestVerbMap}.
+    @ivar verb: The type of publish-subscribe request. See C{_requestVerbMap}.
     @type verb: C{str}.
 
     @ivar affiliations: Affiliations to be modified.
     @type affiliations: C{set}
+
     @ivar items: The items to be published, as L{domish.Element}s.
     @type items: C{list}
+
     @ivar itemIdentifiers: Identifiers of the items to be retrieved or
                            retracted.
     @type itemIdentifiers: C{set}
+
     @ivar maxItems: Maximum number of items to retrieve.
     @type maxItems: C{int}.
+
     @ivar nodeIdentifier: Identifier of the node the request is about.
     @type nodeIdentifier: C{unicode}
+
     @ivar nodeType: The type of node that should be created, or for which the
                     configuration is retrieved. C{'leaf'} or C{'collection'}.
     @type nodeType: C{str}
+
     @ivar options: Configurations options for nodes, subscriptions and publish
                    requests.
     @type options: L{data_form.Form}
+
     @ivar subscriber: The subscribing entity.
-    @type subscriber: L{JID}
+    @type subscriber: L{JID<twisted.words.protocols.jabber.jid.JID>}
+
     @ivar subscriptionIdentifier: Identifier for a specific subscription.
     @type subscriptionIdentifier: C{unicode}
+
     @ivar subscriptions: Subscriptions to be modified, as a set of
-                         L{Subscription}.
+        L{Subscription}.
     @type subscriptions: C{set}
+
     @ivar affiliations: Affiliations to be modified, as a dictionary of entity
-                        (L{JID} to affiliation (C{unicode}).
+        (L{JID<twisted.words.protocols.jabber.jid.JID>} to affiliation
+        (C{unicode}).
     @type affiliations: C{dict}
     """
 
@@ -384,7 +395,7 @@ class PubSubRequest(generic.Stanza):
         Parse node type out of a request for the default node configuration.
         """
         form = data_form.findForm(verbElement, NS_PUBSUB_NODE_CONFIG)
-        if form and form.formType == 'submit':
+        if form is not None and form.formType == 'submit':
             values = form.getValues()
             self.nodeType = values.get('pubsub#node_type', 'leaf')
         else:
@@ -396,7 +407,7 @@ class PubSubRequest(generic.Stanza):
         Parse options out of a request for setting the node configuration.
         """
         form = data_form.findForm(verbElement, NS_PUBSUB_NODE_CONFIG)
-        if form:
+        if form is not None:
             if form.formType in ('submit', 'cancel'):
                 self.options = form
             else:
@@ -412,7 +423,7 @@ class PubSubRequest(generic.Stanza):
         for element in verbElement.parent.elements():
             if element.uri == NS_PUBSUB and element.name == 'configure':
                 form = data_form.findForm(element, NS_PUBSUB_NODE_CONFIG)
-                if form:
+                if form is not None:
                     if form.formType != 'submit':
                         raise BadRequest(text=u"Unexpected form type '%s'" %
                                               form.formType)
@@ -496,7 +507,7 @@ class PubSubRequest(generic.Stanza):
         Parse options form out of a subscription options request.
         """
         form = data_form.findForm(verbElement, NS_PUBSUB_SUBSCRIBE_OPTIONS)
-        if form:
+        if form is not None:
             if form.formType in ('submit', 'cancel'):
                 self.options = form
             else:
@@ -515,7 +526,7 @@ class PubSubRequest(generic.Stanza):
             if element.name == 'options' and element.uri == NS_PUBSUB:
                 form = data_form.findForm(element,
                                           NS_PUBSUB_SUBSCRIBE_OPTIONS)
-                if form:
+                if form is not None:
                     if form.formType != 'submit':
                         raise BadRequest(text=u"Unexpected form type '%s'" %
                                               form.formType)
@@ -526,7 +537,7 @@ class PubSubRequest(generic.Stanza):
 
 
     def _render_optionsWithSubscribe(self, verbElement):
-        if self.options:
+        if self.options is not None:
             optionsElement = verbElement.parent.addElement('options')
             self._render_options(optionsElement)
 
@@ -598,7 +609,7 @@ class PubSubRequest(generic.Stanza):
         L{IQ} for details.
 
         @param xs: The XML stream to send the request on.
-        @type xs: L{xmlstream.XmlStream}
+        @type xs: L{twisted.words.protocols.jabber.xmlstream.XmlStream}
         @rtype: L{defer.Deferred}.
         """
 
@@ -636,7 +647,7 @@ class PubSubEvent(object):
     @param nodeIdentifier: Identifier of the node the event pertains to.
     @type nodeIdentifier: C{unicode}
     @param headers: SHIM headers, see L{wokkel.shim.extractHeaders}.
-    @type headers: L{dict}
+    @type headers: C{dict}
     """
 
     def __init__(self, sender, recipient, nodeIdentifier, headers):
@@ -757,7 +768,7 @@ class PubSubClient(XMPPHandler):
         Create a publish subscribe node.
 
         @param service: The publish subscribe service to create the node at.
-        @type service: L{JID}
+        @type service: L{JID<twisted.words.protocols.jabber.jid.JID>}
         @param nodeIdentifier: Optional suggestion for the id of the node.
         @type nodeIdentifier: C{unicode}
         @param options: Optional node configuration options.
@@ -792,7 +803,7 @@ class PubSubClient(XMPPHandler):
         Delete a publish subscribe node.
 
         @param service: The publish subscribe service to delete the node from.
-        @type service: L{JID}
+        @type service: L{JID<twisted.words.protocols.jabber.jid.JID>}
         @param nodeIdentifier: The identifier of the node.
         @type nodeIdentifier: C{unicode}
         """
@@ -809,14 +820,14 @@ class PubSubClient(XMPPHandler):
         Subscribe to a publish subscribe node.
 
         @param service: The publish subscribe service that keeps the node.
-        @type service: L{JID}
+        @type service: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @param nodeIdentifier: The identifier of the node.
         @type nodeIdentifier: C{unicode}
 
         @param subscriber: The entity to subscribe to the node. This entity
             will get notifications of new published items.
-        @type subscriber: L{JID}
+        @type subscriber: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @param options: Subscription options.
         @type options: C{dict}
@@ -861,13 +872,13 @@ class PubSubClient(XMPPHandler):
         Unsubscribe from a publish subscribe node.
 
         @param service: The publish subscribe service that keeps the node.
-        @type service: L{JID}
+        @type service: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @param nodeIdentifier: The identifier of the node.
         @type nodeIdentifier: C{unicode}
 
         @param subscriber: The entity to unsubscribe from the node.
-        @type subscriber: L{JID}
+        @type subscriber: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @param subscriptionIdentifier: Optional subscription identifier.
         @type subscriptionIdentifier: C{unicode}
@@ -886,7 +897,7 @@ class PubSubClient(XMPPHandler):
         Publish to a publish subscribe node.
 
         @param service: The publish subscribe service that keeps the node.
-        @type service: L{JID}
+        @type service: L{JID<twisted.words.protocols.jabber.jid.JID>}
         @param nodeIdentifier: The identifier of the node.
         @type nodeIdentifier: C{unicode}
         @param items: Optional list of L{Item}s to publish.
@@ -906,7 +917,7 @@ class PubSubClient(XMPPHandler):
         Retrieve previously published items from a publish subscribe node.
 
         @param service: The publish subscribe service that keeps the node.
-        @type service: L{JID}
+        @type service: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @param nodeIdentifier: The identifier of the node.
         @type nodeIdentifier: C{unicode}
@@ -945,13 +956,13 @@ class PubSubClient(XMPPHandler):
         Get subscription options.
 
         @param service: The publish subscribe service that keeps the node.
-        @type service: L{JID}
+        @type service: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @param nodeIdentifier: The identifier of the node.
         @type nodeIdentifier: C{unicode}
 
         @param subscriber: The entity subscribed to the node.
-        @type subscriber: L{JID}
+        @type subscriber: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @param subscriptionIdentifier: Optional subscription identifier.
         @type subscriptionIdentifier: C{unicode}
@@ -982,13 +993,13 @@ class PubSubClient(XMPPHandler):
         Set subscription options.
 
         @param service: The publish subscribe service that keeps the node.
-        @type service: L{JID}
+        @type service: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @param nodeIdentifier: The identifier of the node.
         @type nodeIdentifier: C{unicode}
 
         @param subscriber: The entity subscribed to the node.
-        @type subscriber: L{JID}
+        @type subscriber: L{JID<twisted.words.protocols.jabber.jid.JID>}
 
         @param options: Subscription options.
         @type options: C{dict}.
@@ -1021,10 +1032,10 @@ class PubSubService(XMPPHandler, IQHandlerMixin):
     specification. It is the party responsible for keeping nodes and their
     subscriptions, and sending out notifications.
 
-    Methods from the L{IPubSubService} interface that are called as
-    a result of an XMPP request may raise exceptions. Alternatively the
-    deferred returned by these methods may have their errback called. These are
-    handled as follows:
+    Methods from the L{IPubSubService} interface that are called as a result
+    of an XMPP request may raise exceptions. Alternatively the deferred
+    returned by these methods may have their errback called. These are handled
+    as follows:
 
      - If the exception is an instance of L{error.StanzaError}, an error
        response iq is returned.
@@ -1194,11 +1205,7 @@ class PubSubService(XMPPHandler, IQHandlerMixin):
                 return defer.fail(Unsupported('', text))
 
             handler = getattr(self, handlerName)
-
             args = [getattr(request, arg) for arg in argNames]
-            if 'options' in argNames:
-                args[argNames.index('options')] = request.options.getValues()
-
             d = handler(*args)
 
         # If needed, translate the result into a response

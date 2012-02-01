@@ -7,7 +7,7 @@
 XMPP IM protocol support.
 
 This module provides generic implementations for the protocols defined in
-U{RFC 3921<http://www.xmpp.org/rfcs/rfc3921.html>} (XMPP IM).
+U{RFC 3921<http://xmpp.org/rfcs/rfc3921.html>} (XMPP IM).
 
 All of it should eventually move to Twisted.
 """
@@ -362,7 +362,7 @@ class SubscriptionPresence(BasePresence):
     This kind of presence is used to represent requests for presence
     subscription and their replies.
 
-    Based on L{BasePresence} and {Stanza}, it just uses the L{stanzaType}
+    Based on L{BasePresence} and {Stanza}, it just uses the C{stanzaType}
     attribute to represent the type of subscription presence. This can be
     one of C{'subscribe'}, C{'unsubscribe'}, C{'subscribed'} and
     C{'unsubscribed'}.
