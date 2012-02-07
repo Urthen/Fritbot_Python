@@ -1,10 +1,10 @@
 import re, random, fileinput
 from pymongo import Connection, errors as PyMongoErrors
 
-rooms = ['offtopic']
+rooms = ['offtopic','support_analyst']
 
 connection = Connection()
-db = connection["fritbot"]
+db = connection["kylebot"]
 roomsreturned = db.rooms.find({'name': {'$in': rooms}})
 roomids = []
 for room in roomsreturned:
@@ -20,13 +20,13 @@ END = "__end__"
 
 lines = log.count()
 done = 0
-print "Reading {0} lines".format(lines)
+#print "Reading {0} lines".format(lines)
 
-for line in lines:
+for line in fileinput.input():
 	history = [""]
-	text = line["body"].lower()
+	#text = line["body"].lower()
 	text = line.strip()
-	text = text[text.find('=')+1:]
+	#text = text[text.find('=')+1:]
 	
 	print "*** " + text
 	segments = map(lambda x: ''.join(x), splitter.findall(text))

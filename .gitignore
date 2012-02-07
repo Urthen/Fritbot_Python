@@ -19,3 +19,6 @@ ehthumbs.db
 Icon?
 Thumbs.db
 *~
+
+# Ignore Bazaarvoice Modules #
+bv*.py
