@@ -1,4 +1,4 @@
-import re, random, fileinput
+import re, random
 from pymongo import Connection, errors as PyMongoErrors
 
 rooms = ['offtopic']
@@ -22,12 +22,9 @@ lines = log.count()
 done = 0
 print "Reading {0} lines".format(lines)
 
-for line in lines:
+for line in log:
 	history = [""]
 	text = line["body"].lower()
-	text = line.strip()
-	text = text[text.find('=')+1:]
-	
 	print "*** " + text
 	segments = map(lambda x: ''.join(x), splitter.findall(text))
 	segments.append(END)
