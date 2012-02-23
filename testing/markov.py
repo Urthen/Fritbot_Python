@@ -25,7 +25,7 @@ print "Reading {0} lines".format(lines)
 for line in log:
 	history = [""]
 	text = line["body"].lower()
-	print "*** " + text
+	#print "*** " + text
 	segments = map(lambda x: ''.join(x), splitter.findall(text))
 	segments.append(END)
 
