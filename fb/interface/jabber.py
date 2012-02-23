@@ -1,7 +1,7 @@
-'''Primary Fritbot class, which acts as the twistd service.
+'''The original Jabber interface.
 Connects to and handles all communication with the jabber server.'''
 
-import sys, datetime, random
+import sys, datetime
 
 from twisted.internet import defer, reactor
 from twisted.words.protocols.jabber import jid
