@@ -48,8 +48,12 @@ class TwitterModule(FritbotModule):
 		db.db.twittersearch.insert({"query": query, "max_id": since});
 		
 		if len(data['results']):
+			count = 0
 			for result in data['results']:
 				msg += '\t@' + result['from_user'] + ': ' + result['text'] + '\n'
+				count += 1
+				if count >= 5:
+					break
 		else:
 			if existing is not None:
 				msg = "Slow your roll {0}, Twitter doesn't have anything new yet.".format(user['nick'])
