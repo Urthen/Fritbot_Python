@@ -23,7 +23,7 @@ class MarkovModule(FritbotModule):
 	def register(self):
 		intent.service.registerCommand("babble", self.babble, self, "Babble", "Say a randomly generated phrase.")
 		self.stacked = 0
-    
+
 	def doMarkov(self, room, user):
 		state = [""]
 		cache = {}
@@ -49,7 +49,7 @@ class MarkovModule(FritbotModule):
 					else:
 						segments[word] += power
 					total += power
-            
+
 			rand = random.randrange(math.floor(total))
 			#print state, total, rand
 			for seg in segments:
