@@ -22,7 +22,6 @@ class MarkovModule(FritbotModule):
 
 	def register(self):
 		intent.service.registerCommand("babble", self.babble, self, "Babble", "Say a randomly generated phrase.")
-		intent.service.registerCommand("babblemash", self.babbleMash, self, "BabbleMash", "BABBBLE MASH!!#@!")
 		self.stacked = 0
     
 	def doMarkov(self, room, user):
@@ -88,12 +87,5 @@ class MarkovModule(FritbotModule):
 			self.stacked += 1
 			reactor.callLater(0, self.doMarkov, room, user)
 		return True
-
-	def babbleMash(self, bot, room, user, args):
-		reactor.callLater(0, self.doMarkov, room, user)
-		reactor.callLater(0, self.doMarkov, room, user)
-		reactor.callLater(0, self.doMarkov, room, user)
-		reactor.callLater(0, self.doMarkov, room, user)
-		return True   
 
 module = MarkovModule()
