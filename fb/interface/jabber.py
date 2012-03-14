@@ -31,6 +31,9 @@ class JRoom(Room):
     def setNick(self, nick):
         self._interface.nick(self._room.occupantJID.userhostJID(), nick)
 
+    def setTopic(self, topic):
+        self._interface.subject(self._room.occupantJID.userhostJID(), topic)
+
 class JUser(User):
     def __init__(self, user, nick, interface):
         self._interface = interface
