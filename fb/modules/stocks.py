@@ -1,5 +1,4 @@
 #Get Current Stock Price
-from pprint import pprint
 
 import json, urllib
 from fb.db import db
