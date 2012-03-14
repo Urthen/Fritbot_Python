@@ -1109,9 +1109,11 @@ class User(object):
     A user/entity in a multi-user chat room.
     """
 
-    def __init__(self, nick, entity=None):
+    def __init__(self, nick, entity=None, jid=None):
+        print "User Created, JID:", jid
         self.nick = nick
         self.entity = entity
+        self.jid = jid
         self.affiliation = 'none'
         self.role = 'none'
 
@@ -1305,9 +1307,11 @@ class MUCClient(MUCClientProtocol):
         if room is None:
             return
 
+        print "Presence available:", presence.__dict__
+
         if user is None:
             nick = presence.sender.resource
-            user = User(nick, presence.entity)
+            user = User(nick, presence.entity, presence.sender)
 
         # Update user status
         user.status = presence.status

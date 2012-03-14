@@ -16,14 +16,13 @@ import config, fb.intent as intent
 
 
 CHAT = muc.MESSAGE + '[@type="chat"]'
-STATUS_CODE_CREATED = 201
 
 class JRoom(Room):
     
     def __init__(self, room, interface):
         self._room = room
         self._interface = interface
-        Room.__init__(self, room.roomIdentifier, room.nick)
+        Room.__init__(self, room.roomJID.user, room.nick)
 
     def _send(self, message):
         self._interface.groupChat(self._room.occupantJID.userhostJID(), message)
@@ -66,8 +65,9 @@ class JabberInterface(Interface, muc.MUCClient):
         self._presence.available(statuses={None: config.CONFIG["status"]})
         self._ping.setHandlerParent(parent)
        
-    def initialized(self):
+    def connectionInitialized(self):
         '''Called on connect/reconnect. Attempts to re-join all existing rooms.'''
+        muc.MUCClient.connectionInitialized(self)
         log.msg("MUC Connected.")
         self.xmlstream.addObserver(CHAT, self.receivedPrivateChat)
         FritBot.bot.connected()
@@ -82,26 +82,23 @@ class JabberInterface(Interface, muc.MUCClient):
         Configure rooms that need to be before others can join.'''
 
 
-        log.msg("Attempting to connect to jabber room " + room.roomIdentifier)
+        log.msg("Attempting to connect to jabber room " + room.roomJID.user)
         r = db.getRoom(JRoom(room, self))
         room.info = r
 
-        if int(room.status) == STATUS_CODE_CREATED:
-            log.msg("New room created: " + room.roomIdentifier)
-            userhost = rjid(room).userhost()
-            config_form = yield self.getConfigureForm(userhost)
+        if room.locked:
+            log.msg("New room created: " + room.roomJID.user)
+            config_form = yield self.getConfiguration(room.roomJID)
             
             # set config default
-            config_result = yield self.configure(userhost)  
-        reactor.callFromThread(self.fbInitRoom, r)
-        
-    def fbInitRoom(self, room):
-        '''Joined a room, get the configuration or create default configuration'''
-        FritBot.bot.initRoom(room)
+            config_result = yield self.configure(room.roomJID)  
+        FritBot.bot.initRoom(r)
         
     def joinRoom(self, room, nick):
         '''Join a room'''
-        self.join(config.JABBER['confserver'], room, nick).addCallback(self.initRoom)                           
+        print "JOIN ROOM CALLED!"
+        rjid = jid.internJID("%s@%s/%s" % (room, config.JABBER['confserver'], nick))
+        self.join(rjid, nick).addCallback(self.initRoom)                           
         
     def leaveRoom(self, room):
         '''Leave a room'''
@@ -118,7 +115,7 @@ class JabberInterface(Interface, muc.MUCClient):
             
     def userUpdatedStatus(self, room, user, show, status):
         '''Called when a user changes their nickname'''
-        u = db.getUser(JUser(user.user, user.nick, self))
+        u = db.getUser(JUser(user.jid.user, user.nick, self))
         if hasattr(room, 'info'):
             r = room.info
         else:
@@ -137,7 +134,9 @@ class JabberInterface(Interface, muc.MUCClient):
         if user is None:
             return
 
-        u = db.getUser(JUser(user.user, user.nick, self))
+        print user
+
+        u = db.getUser(JUser(user, user.nick, self))
 
         self.doNickUpdate(u, room.info, user.nick)
 
