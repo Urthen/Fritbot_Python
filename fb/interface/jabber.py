@@ -31,12 +31,13 @@ class JRoom(Room):
         self._interface.nick(self._room.occupantJID.userhostJID(), nick)
 
 class JUser(User):
-    def __init__(self, user, nick, interface):
+    def __init__(self, jid, nick, interface):
         self._interface = interface
-        User.__init__(self, user, nick)
+        self.jid = jid
+        User.__init__(self, jid.resource, nick)
 
     def _send(self, message):
-        self._interface.chat(jid.internJID(self.uid), message)
+        self._interface.chat(self.jid, message)
 
 class JabberInterface(Interface, muc.MUCClient):
     '''Handles connections to individual rooms'''
@@ -96,7 +97,6 @@ class JabberInterface(Interface, muc.MUCClient):
         
     def joinRoom(self, room, nick):
         '''Join a room'''
-        print "JOIN ROOM CALLED!"
         rjid = jid.internJID("%s@%s/%s" % (room, config.JABBER['confserver'], nick))
         self.join(rjid, nick).addCallback(self.initRoom)                           
         
@@ -115,14 +115,13 @@ class JabberInterface(Interface, muc.MUCClient):
             
     def userUpdatedStatus(self, room, user, show, status):
         '''Called when a user changes their nickname'''
-        u = db.getUser(JUser(user.jid.user, user.nick, self))
+        u = db.getUser(JUser(user.jid, user.nick, self))
         if hasattr(room, 'info'):
             r = room.info
         else:
             r = db.getRoom(JRoom(room, self))
         
         self.doNickUpdate(u, r, user.nick)
-
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions directly relate to sending and recieving messages.
@@ -134,9 +133,7 @@ class JabberInterface(Interface, muc.MUCClient):
         if user is None:
             return
 
-        print user
-
-        u = db.getUser(JUser(user, user.nick, self))
+        u = db.getUser(JUser(user.jid, user.nick, self))
 
         self.doNickUpdate(u, room.info, user.nick)
 
@@ -149,9 +146,8 @@ class JabberInterface(Interface, muc.MUCClient):
 
         user_jid = jid.internJID(msg.getAttribute('from', ''))
 
-        resource = user_jid.userhost()
         nick = user_jid.userhost().split('@', 1)[0]
 
-        user = db.getUser(JUser(resource, nick, self))
+        user = db.getUser(JUser(user_jid, nick, self))
 
         FritBot.bot.receivedPrivateChat(user, unicode(msg.body))

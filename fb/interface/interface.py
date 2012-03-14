@@ -211,3 +211,4 @@ class Interface(object):
 
     def leaveRoom(self, room, nick):
         raise NotImplementedError("leaveRoom() must be implemented by a sub-class.")
+        

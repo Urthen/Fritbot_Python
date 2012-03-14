@@ -72,10 +72,6 @@ class PresenceClientProtocol(XMPPHandler):
         return statuses
 
     def _onPresence(self, presence):
-        print "Presence:", presence.__dict__
-        print "Attr:"
-        for x in presence.children:
-            print x
         type = presence.getAttribute("type", "available")
         try:
             handler = getattr(self, '_onPresence%s' % (type.capitalize()))

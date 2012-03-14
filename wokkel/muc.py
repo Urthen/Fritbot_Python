@@ -1110,7 +1110,6 @@ class User(object):
     """
 
     def __init__(self, nick, entity=None, jid=None):
-        print "User Created, JID:", jid
         self.nick = nick
         self.entity = entity
         self.jid = jid
@@ -1306,8 +1305,6 @@ class MUCClient(MUCClientProtocol):
 
         if room is None:
             return
-
-        print "Presence available:", presence.__dict__
 
         if user is None:
             nick = presence.sender.resource
