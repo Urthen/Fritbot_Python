@@ -101,7 +101,7 @@ class JabberInterface(Interface, muc.MUCClient):
         
     def joinRoom(self, room, nick):
         '''Join a room'''
-        self.join(config.JABBER['server'], room, nick).addCallback(self.initRoom)                           
+        self.join(config.JABBER['confserver'], room, nick).addCallback(self.initRoom)                           
         
     def leaveRoom(self, room):
         '''Leave a room'''
