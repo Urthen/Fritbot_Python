@@ -20,7 +20,8 @@ JABBER =  {
     "jid": "user", # as in, user@server.name.com/Resource
     "resource": "resource",
     "password": "password", 
-    "server": "server.name.com"
+    "server": "server.name.com",
+    "confserver": "conference.server.name.com"
 }
 
 # Jabber rooms to join on startup, with per-room nicknames

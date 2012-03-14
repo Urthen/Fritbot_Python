@@ -1,7 +1,7 @@
-'''Primary Fritbot class, which acts as the twistd service.
+'''The original Jabber interface.
 Connects to and handles all communication with the jabber server.'''
 
-import sys, datetime, random
+import sys, datetime
 
 from twisted.internet import defer, reactor
 from twisted.words.protocols.jabber import jid
@@ -101,7 +101,7 @@ class JabberInterface(Interface, muc.MUCClient):
         
     def joinRoom(self, room, nick):
         '''Join a room'''
-        self.join(config.JABBER['server'], room, nick).addCallback(self.initRoom)                           
+        self.join(config.JABBER['confserver'], room, nick).addCallback(self.initRoom)                           
         
     def leaveRoom(self, room):
         '''Leave a room'''

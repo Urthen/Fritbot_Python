@@ -84,7 +84,7 @@ class IntentService(object):
         for word in keywords:
             rexwords.append(re.compile('^' + word + "$", re.I))
 
-        command = {'keywords': rexwords, 'function': function, 'name': name, 'description': description, 'module': module, 'core': core}
+        command = {'keywords': rexwords, 'originals': keywords, 'function': function, 'name': name, 'description': description, 'module': module, 'core': core}
         self._commands.append(command)
 
     def registerListener(self, patterns=None, function=None, module=None, name=None, description='No description provided.'):

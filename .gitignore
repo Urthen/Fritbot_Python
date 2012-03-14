@@ -2,6 +2,7 @@
 ###################
 *.pyc
 *.pid
+bv*.py
 config.py
 db
 twisted_env
@@ -19,3 +20,6 @@ ehthumbs.db
 Icon?
 Thumbs.db
 *~
+
+# Ignore Bazaarvoice Modules #
+bv*.py

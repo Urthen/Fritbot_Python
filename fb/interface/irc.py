@@ -1,0 +1,88 @@
+'''Fritbot IRC interface
+Connects to and handles all communication with an IRC server.'''
+
+import sys, datetime
+from twisted.internet import defer, reactor
+from twisted.python import log
+from twisted.words.protocols import irc
+
+import fb.fritbot as FritBot
+from interface import Interface, User, Room
+from fb.db import db
+import config, fb.intent as intent
+
+class IRCChannel(Room):
+    
+    def __init__(self, channel, interface):
+        self._interface = interface
+        Room.__init__(self, channel)
+
+    def _send(self, message):
+        self._interface.msg(self.uid, message)
+
+    def setNick(self, nick):
+        raise NotImplementedError("setNick() is not available for IRC.")
+
+class IRCUser(User):
+    def __init__(self, nick, interface):
+        self._interface = interface
+        User.__init__(self, nick, nick)
+
+    def _send(self, message):
+        self._interface.msg(self.uid, message)
+
+class IRCInterface(Interface, irc.IRCClient):
+    '''Handles connections to individual rooms'''
+
+    interface = None
+
+    def __init__(self):
+        '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
+        log.msg("Initializing IRC interface...")
+
+        Interface.__init__(self)
+    
+    def connectionMade(self):
+        irc.IRCClient.connectionMade(self)
+
+    def connectionLost(self, reason):
+        irc.IRCClient.connectionLost(self, reason)
+
+    def signedOn(self):
+        """Called when bot has succesfully signed on to server."""
+        log.msg("MUC Connected.")
+        FritBot.bot.connected()
+
+    def joined(self, channel):
+        """This will get called when the bot joins the channel."""
+        FritBot.bot.initRoom(room)
+
+    def privmsg(self, user, channel, msg):
+        """This will get called when the bot receives a message."""
+        user = user.split('!', 1)[0]
+        self.logger.log("<%s> %s" % (user, msg))
+        
+        # Check to see if they're sending me a private message
+        if channel == self.nickname:
+            msg = "It isn't nice to whisper!  Play nice with the group."
+            self.msg(user, msg)
+            return
+
+        # Otherwise check to see if it is a message directed at me
+        if msg.startswith(self.nickname + ":"):
+            msg = "%s: I am a log bot" % user
+            self.msg(channel, msg)
+            self.logger.log("<%s> %s" % (self.nickname, msg))
+
+    def action(self, user, channel, msg):
+        """This will get called when the bot sees someone do an action."""
+        user = user.split('!', 1)[0]
+        self.logger.log("* %s %s" % (user, msg))
+
+    # irc callbacks
+
+    def irc_NICK(self, prefix, params):
+        """Called when an IRC user changes their nickname."""
+        old_nick = prefix.split('!')[0]
+        new_nick = params[0]
+        self.logger.log("%s is now known as %s" % (old_nick, new_nick))
