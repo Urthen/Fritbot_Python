@@ -53,7 +53,8 @@ class StocksModule(FritbotModule):
                         msg = 'No stocks found for ' + query
 
 		room.setTopic(msg.strip())
-		return false
+		return False
+
 module = StocksModule()
 
 
