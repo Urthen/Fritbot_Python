@@ -133,6 +133,9 @@ class Room(Route):
     def setNick(self, nick):
         raise NotImplementedError("setNick() must be implemented by a sub-class.")
 
+    def setTopic(self, topic):
+        raise NotImplementedError("setTopic() must be implemented by a sub-class.")
+
     @property
     def squelched(self):
         if 'squelched' in self.info and self["squelched"] > datetime.datetime.now():
