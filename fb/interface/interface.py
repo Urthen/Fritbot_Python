@@ -186,6 +186,7 @@ class Interface(object):
     def __init__(self):
         import fb.fritbot as FritBot
         FritBot.bot.registerInterface(self)
+        self.defaultConnections = []
 
     def doNickUpdate(self, user, room, nick):
         '''Update user and room nicknames, if appropriate.
@@ -214,3 +215,6 @@ class Interface(object):
 
     def leaveRoom(self, room, nick):
         raise NotImplementedError("leaveRoom() must be implemented by a sub-class.")
+
+    def setDefaultConnections(self, rooms):
+        self.defaultConnections = rooms

@@ -37,23 +37,12 @@ class FritBot(object):
         log.msg("Initializing bot...")
 
         # Configure internals
-        for uid, nick in config.ROOMS.items():
-            room = Room(uid, nick)
-            self.rooms[uid] = room
-
         intent.service.link(self)
         intent.service.loadModules()
 
     def registerInterface(self, interface):
         log.msg("Connecting bot to interface...")
         self._connection = interface
-       
-    def connected(self):
-        log.msg("Joining rooms...")
-        roomlist = self.rooms.values()
-        self.rooms = {}
-        for room in roomlist:
-            self._connection.joinRoom(room.uid, room['nick'])
 
     def shutdown(self):
         '''Shut down the bot after a 2 second delay.'''

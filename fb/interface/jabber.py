@@ -73,7 +73,9 @@ class JabberInterface(Interface, muc.MUCClient):
         '''Called on connect/reconnect. Attempts to re-join all existing rooms.'''
         log.msg("MUC Connected.")
         self.xmlstream.addObserver(CHAT, self.receivedPrivateChat)
-        FritBot.bot.connected()
+        
+        for room in self.defaultConnections:
+            self.joinRoom(room[0], room[1])
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to joining, creating, and leaving rooms.
@@ -91,7 +93,7 @@ class JabberInterface(Interface, muc.MUCClient):
 
         if int(room.status) == STATUS_CODE_CREATED:
             log.msg("New room created: " + room.roomIdentifier)
-            userhost = rjid(room).userhost()
+            userhost = room._room.occupantjid.userhost()
             config_form = yield self.getConfigureForm(userhost)
             
             # set config default

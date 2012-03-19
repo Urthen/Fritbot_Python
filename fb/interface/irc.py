@@ -5,6 +5,7 @@ import sys, datetime
 from twisted.internet import defer, reactor
 from twisted.python import log
 from twisted.words.protocols import irc
+from twisted.internet import protocol
 
 import fb.fritbot as FritBot
 from interface import Interface, User, Room
@@ -18,7 +19,7 @@ class IRCChannel(Room):
         Room.__init__(self, channel)
 
     def _send(self, message):
-        self._interface.msg(self.uid, message)
+        self._interface.notice(self.uid, message)
 
     def setNick(self, nick):
         raise NotImplementedError("setNick() is not available for IRC.")
@@ -29,7 +30,7 @@ class IRCUser(User):
         User.__init__(self, nick, nick)
 
     def _send(self, message):
-        self._interface.msg(self.uid, message)
+        self._interface.notice(self.uid, message)
 
 class IRCInterface(Interface, irc.IRCClient):
     '''Handles connections to individual rooms'''
@@ -37,10 +38,13 @@ class IRCInterface(Interface, irc.IRCClient):
     interface = None
 
     def __init__(self):
-        '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
+        '''Initialize the bot: Called when first launched and subsequent reconnects.'''
         log.msg("Initializing IRC interface...")
 
         Interface.__init__(self)
+
+    def _get_nickname(self):
+        return config.IRC['nick']
     
     def connectionMade(self):
         irc.IRCClient.connectionMade(self)
@@ -86,3 +90,17 @@ class IRCInterface(Interface, irc.IRCClient):
         old_nick = prefix.split('!')[0]
         new_nick = params[0]
         self.logger.log("%s is now known as %s" % (old_nick, new_nick))
+
+class IRCInterfaceFactory(protocol.ClientFactory):
+    protocol = IRCInterface
+
+    def __init__(self, channel, nickname='YourMomDotCom'):
+        self.channel = channel
+        self.nickname = nickname
+
+    def clientConnectionLost(self, connector, reason):
+        print "Lost connection (%s), reconnecting." % (reason,)
+        connector.connect()
+
+    def clientConnectionFailed(self, connector, reason):
+        print "Could not connect: %s" % (reason,)
