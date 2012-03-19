@@ -30,6 +30,9 @@ class JRoom(Room):
     def setNick(self, nick):
         self._interface.nick(self._room.occupantJID.userhostJID(), nick)
 
+    def setTopic(self, topic):
+        self._interface.subject(self._room.occupantJID.userhostJID(), topic)
+
 class JUser(User):
     def __init__(self, jid, nick, interface):
         self._interface = interface
@@ -71,7 +74,9 @@ class JabberInterface(Interface, muc.MUCClient):
         muc.MUCClient.connectionInitialized(self)
         log.msg("MUC Connected.")
         self.xmlstream.addObserver(CHAT, self.receivedPrivateChat)
-        FritBot.bot.connected()
+        
+        for room in self.defaultConnections:
+            self.joinRoom(room[0], room[1])
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to joining, creating, and leaving rooms.
@@ -90,7 +95,6 @@ class JabberInterface(Interface, muc.MUCClient):
         if room.locked:
             log.msg("New room created: " + room.roomJID.user)
             config_form = yield self.getConfiguration(room.roomJID)
-            
             # set config default
             config_result = yield self.configure(room.roomJID)  
         FritBot.bot.initRoom(r)

@@ -133,6 +133,9 @@ class Room(Route):
     def setNick(self, nick):
         raise NotImplementedError("setNick() must be implemented by a sub-class.")
 
+    def setTopic(self, topic):
+        raise NotImplementedError("setTopic() must be implemented by a sub-class.")
+
     @property
     def squelched(self):
         if 'squelched' in self.info and self["squelched"] > datetime.datetime.now():
@@ -183,6 +186,7 @@ class Interface(object):
     def __init__(self):
         import fb.fritbot as FritBot
         FritBot.bot.registerInterface(self)
+        self.defaultConnections = []
 
     def doNickUpdate(self, user, room, nick):
         '''Update user and room nicknames, if appropriate.
@@ -211,4 +215,6 @@ class Interface(object):
 
     def leaveRoom(self, room, nick):
         raise NotImplementedError("leaveRoom() must be implemented by a sub-class.")
-        
+
+    def setDefaultConnections(self, rooms):
+        self.defaultConnections = rooms
