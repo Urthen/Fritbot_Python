@@ -87,7 +87,7 @@ class FritBot(object):
     The following functions directly relate to sending and recieving messages.
     -----------------------------------------------------------------------------------------------------------------------------------------'''
 
-    def addHistory(self, room, user, nick, body, command):
+    def addHistory(self, room, user, nick, body, command = False):
         history = {
             "body": body,
             "user": {
@@ -111,15 +111,14 @@ class FritBot(object):
 
         #Validate that the user is NOT the bot itself!
         wasCommand = False
-        if user.uid.split('@', 1)[0] != config.JABBER['jid']:
-            if nick is None:
-                nick = user['nick']
-            
-            log.msg("Group chat: <{0}/{1}>: {2}".format(room.uid, nick, body))
-            
-            wasCommand, message = intent.service.parseMessage(body, room, user)
-            if message is not None:
-               room.send(message)
+        if nick is None:
+            nick = user['nick']
+        
+        log.msg("Group chat: <{0}/{1}>: {2}".format(room.uid, nick, body))
+        
+        wasCommand, message = intent.service.parseMessage(body, room, user)
+        if message is not None:
+           room.send(message)
 
         self.addHistory(room, user, nick, body, wasCommand)
 

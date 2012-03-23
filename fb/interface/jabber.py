@@ -33,11 +33,15 @@ class JRoom(Room):
     def setTopic(self, topic):
         self._interface.subject(self._room.occupantJID.userhostJID(), topic)
 
+    @property
+    def roster(self):
+        return self._room.roster.keys()
+
 class JUser(User):
-    def __init__(self, jid, nick, interface):
+    def __init__(self, jid, uid, nick, interface):
         self._interface = interface
         self.jid = jid
-        User.__init__(self, jid.resource, nick)
+        User.__init__(self, uid, nick)
 
     def _send(self, message):
         self._interface.chat(self.jid, message)
@@ -119,7 +123,7 @@ class JabberInterface(Interface, muc.MUCClient):
             
     def userUpdatedStatus(self, room, user, show, status):
         '''Called when a user changes their nickname'''
-        u = db.getUser(JUser(user.jid, user.nick, self))
+        u = db.getUser(JUser(user.jid, user.jid.user, user.nick, self))
         if hasattr(room, 'info'):
             r = room.info
         else:
@@ -137,11 +141,21 @@ class JabberInterface(Interface, muc.MUCClient):
         if user is None:
             return
 
-        u = db.getUser(JUser(user.jid, user.nick, self))
+        if hasattr(user, 'entity') and user.entity is not None:
+            ujid = user.entity
+            uid = user.entity.user
+        else:
+            ujid = user.jid
+            uid = user.jid.resource
 
+        u = db.getUser(JUser(ujid, uid, user.nick, self))
         self.doNickUpdate(u, room.info, user.nick)
 
-        FritBot.bot.receivedGroupChat(room.info, u, message.body, nick=user.nick)
+        #If we think this is from the bot itself, log it. If it's from someone else, try and handle it.
+        if ujid.resource == config.JABBER['resource'] or ujid.resource == room.nick:
+            FritBot.bot.addHistory(room.info, u, user.nick, message.body)
+        else:
+            FritBot.bot.receivedGroupChat(room.info, u, message.body, nick=user.nick)
 
     def receivedPrivateChat(self, msg):
         '''Triggered when someone messages the bot directly.'''
@@ -152,6 +166,6 @@ class JabberInterface(Interface, muc.MUCClient):
 
         nick = user_jid.userhost().split('@', 1)[0]
 
-        user = db.getUser(JUser(user_jid, nick, self))
+        user = db.getUser(JUser(user_jid, user_jid.user, nick, self))
 
         FritBot.bot.receivedPrivateChat(user, unicode(msg.body))

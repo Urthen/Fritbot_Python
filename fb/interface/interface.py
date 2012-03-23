@@ -137,6 +137,10 @@ class Room(Route):
         raise NotImplementedError("setTopic() must be implemented by a sub-class.")
 
     @property
+    def roster(self):
+        raise NotImplementedError("roster must be implemented by a sub-class.")
+
+    @property
     def squelched(self):
         if 'squelched' in self.info and self["squelched"] > datetime.datetime.now():
             seconds = (self["squelched"] - datetime.datetime.now()).seconds
