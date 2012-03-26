@@ -123,7 +123,14 @@ class JabberInterface(Interface, muc.MUCClient):
             
     def userUpdatedStatus(self, room, user, show, status):
         '''Called when a user changes their nickname'''
-        u = db.getUser(JUser(user.jid, user.jid.user, user.nick, self))
+
+        if hasattr(user, 'entity') and user.entity is not None:
+            ujid = user.entity
+            uid = user.entity.user
+        else:
+            ujid = user.jid
+            uid = user.jid.resource
+        u = db.getUser(JUser(ujid, uid, user.nick, self))
         if hasattr(room, 'info'):
             r = room.info
         else:
