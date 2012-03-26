@@ -6,6 +6,7 @@ from twisted.internet import defer, reactor
 from twisted.python import log
 from twisted.words.protocols import irc
 from twisted.internet import protocol
+import zope.interface
 
 import fb.fritbot as FritBot
 from connector import IConnector, User, Room
@@ -32,16 +33,15 @@ class IRCUser(User):
     def _send(self, message):
         self._interface.notice(self.uid, message)
 
-class IRCInterface(IConnector, irc.IRCClient):
+class IRCInterface(irc.IRCClient):
     '''Handles connections to individual rooms'''
 
-    interface = None
+    zope.interface.implements(IConnector)
 
     def __init__(self):
         '''Initialize the bot: Called when first launched and subsequent reconnects.'''
         log.msg("Initializing IRC interface...")
-
-        IConnector.__init__(self)
+        #LOL NOPE
 
     def _get_nickname(self):
         return config.IRC['nick']

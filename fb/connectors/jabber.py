@@ -6,6 +6,7 @@ import sys, datetime
 from twisted.internet import defer, reactor
 from twisted.words.protocols.jabber import jid
 from twisted.python import log
+import zope.interface
 
 from wokkel import muc, xmppim, ping
 
@@ -46,16 +47,14 @@ class JUser(User):
     def _send(self, message):
         self._interface.chat(self.jid, message)
 
-class JabberConnector(IConnector, muc.MUCClient):
-    '''Handles connections to individual rooms'''
+class JabberConnector(muc.MUCClient):
+    '''Handles connection to a jabber (XMPP) server and the rooms within.'''
 
-    interface = None
+    zope.interface.implements(IConnector)
 
     def __init__(self):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
         log.msg("Initializing Jabber connection...")
-
-        IConnector.__init__(self)
 
         try:
             import OpenSSL

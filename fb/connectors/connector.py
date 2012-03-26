@@ -209,10 +209,12 @@ class User(Route):
 
         self.save()
 
-class IConnector(object):
+class IConnector(zope.interface.Interface):
+    """Defines a connection to a given chat service. Beyond simply defining the join and leave room functions, it must also accept inbound chat room or private messages and pass
+    pass them along to the bot."""
 
     def joinRoom(self, room, nick):
-        raise NotImplementedError("joinRoom() must be implemented by a sub-class.")
+        """Tells the connector to join a given room/channel/etc."""
 
     def leaveRoom(self, room, nick):
-        raise NotImplementedError("leaveRoom() must be implemented by a sub-class.")
+        """Tells the connector to leave a given room/channel/etc."""
