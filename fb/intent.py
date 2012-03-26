@@ -197,5 +197,10 @@ class IntentService(object):
                         if handled:
                             return False
 
+        if room is None:
+            user.send('Huh?')
+        elif address is not None:
+            room.send('Huh?')
+
 service = IntentService()
 

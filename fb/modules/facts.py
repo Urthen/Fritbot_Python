@@ -35,7 +35,6 @@ class FactsModule:
 				if triggerset['_id'] not in self.trigger_cache[trigger]['facts']:
 					self.trigger_cache[trigger]['facts'].append(triggerset['_id'])
 
-	@response
 	def checkfacts(self, bot, room, user, args):
 		body = args.group()
 
@@ -82,6 +81,9 @@ class FactsModule:
 		while '$giveitem' in reply:
 			reply = reply.replace('$giveitem', itemmodule.giveItem(), 1)
 
-		return reply
+		if room is not None:
+			room.send(reply, delay=True)
+		else:
+			user.send(reply, delay=True)
 
 module = FactsModule()

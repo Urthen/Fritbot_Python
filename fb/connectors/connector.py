@@ -52,7 +52,7 @@ class Route(object):
         return "<{0} {1}>".format(self.TYPE, self.uid)
 
     def send(self, message, delay=False):
-        '''Attempt to send a message with given delay'''
+        '''Attempt to send a message with optional delay'''
         if not self.active:
             log.warn("Attempted to send a message to inactive %s: %s", self.TYPE, self.uid)
             return
@@ -66,7 +66,7 @@ class Route(object):
 
         time = 0.2
         if delay:
-            time = random.random() + 2.0
+            time = 2.5
         log.msg("Sending <{0}>: {1}".format(self.uid, message))
         reactor.callLater(time, self._send, unicode(message, 'utf-8'))
 
