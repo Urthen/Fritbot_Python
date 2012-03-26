@@ -49,6 +49,7 @@ def inRoster(name, room=None, special=None):
 	users = db.db.users.find()
 	for user in users:
 		names.append((user['nick'], user))
+		names.append((user.uid, user))
 
 	#print "Names Found!", names
 

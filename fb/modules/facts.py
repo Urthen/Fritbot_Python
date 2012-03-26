@@ -1,4 +1,4 @@
-import re, random
+import re, random, datetime
 
 import zope.interface
 
@@ -41,6 +41,9 @@ class FactsModule:
 					self.trigger_cache[trigger]['facts'].append(triggerset['_id'])
 
 	def checkfacts(self, bot, room, user, args):
+		if room is not None and not room.allowed('facts'):
+			return False
+			
 		body = args.group()
 
 		response = None
@@ -57,7 +60,7 @@ class FactsModule:
 						count = fact['count']
 
 		if response is None:
-			return None
+			return False
 
 		response['count'] = response['count'] + 1
 		db.facts.update({'_id': response['_id']}, response)
@@ -93,6 +96,8 @@ class FactsModule:
 			room.send(reply, delay=True)
 		else:
 			user.send(reply, delay=True)
+			
+		return True
 
 	@returnjson
 	def apilist(self, request):

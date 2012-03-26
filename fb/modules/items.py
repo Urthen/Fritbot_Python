@@ -38,7 +38,7 @@ class ItemsModule:
 
 		if db.items.find_one({'name': item}) is not None:
 			db.items.remove({'name': item})
-			return "{1} has completely erased {0} from existance!".format(item, user.nick)
+			return "{1} has completely erased {0} from existance!".format(item, user['nick'])
 		else:
 			return "I don't know about {0} in the first place...".format(item)
 
@@ -57,7 +57,7 @@ class ItemsModule:
 	@response
 	def commanddrop(self, bot, room, user, args):
 		if not self.getItems(owned=True):
-			return "I don't have anything to give you, {0}!".format(user.nick)
+			return "I don't have anything to give you, {0}!".format(user['nick'])
 		name = ' '.join(args)
 		if name == 'something':
 			name = self.getPosesssion()
