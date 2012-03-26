@@ -10,7 +10,7 @@ from twisted.python import log
 from wokkel import muc, xmppim, ping
 
 import fb.fritbot as FritBot
-from interface import Interface, User, Room
+from connector import IConnector, User, Room
 from fb.db import db
 import config, fb.intent as intent
 
@@ -46,16 +46,16 @@ class JUser(User):
     def _send(self, message):
         self._interface.chat(self.jid, message)
 
-class JabberInterface(Interface, muc.MUCClient):
+class JabberConnector(IConnector, muc.MUCClient):
     '''Handles connections to individual rooms'''
 
     interface = None
 
     def __init__(self):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
-        log.msg("Initializing Jabber interface...")
+        log.msg("Initializing Jabber connection...")
 
-        Interface.__init__(self)
+        IConnector.__init__(self)
 
         try:
             import OpenSSL
@@ -136,7 +136,7 @@ class JabberInterface(Interface, muc.MUCClient):
         else:
             r = db.getRoom(JRoom(room, self))
         
-        self.doNickUpdate(u, r, user.nick)
+        u.doNickUpdate(r, user.nick)
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions directly relate to sending and recieving messages.
@@ -156,7 +156,7 @@ class JabberInterface(Interface, muc.MUCClient):
             uid = user.jid.resource
 
         u = db.getUser(JUser(ujid, uid, user.nick, self))
-        self.doNickUpdate(u, room.info, user.nick)
+        u.doNickUpdate(room.info, user.nick)
 
         #If we think this is from the bot itself, log it. If it's from someone else, try and handle it.
         if ujid.resource == config.JABBER['resource'] or ujid.resource == room.nick:

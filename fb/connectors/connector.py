@@ -1,5 +1,7 @@
 import datetime
 
+import zope.interface
+
 from twisted.internet import defer, reactor
 from twisted.python import log
 
@@ -185,34 +187,32 @@ class User(Route):
     def allowed(self, permissions):
         return True #everything's allowed when you're having fun alone
 
-class Interface(object):
-
-    def __init__(self):
-        import fb.fritbot as FritBot
-        FritBot.bot.registerInterface(self)
-        self.defaultConnections = []
-
-    def doNickUpdate(self, user, room, nick):
+    def doNickUpdate(self, room, nick):
         '''Update user and room nicknames, if appropriate.
         Helper function that should be called by sub-classes whenever a new user connects to a room, or a user of a room changes nicknames.'''
 
-        if "nicks" in user.info:
+        if "nicks" in self.info:
             found = False
-            for r in user["nicks"]:
+            for r in self["nicks"]:
                 if r["room"] == room.uid:
                     if nick not in r["nicks"]:
                         r["nicks"].append(nick)
                     found = True
                     break
             if not found:
-                user["nicks"].append({"room": room.uid, "nicks": [nick]})
+                self["nicks"].append({"room": room.uid, "nicks": [nick]})
         else:
-            user["nicks"] = [{"room": room.uid, "nicks": [user['nick']]}]
+            self["nicks"] = [{"room": room.uid, "nicks": [self['nick']]}]
 
-        if "nick" not in user.info:
-            user["nick"] = user.nick
+        if "nick" not in self.info:
+            self["nick"] = user.nick
 
-        user.save()
+        self.save()
+
+class IConnector(object):
+
+    def __init__(self):
+        self.defaultConnections = []
 
     def joinRoom(self, room, nick):
         raise NotImplementedError("joinRoom() must be implemented by a sub-class.")

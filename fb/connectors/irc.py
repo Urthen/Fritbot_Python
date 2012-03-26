@@ -8,7 +8,7 @@ from twisted.words.protocols import irc
 from twisted.internet import protocol
 
 import fb.fritbot as FritBot
-from interface import Interface, User, Room
+from connector import IConnector, User, Room
 from fb.db import db
 import config, fb.intent as intent
 
@@ -32,7 +32,7 @@ class IRCUser(User):
     def _send(self, message):
         self._interface.notice(self.uid, message)
 
-class IRCInterface(Interface, irc.IRCClient):
+class IRCInterface(IConnector, irc.IRCClient):
     '''Handles connections to individual rooms'''
 
     interface = None
@@ -41,7 +41,7 @@ class IRCInterface(Interface, irc.IRCClient):
         '''Initialize the bot: Called when first launched and subsequent reconnects.'''
         log.msg("Initializing IRC interface...")
 
-        Interface.__init__(self)
+        IConnector.__init__(self)
 
     def _get_nickname(self):
         return config.IRC['nick']

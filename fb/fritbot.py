@@ -9,7 +9,7 @@ from twisted.python import log
 
 from wokkel import muc, xmppim
 
-from fb.interface.interface import Room, User, Interface
+from fb.connectors.connector import Room, User
 from fb.db import db
 import config, fb.intent as intent
 
@@ -40,9 +40,9 @@ class FritBot(object):
         intent.service.link(self)
         intent.service.loadModules()
 
-    def registerInterface(self, interface):
-        log.msg("Connecting bot to interface...")
-        self._connection = interface
+    def registerConnector(self, connector):
+        log.msg("Connecting bot to requested chat service...")
+        self._connection = connector
 
     def shutdown(self):
         '''Shut down the bot after a 2 second delay.'''

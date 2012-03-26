@@ -11,7 +11,8 @@ from twisted.application import service
 from wokkel.client import XMPPClient
 
 from fb.audit import log
-from fb.interface.jabber import JabberInterface
+from fb.connectors.jabber import JabberConnector
+from fb.fritbot import bot
 import config
 
 try:
@@ -32,9 +33,10 @@ xmppclient = XMPPClient(jid.internJID(bot_jid), config.JABBER["password"], confi
 xmppclient.logTraffic = config.LOG["traffic"]
 
 # Hook chat instance into main app
-jinterface = JabberInterface()
-jinterface.setHandlerParent(xmppclient)
-jinterface.setDefaultConnections(config.JABBER['rooms'])
+connection = JabberConnector()
+bot.registerConnector(connection)
+connection.setHandlerParent(xmppclient)
+connection.setDefaultConnections(config.JABBER['rooms'])
 xmppclient.setServiceParent(application)
 
 if hasattr(config, 'API'):
