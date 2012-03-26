@@ -12,9 +12,21 @@ class HelpModule(FritbotModule):
 
 	def help(self, bot, room, user, args):
 		out = ["Available commands:"]
+		modules = {}
 
 		for command in intent.service._commands:
-			out.append("{0}: {1} - {2}".format(command['name'], command['originals'], command['description']))
+			tagline = "{0} - {1} ({2})".format(command['module'].name, command['module'].description, command['module'].author)
+
+			if tagline not in modules:
+				modules[tagline] = []
+
+			modules[tagline].append("* {0}: {1} - {2}".format(command['name'], command['originals'], command['description']))
+
+		for module in modules:
+			out.append(module)
+			for command in modules[module]:
+				out.append(command)
+			out.append("")
 
 		user.send('\n'.join(out))
 		return True
