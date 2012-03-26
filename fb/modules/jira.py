@@ -23,7 +23,7 @@ from SOAPpy import Types
 class JIRAModule:
 	zope.interface.implements(IModule)
 
-	name="Confluence"
+	name="JIRA"
 	description="Functionality for searching Jira"
 	author="Kyle Varga (kyle.varga@bazaarvoice.com)"
 
