@@ -36,7 +36,6 @@ xmppclient.logTraffic = config.LOG["traffic"]
 connection = JabberConnector()
 bot.registerConnector(connection)
 connection.setHandlerParent(xmppclient)
-connection.setDefaultConnections(config.JABBER['rooms'])
 xmppclient.setServiceParent(application)
 
 if hasattr(config, 'API'):

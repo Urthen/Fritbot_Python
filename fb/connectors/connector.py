@@ -211,14 +211,8 @@ class User(Route):
 
 class IConnector(object):
 
-    def __init__(self):
-        self.defaultConnections = []
-
     def joinRoom(self, room, nick):
         raise NotImplementedError("joinRoom() must be implemented by a sub-class.")
 
     def leaveRoom(self, room, nick):
         raise NotImplementedError("leaveRoom() must be implemented by a sub-class.")
-
-    def setDefaultConnections(self, rooms):
-        self.defaultConnections = rooms

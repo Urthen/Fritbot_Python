@@ -64,6 +64,7 @@ class JabberConnector(IConnector, muc.MUCClient):
 
         self._presence = xmppim.PresenceClientProtocol()
         self._ping = ping.PingHandler()
+        self.defaultConnections = config.JABBER['rooms']
         muc.MUCClient.__init__(self)
 
     def setHandlerParent(self, parent):
