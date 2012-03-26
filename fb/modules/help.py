@@ -1,7 +1,10 @@
-import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+import zope.interface
 
-class HelpModule(FritbotModule):
+import fb.intent as intent
+from fb.modules.base import IModule, response
+
+class HelpModule:
+	zope.interface.implements(IModule)
 
 	name="Help Functions"
 	description="Functions to document what commands the bot currently has available."

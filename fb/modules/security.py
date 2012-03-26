@@ -1,8 +1,11 @@
+import zope.interface
+
 import fb.intent as intent
 from fb import security
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
-class SecurityModule(FritbotModule):
+class SecurityModule:
+	zope.interface.implements(IModule)
 
 	name="Security"
 	description="Security and API access related commands"

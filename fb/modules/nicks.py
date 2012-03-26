@@ -1,8 +1,11 @@
+import zope.interface
+
 from fb.db import db
 import fb.intent as intent
 import fb.modules.base as base
 
-class NicknameModule(base.FritbotModule):
+class NicknameModule:
+	zope.interface.implements(base.IModule)
 
 	name="Nicknames"
 	description="Simple functions to manipulate the name of the bot or the user"

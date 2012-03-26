@@ -1,5 +1,7 @@
 import datetime
 
+import zope.interface
+
 from twisted.python import log
 from twisted.internet import reactor
 
@@ -7,7 +9,9 @@ import fb.intent as intent
 import fb.modules.base as base
 import config
 
-class CoreCommandsModule(base.FritbotModule):
+class CoreCommandsModule:
+	zope.interface.implements(base.IModule)
+	
 	name="Core Commands"
 	description="Core Fritbot Commands, minimum functionality."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"

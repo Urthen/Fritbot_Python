@@ -1,11 +1,14 @@
 import random, datetime, re
 
+import zope.interface
+
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
 from fb.db import db
 
-class ItemsModule(FritbotModule):
+class ItemsModule:
+	zope.interface.implements(IModule)
 
 	name="Items & Inventory"
 	description="Handles a fictitious items & inventory system, allowing you to give and take items from the bot."

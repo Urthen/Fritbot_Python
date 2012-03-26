@@ -1,12 +1,14 @@
 import random, re, datetime
 from operator import itemgetter
 
+import zope.interface
+
 from pymongo import ASCENDING, DESCENDING
 
 from fb.db import db
 
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
 MULT_EXACT = 1.0
 MULT_CASE_WRONG = 0.9
@@ -155,7 +157,8 @@ def sayQuotes(room, user, nick, segment, min=1, max=1):
 
 	return msg
 
-class QuotesModule(FritbotModule):
+class QuotesModule:
+	zope.interface.implements(IModule)
 
 	name="Quotes"
 	description="Remember and recite quotes users have said in chat rooms."

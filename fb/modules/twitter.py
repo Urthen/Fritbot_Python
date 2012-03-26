@@ -1,14 +1,17 @@
 #Searching Twitter
 
 import json, urllib
+import zope.interface
+
 from fb.db import db
 
 from twisted.python import log
 
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
-class TwitterModule(FritbotModule):
+class TwitterModule:
+	zope.interface.implements(IModule)
 
 	name="Twitter"
 	description="Functionality for searching Twitter"

@@ -1,10 +1,13 @@
+import zope.interface
+
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
 # requirements
 import urllib, json
 
-class WeatherModule(FritbotModule):
+class WeatherModule:
+	zope.interface.implements(IModule)
 
 	name="Weather"
 	description="Functions for returning weather"

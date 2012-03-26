@@ -1,7 +1,9 @@
 import re, random
 
+import zope.interface
+
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 from fb.db import db
 
 try:
@@ -9,7 +11,9 @@ try:
 except ImportError:
 	raise ImportError, "Can't find the items module, which is required for the facts module!"
 
-class FactsModule(FritbotModule):
+class FactsModule:
+	zope.interface.implements(IModule)
+
 
 	name="Facts"
 	description="Responds to other users' chats with super A+ userful factoids."

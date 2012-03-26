@@ -1,12 +1,15 @@
+import zope.interface
+
 from pymongo import ASCENDING, DESCENDING
 
 import config
 from fb.db import db
 
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
-class HistoryModule(FritbotModule):
+class HistoryModule:
+	zope.interface.implements(IModule)
 
 	name="History"
 	description="Searches the Fritbot history"

@@ -2,11 +2,14 @@ import xmlrpclib
 
 from twisted.python import log
 
+import zope.interface
+
 import config
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
-class ConfluenceModule(FritbotModule):
+class ConfluenceModule:
+	zope.interface.implements(IModule)
 
 	name="Confluence"
 	description="Functionality for searching Confluence"

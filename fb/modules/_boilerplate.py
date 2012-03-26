@@ -1,8 +1,10 @@
+import zope.interface
+
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
-class MyModule(FritbotModule):
-
+class MyModule:
+	zope.interface.implements(IModule)
 	name=""
 	description=""
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"

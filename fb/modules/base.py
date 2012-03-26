@@ -1,4 +1,5 @@
 from twisted.python import log
+import zope.interface
  	
 def response(f):
 	def responder(self, bot, room, user, args):
@@ -50,12 +51,11 @@ def user_only(f):
 
 	return roomcheck
 
-class FritbotModule(object):
+class IModule(zope.interface.Interface):
 	
-	name="Basic Module"
-	description="Basic Module Description"
-	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
-	requirements = []
+	name=zope.interface.Attribute("Name of the module")
+	description=zope.interface.Attribute("Description of the module")
+	author=zope.interface.Attribute("Author's name, email address if desired.")
 
 	def register(self):
-		raise NotImplementedError("register must be overridden by a subclass!")
+		"""Functionality to register the module with the intent service."""
