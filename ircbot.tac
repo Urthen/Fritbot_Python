@@ -29,11 +29,5 @@ log.start(application)
 
 
 if hasattr(config, 'API'):
-	from twisted.application.internet import TCPServer
-	from twisted.web.server import Site
-	from fb.api.core import fbapi
-
-	# Initialize the API
-	api = fbapi()
-
-	TCPServer(config.API['port'], Site(api)).setServiceParent(application)
+	from fb.api.core import api
+	api.launch(application)

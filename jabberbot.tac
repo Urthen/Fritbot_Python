@@ -39,14 +39,5 @@ connection.setHandlerParent(xmppclient)
 xmppclient.setServiceParent(application)
 
 if hasattr(config, 'API'):
-	from twisted.application.internet import TCPServer
-	from twisted.web.server import Site
-	from fb.api.core import fbapi
-
-	if 'security' not in config.APPLICATION['modules']:
-		log("Warning: You have the API enabled, but not the 'security' module!")
-
-	# Initialize the API
-	api = fbapi()
-
-	TCPServer(config.API['port'], Site(api)).setServiceParent(application)
+	from fb.api.core import api
+	api.launch(application)
