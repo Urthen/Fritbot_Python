@@ -35,7 +35,7 @@ class ItemsModule(FritbotModule):
 
 		if db.items.find_one({'name': item}) is not None:
 			db.items.remove({'name': item})
-			return "I've completely erased {0} from existance!".format(item)
+			return "{1} has completely erased {0} from existance!".format(item, user.nick)
 		else:
 			return "I don't know about {0} in the first place...".format(item)
 
@@ -46,46 +46,58 @@ class ItemsModule(FritbotModule):
 		if not inventory:
 			return "My inventory seems to be empty!"
 		elif len(inventory) == 1:
-			return "I have {0}.".format(inventory[0]['name'])
+			return "I have {0}.".format(inventory[0])
 		else:
 			inventory[-1] = "and " + inventory[-1]  
 			return "I've got {0}.".format(', '.join(inventory))
 
 	@response
 	def commanddrop(self, bot, room, user, args):
+		if not self.getItems(owned=True):
+			return "I don't have anything to give you, {0}!".format(user.nick)
 		name = ' '.join(args)
 		if name == 'something':
 			name = self.getPosesssion()
 		item = self.giveItem(name)
 		if item is not None:
-			return "I no longer have {0}!".format(item['name'])
+			return "Ok, I no longer have {0}!".format(item)
 		else:
-			return "I'm not sure what that is..."
+			return "I don't have {0} to give you!".format(name)
 		
 	def getItems(self, owned=None):
 		query = {}
 		if owned is not None:
 			query = {'owned': owned}
 		out = [item['name'] for item in db.items.find(query)]
-		if out:
-			return out
-		else:
-			return ['something']
+		return out
 
 	def getSomething(self):
-		return random.choice(self.getItems())
+		out = random.choice(self.getItems())
+		if not out:
+			out = 'something'
+		return out
+
 	def getPosesssion(self):
-		return random.choice(self.getItems(owned=True))
+		out = random.choice(self.getItems(owned=True))
+		if not out:
+			out = 'something'
+		return out
+
 	def getNotCarried(self):
-		return random.choice(self.getItems(owned=False))
+		out = random.choice(self.getItems(owned=False))
+		if not out:
+			out = 'something'
+		return out
 
 	def giveItem(self, item=None):
 		if item is None:
 			item = random.choice(self.getItems(owned=True))
 		else:
-			item = db.items.find_one({'name': {'$regex': item, '$options': 'i'}, 'owned': True})['name']
+			item = db.items.find_one({'name': {'$regex': item, '$options': 'i'}, 'owned': True})
 			if item is None:
 				return None
+			else:
+				item = item['name']
 
 
 		db.items.update({'name': item}, {'$set': {'owned': False}})

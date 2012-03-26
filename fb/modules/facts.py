@@ -58,10 +58,16 @@ class FactsModule(FritbotModule):
 		except IndexError:
 			what = itemmodule.getSomething()
 
-		reply = reply.replace('$who', user['nick']).replace('$what', what).replace('$something', itemmodule.getSomething())
+		reply = reply.replace('$who', user['nick']).replace('$what', what)
+
+		while '$something' in reply:
+			reply = reply.replace('$something', itemmodule.getSomething(), 1)
 		
 		while '$someone' in reply:
-			reply = reply.replace('$someone', random.choice(room.roster), 1)
+			if room is None:
+				reply = reply.replace('$someone', "someone", 1)
+			else:
+				reply = reply.replace('$someone', random.choice(room.roster), 1)
 
 		while '$inventory' in reply:
 			reply = reply.replace('$inventory', itemmodule.getPossession(), 1)
