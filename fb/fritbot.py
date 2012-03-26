@@ -116,9 +116,7 @@ class FritBot(object):
         
         log.msg("Group chat: <{0}/{1}>: {2}".format(room.uid, nick, body))
         
-        wasCommand, message = intent.service.parseMessage(body, room, user)
-        if message is not None:
-           room.send(message)
+        wasCommand = intent.service.parseMessage(body, room, user)
 
         self.addHistory(room, user, nick, body, wasCommand)
 
@@ -132,9 +130,7 @@ class FritBot(object):
 
         log.msg("Private chat: <{0}>: {1}".format(user['nick'], body))
 
-        wasCommand, message = intent.service.parseMessage(body, None, user)
-        if message is not None:
-            user.send(message)
+        wasCommand = intent.service.parseMessage(body, None, user)
 
         self.addHistory(None, user, user['nick'], body, wasCommand)
 
