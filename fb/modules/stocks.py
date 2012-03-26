@@ -1,14 +1,17 @@
 #Get Current Stock Price
 
 import json, urllib
+import zope.interface
+
 from fb.db import db
 
 from twisted.python import log
 
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
-class StocksModule(FritbotModule):
+class StocksModule:
+	zope.interface.implements(IModule)
 
 	name="Stocks"
 	description="Functionality for stock quotes"

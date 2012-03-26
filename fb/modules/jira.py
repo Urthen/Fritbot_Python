@@ -1,8 +1,10 @@
 from twisted.python import log
 
+import zope.interface
+
 import config
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
 #for jira ticket info
 import SOAPpy, getpass, datetime, array, base64, random
@@ -18,7 +20,8 @@ from SOAPpy import Types
 #    "default_project": "BVC-" # Also include the -, ie. "PRJ-"
 #}
 
-class JIRAModule(FritbotModule):
+class JIRAModule:
+	zope.interface.implements(IModule)
 
 	name="Confluence"
 	description="Functionality for searching Jira"

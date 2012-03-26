@@ -2,13 +2,16 @@
 
 import json, urllib
 
+import zope.interface
+
 from twisted.python import log
 
 import config
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
-class GoogleSearchModule(FritbotModule):
+class GoogleSearchModule:
+	zope.interface.implements(IModule)
 
 	name="Google Search"
 	description="Functionality for searching Google Web and YouTube"

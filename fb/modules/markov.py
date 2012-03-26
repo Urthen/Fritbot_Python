@@ -2,13 +2,15 @@ from __future__ import division
 import re, random, math
 
 from twisted.internet import reactor
+import zope.interface
 
 import fb.intent as intent
-from fb.modules.base import FritbotModule, response
+from fb.modules.base import IModule, response
 
 from fb.db import db
 
-class MarkovModule(FritbotModule):
+class MarkovModule:
+	zope.interface.implements(IModule)
 
 	name="Markov Chains"
 	description="Adds babbling functionality by randomly selecting old snippets of text from historical conversations."

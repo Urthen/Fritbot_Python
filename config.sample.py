@@ -21,12 +21,8 @@ JABBER =  {
     "resource": "resource",
     "password": "password", 
     "server": "server.name.com",
-    "confserver": "conference.server.name.com"
-}
-
-# Jabber rooms to join on startup, with per-room nicknames
-ROOMS = {
-    "Room": "Nickname"
+    "confserver": "conference.server.name.com",
+    "rooms": [("room", 'nickname'), ("room2", 'nickname')]
 }
 
 CONFLUENCE = {

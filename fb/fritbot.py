@@ -9,7 +9,7 @@ from twisted.python import log
 
 from wokkel import muc, xmppim
 
-from fb.interface.interface import Room, User, Interface
+from fb.connectors.connector import Room, User
 from fb.db import db
 import config, fb.intent as intent
 
@@ -40,9 +40,9 @@ class FritBot(object):
         intent.service.link(self)
         intent.service.loadModules()
 
-    def registerInterface(self, interface):
-        log.msg("Connecting bot to interface...")
-        self._connection = interface
+    def registerConnector(self, connector):
+        log.msg("Connecting bot to requested chat service...")
+        self._connection = connector
 
     def shutdown(self):
         '''Shut down the bot after a 2 second delay.'''
@@ -87,7 +87,7 @@ class FritBot(object):
     The following functions directly relate to sending and recieving messages.
     -----------------------------------------------------------------------------------------------------------------------------------------'''
 
-    def addHistory(self, room, user, nick, body, command):
+    def addHistory(self, room, user, nick, body, command = False):
         history = {
             "body": body,
             "user": {
@@ -111,15 +111,12 @@ class FritBot(object):
 
         #Validate that the user is NOT the bot itself!
         wasCommand = False
-        if user.uid.split('@', 1)[0] != config.JABBER['jid']:
-            if nick is None:
-                nick = user['nick']
-            
-            log.msg("Group chat: <{0}/{1}>: {2}".format(room.uid, nick, body))
-            
-            wasCommand, message = intent.service.parseMessage(body, room, user)
-            if message is not None:
-               room.send(message)
+        if nick is None:
+            nick = user['nick']
+        
+        log.msg("Group chat: <{0}/{1}>: {2}".format(room.uid, nick, body))
+        
+        wasCommand = intent.service.parseMessage(body, room, user)
 
         self.addHistory(room, user, nick, body, wasCommand)
 
@@ -133,9 +130,7 @@ class FritBot(object):
 
         log.msg("Private chat: <{0}>: {1}".format(user['nick'], body))
 
-        wasCommand, message = intent.service.parseMessage(body, None, user)
-        if message is not None:
-            user.send(message)
+        wasCommand = intent.service.parseMessage(body, None, user)
 
         self.addHistory(None, user, user['nick'], body, wasCommand)
 

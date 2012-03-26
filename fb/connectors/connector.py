@@ -1,5 +1,7 @@
 import datetime
 
+import zope.interface
+
 from twisted.internet import defer, reactor
 from twisted.python import log
 
@@ -50,7 +52,7 @@ class Route(object):
         return "<{0} {1}>".format(self.TYPE, self.uid)
 
     def send(self, message, delay=False):
-        '''Attempt to send a message with given delay'''
+        '''Attempt to send a message with optional delay'''
         if not self.active:
             log.warn("Attempted to send a message to inactive %s: %s", self.TYPE, self.uid)
             return
@@ -64,7 +66,7 @@ class Route(object):
 
         time = 0.2
         if delay:
-            time = random.random() + 2.0
+            time = 2.5
         log.msg("Sending <{0}>: {1}".format(self.uid, message))
         reactor.callLater(time, self._send, unicode(message, 'utf-8'))
 
@@ -137,6 +139,10 @@ class Room(Route):
         raise NotImplementedError("setTopic() must be implemented by a sub-class.")
 
     @property
+    def roster(self):
+        raise NotImplementedError("roster must be implemented by a sub-class.")
+
+    @property
     def squelched(self):
         if 'squelched' in self.info and self["squelched"] > datetime.datetime.now():
             seconds = (self["squelched"] - datetime.datetime.now()).seconds
@@ -181,40 +187,34 @@ class User(Route):
     def allowed(self, permissions):
         return True #everything's allowed when you're having fun alone
 
-class Interface(object):
-
-    def __init__(self):
-        import fb.fritbot as FritBot
-        FritBot.bot.registerInterface(self)
-        self.defaultConnections = []
-
-    def doNickUpdate(self, user, room, nick):
+    def doNickUpdate(self, room, nick):
         '''Update user and room nicknames, if appropriate.
         Helper function that should be called by sub-classes whenever a new user connects to a room, or a user of a room changes nicknames.'''
 
-        if "nicks" in user.info:
+        if "nicks" in self.info:
             found = False
-            for r in user["nicks"]:
+            for r in self["nicks"]:
                 if r["room"] == room.uid:
                     if nick not in r["nicks"]:
                         r["nicks"].append(nick)
                     found = True
                     break
             if not found:
-                user["nicks"].append({"room": room.uid, "nicks": [nick]})
+                self["nicks"].append({"room": room.uid, "nicks": [nick]})
         else:
-            user["nicks"] = [{"room": room.uid, "nicks": [user['nick']]}]
+            self["nicks"] = [{"room": room.uid, "nicks": [self['nick']]}]
 
-        if "nick" not in user.info:
-            user["nick"] = user.nick
+        if "nick" not in self.info:
+            self["nick"] = user.nick
 
-        user.save()
+        self.save()
+
+class IConnector(zope.interface.Interface):
+    """Defines a connection to a given chat service. Beyond simply defining the join and leave room functions, it must also accept inbound chat room or private messages and pass
+    pass them along to the bot."""
 
     def joinRoom(self, room, nick):
-        raise NotImplementedError("joinRoom() must be implemented by a sub-class.")
+        """Tells the connector to join a given room/channel/etc."""
 
     def leaveRoom(self, room, nick):
-        raise NotImplementedError("leaveRoom() must be implemented by a sub-class.")
-
-    def setDefaultConnections(self, rooms):
-        self.defaultConnections = rooms
+        """Tells the connector to leave a given room/channel/etc."""
