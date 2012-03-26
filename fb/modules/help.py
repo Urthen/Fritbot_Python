@@ -8,7 +8,8 @@ class HelpModule(FritbotModule):
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	def register(self):
-		intent.service.registerCommand("help", self.help, self, "Help", "List all available commands.")
+		intent.service.registerCommand(["help", "manual"], self.help, self, "Help", "List all available commands.")
+		intent.service.registerListener(["man fritbot"], self.help, self, "Help", "List all available commands")
 
 	def help(self, bot, room, user, args):
 		out = ["Available commands:"]
