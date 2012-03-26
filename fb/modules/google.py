@@ -4,6 +4,7 @@ import json, urllib
 
 from twisted.python import log
 
+import config
 import fb.intent as intent
 from fb.modules.base import FritbotModule, response
 
@@ -62,10 +63,15 @@ class GoogleSearchModule(FritbotModule):
 
 		yt_service = gdata.youtube.service.YouTubeService()
 		query = gdata.youtube.service.YouTubeVideoQuery()
-		if config.CONFIG["racy"]:
-			query.racy = "include"
-		else:
-			query.racy = "exclude"
+		
+		try:
+			if config.CONFIG["racy"]:
+				query.racy = "include"
+			else:
+				query.racy = "exclude"
+		except:
+			query.racy = "exclude"		    
+	
 		query.vq = ' '.join(args)
 		feed = yt_service.YouTubeQuery(query)
 
