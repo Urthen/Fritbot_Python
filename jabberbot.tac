@@ -42,6 +42,9 @@ if hasattr(config, 'API'):
 	from twisted.web.server import Site
 	from fb.api.core import fbapi
 
+	if 'security' not in config.APPLICATION['modules']:
+		log("Warning: You have the API enabled, but not the 'security' module!")
+
 	# Initialize the API
 	api = fbapi()
 
