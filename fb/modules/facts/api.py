@@ -24,6 +24,7 @@ class FactObj(dict):
 		self['created'] = str(row['created'])
 		self['factoids'] = row['factoids']
 		self['count'] = row['count']
+		self['triggers'] = row['triggers']
 		for factoid in self['factoids']:
 			factoid['created'] = str(factoid['created'])
 
