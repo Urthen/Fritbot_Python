@@ -81,7 +81,7 @@ class FactsModule:
 			if room is None:
 				reply = reply.replace('$someone', "someone", 1)
 			else:
-				reply = reply.replace('$someone', random.choice(room.roster), 1)
+				reply = reply.replace('$someone', random.choice(room.roster.values())['nick'], 1)
 
 		while '$inventory' in reply:
 			reply = reply.replace('$inventory', itemmodule.getPossession(), 1)

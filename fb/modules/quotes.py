@@ -51,7 +51,10 @@ def inRoster(name, room=None, special=None):
 		names.append((user['nick'], user))
 		names.append((user['resource'], user))
 
-	#print "Names Found!", names
+	for nick, user in room.roster.items():
+		names.append((nick, user.info))
+
+	#print names
 
 	results = []
 
@@ -206,6 +209,8 @@ class QuotesModule:
 				query = {"user.id": u[0]["_id"], "room": room.info["_id"], "body": {"$regex": text, '$options': 'i'}, "command": False}
 
 				quote = db.db.history.find_one(query, sort=[("date", DESCENDING)])
+				#print "query:", query
+				#print "quote:", quote
 
 				if quote:
 					if quote['user']['id'] == user['_id']:

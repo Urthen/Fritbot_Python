@@ -202,5 +202,7 @@ class IntentService(object):
         elif address is not None:
             room.send('Huh?')
 
+        return False
+
 service = IntentService()
 

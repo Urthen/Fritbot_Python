@@ -36,7 +36,17 @@ class JRoom(Room):
 
     @property
     def roster(self):
-        return self._room.roster.keys()
+        roster = {}
+        for nick, user in self._room.roster.items():
+            if hasattr(user, 'entity') and user.entity is not None:
+                ujid = user.entity
+                uid = user.entity.user
+            else:
+                ujid = user.jid
+                uid = user.jid.resource
+            u = db.getUser(JUser(ujid, uid, user.nick, self._interface))
+            roster[user.nick] = u
+        return roster
 
 class JUser(User):
     def __init__(self, jid, uid, nick, interface):
