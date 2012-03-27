@@ -10,15 +10,20 @@ class SimpleModule(APIResponse):
 		self.apichildren[name] = child
 		APIResponse.putChild(self, name, child)
 
-	def putSimpleChild(self, name, f):
-		self.putChild(name, SimpleChild(f))
-
 	@returnjson
 	def render(self, request):
 		return self.error(request, self.NOT_FOUND, "Valid API Module, but you must specify an actual function! Valid functions are: {0}".format(', '.join(self.apichildren.keys())))
 
-class SimpleChild(APIResponse):
+class SimpleFunction(APIResponse):
 	def __init__(self, f):
 		self.render = f
 		APIResponse.__init__(self)
+
+class SimpleData(APIResponse):
+	def __init__(self, data):
+		self.data = data
+	
+	@returnjson
+	def render_GET(self, request):
+		return self.data
 		

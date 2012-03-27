@@ -43,8 +43,9 @@ class APIWrapper(object):
 
 		self.preregistered = []
 
-	def registerModule(self, name):
-		module = SimpleModule()
+	def registerModule(self, name, module = None):
+		if module is None:
+			module = SimpleModule()
 		if self.root is None:
 			self.preregistered[name] = module
 		else:
