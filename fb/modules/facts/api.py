@@ -2,9 +2,10 @@ import zope.interface
 
 import fb.intent as intent
 from fb.modules.base import IModule
-from fb.db import db
+from fb.db import db, OID
 from fb.api.core import api
-from fb.api.util import returnjson
+from fb.api.util import APIResponse, APIError, returnjson
+from fb.api.simple import SimpleFunction, SimpleData
 
 class FactsAPIModule:
 	zope.interface.implements(IModule)
@@ -15,20 +16,45 @@ class FactsAPIModule:
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	def register(self, parent):
-		apimodule = api.registerModule('facts')
-		apimodule.putSimpleChild('list', self.apilist)
+		apimodule = api.registerModule('facts', FactsList())
+
+class FactObj(dict):
+	def __init__(self, row):
+		self['id'] = str(row['_id'])
+		self['created'] = str(row['created'])
+		self['factoids'] = row['factoids']
+		self['count'] = row['count']
+		for factoid in self['factoids']:
+			factoid['created'] = str(factoid['created'])
+
+class FactsList(APIResponse):
+
+	def getChild(self, name, request):
+		
+		if name is "":
+			return SimpleFunction(self.apilist)
+		else:
+			try:
+				factid = OID(name)
+			except:
+				return APIError(self.BAD_REQUEST, "That isn't a valid ID.")
+			
+			fact = db.facts.find_one({'_id': factid})
+			if fact is None:
+				return APIError(self.NOT_FOUND, "Fact doesn't exist.")
+				 
+			return FactItem(FactObj(fact))
 
 	@returnjson
 	def apilist(self, request):
 		factlist = []
-		for fact in db.facts.find({}, {'_id': 0}):
-			fact['created'] = str(fact['created'])
-			for factoid in fact['factoids']:
-				factoid['created'] = str(factoid['created'])
-
+		for row in db.facts.find({}).sort('count', -1):
+			fact = FactObj(row)
 			factlist.append(fact)
 
-		return {'facts': factlist}
-				
+		return {'facts': factlist}			
+
+class FactItem(SimpleData):
+	pass
 
 module = FactsAPIModule()
