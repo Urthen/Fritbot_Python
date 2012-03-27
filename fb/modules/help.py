@@ -26,9 +26,10 @@ class HelpModule:
 
 			modules[tagline].append("* {0}: {1} - {2}".format(command['name'], command['originals'], command['description']))
 
-		for module in modules:
+		for module in sorted(modules.keys()):
 			out.append(module)
-			for command in modules[module]:
+			commands = sorted(modules[module])
+			for command in commands:
 				out.append(command)
 			out.append("")
 
