@@ -123,8 +123,12 @@ class IntentService(object):
             try:
                 if fullname in sys.modules:
                     reload(sys.modules[fullname])
+                    if 'children' in sys.modules[fullname].__dict__.keys():
+                        for child in sys.modules[fullname].children:
+                            reload(child)
                 else:
                     __import__(fullname, globals(), locals(), [], -1)
+
             except:
                 log.msg("Error loading module:")
                 self._listeners = old_listeners
