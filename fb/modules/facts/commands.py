@@ -5,27 +5,21 @@ import zope.interface
 import fb.intent as intent
 from fb.modules.base import IModule, response
 from fb.db import db
-from fb.api.core import api
-from fb.api.util import returnjson
 
 try:
 	from fb.modules.items import module as itemmodule
 except ImportError:
-	raise ImportError, "Can't find the items module, which is required for the facts module!"
+	raise ImportError, "Can't find the items module, which is required for the facts commands module!"
 
-class FactsModule:
+class FactsCommandModule:
 	zope.interface.implements(IModule)
 
-
-	name="Facts"
-	description="Responds to other users' chats with super A+ userful factoids."
+	name="Facts Command Module"
+	description="Listener to respond to other users' chats with super A+ userful factoids."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
-		apimodule = api.registerModule('facts')
-		apimodule.putSimpleChild('list', self.apilist)
-
-		intent.service.registerListener("^.*$", self.checkfacts, self, "Fact Listener", "Listen for fact triggers and respond as appropriate")
+	def register(self, parent):
+		intent.service.registerListener("^.*$", self.checkfacts, parent, "Fact Listener", "Listen for fact triggers and respond as appropriate")
 		self.refresh()
 
 	def refresh(self):
@@ -99,17 +93,5 @@ class FactsModule:
 			
 		return True
 
-	@returnjson
-	def apilist(self, request):
-		factlist = []
-		for fact in db.facts.find({}, {'_id': 0}):
-			fact['created'] = str(fact['created'])
-			for factoid in fact['factoids']:
-				factoid['created'] = str(factoid['created'])
 
-			factlist.append(fact)
-
-		return {'facts': factlist}
-				
-
-module = FactsModule()
+module = FactsCommandModule()
