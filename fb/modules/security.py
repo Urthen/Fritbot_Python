@@ -25,12 +25,14 @@ class SecurityModule:
 		if len(args) == 0:
 			return "You've got to specify what login token you want to allow."
 
+		print args[0], user
+
 		result = security.tokenLogin(args[0], user)
 
 		if result is None:
 			return "That key appears to be valid, but the requestor is no longer listening. You may have closed a web page. Since these are one-use keys, you must request a new key. and attempt to authorize again."
 		elif result is False:
-			return "That doesn't seem to be a valid token, sorry!"
+			return "That doesn't seem to be a valid token, lol!"
 		else:
 			return """Token accepted for application '{0}'. This application has been provided an API key and will now be able to issue commands to Fritbot as if they were you.\n
 If this is not what you meant to do, or you wish to later on revoke access to this application, type 'revoke "{0}"'.\n
@@ -40,8 +42,8 @@ To see all keys you currently have approved, type 'list keys'.""".format(result)
 	def authorizations(self, bot, room, user, args):
 		if 'authorizations' in user.info and len(user['authorizations']) > 0:
 			out = ['Below are the applications that you have granted access to.']
-			for key, data in user['authorizations'].items():
-				out.append('<{0}> granted {1}'.format(key, data['date'].strftime("%H:%M %D")))
+			for data in user['authorizations']:
+				out.append('<{0}> granted {1}'.format(data['app'], data['date'].strftime("%H:%M %D")))
 			return '\n'.join(out)
 		else:
 			return "You don't have any applications authorized to use Fritbot as you."

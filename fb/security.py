@@ -32,9 +32,9 @@ def tokenLogin(token, user):
 				callback(user, key)
 
 			if 'authorizations' not in user.info:
-				user['authorizations'] = {}
+				user['authorizations'] = []
 			application = _tokens[token]['application']
-			user['authorizations'][application] = {'key': key, 'date': datetime.datetime.now()}
+			user['authorizations'].append({'app': application, 'key': key, 'date': datetime.datetime.now()})
 			user.save()
 
 			log.msg("Login succeded with token %s to user %s, provided API key %s" % (token, user.uid, key))
@@ -45,7 +45,7 @@ def tokenLogin(token, user):
 			del _tokens[token]
 			return None
 	else:
-		log.msg("User %s attempted to login with invalid or expired token, %s" % (user.uid, token))
+		print("User %s attempted to login with invalid or expired token, %s" % (user.uid, token))
 		return False
 
 def cancelLogin(token):
@@ -56,10 +56,33 @@ def cancelLogin(token):
 		log.msg("Login token %s revoked due to timeout or cancellation" % token)
 		del _tokens[token]
 
-def revokeKey(user, application):
-	if application in user['authorizations']:
-		del user['authorizations'][application]
-		user.save()
-		return True
-	else:
-		return False
+def revokeKey(user, application=None, key=None):
+	newauths = user['authorizations']
+	removed = False
+	for k in user['authorizations']:	
+		if k['key'] != key and k['app'] != application:
+			newauths.append(k)
+		else:
+			removed = True
+	user['authorizations'] = newauths
+	user.save()
+	return removed
+
+def getKeyInfo(key):
+	user = db.db.users.find_one({'authorizations.key': key})
+	if user is None:
+		return None
+
+	data = None
+	for k in user['authorizations']:	
+		if k['key'] == key:
+			data = k
+			break
+
+	output = {'nick': user['nick'],
+		'date': str(data['date']),
+		'userid': user['resource'],
+		'app': data['app']
+	}
+
+	return output

@@ -23,7 +23,7 @@ class FactsCommandModule:
 		self.refresh()
 
 	def refresh(self):
-		triggers = db.facts.find({}, {'triggers': 1})
+		triggers = db.facts.find({'$or': [{'removed': False}, {'removed': {'$exists': False}}]}, {'triggers': 1})
 		self.trigger_cache = {}
 
 		for triggerset in triggers:

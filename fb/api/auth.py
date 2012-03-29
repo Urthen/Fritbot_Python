@@ -13,6 +13,7 @@ class Retriever(APIResponse):
 		APIResponse.__init__(self)
 		self.putChild('request', KeyRequest())
 		self.putChild('response', KeyListener())
+		self.putChild('info', KeyInfo())
 
 	@returnjson
 	def render(self, request):
@@ -48,3 +49,15 @@ class KeyListener(APIResponse):
 				self.request = request
 				return NOT_DONE_YET
 		return self.error(request, self.NOT_FOUND, "Token not specified, not recognized, or expired.")
+
+class KeyInfo(APIResponse):
+	isLeaf=True
+
+	@returnjson
+	def render_GET(self, request):
+		print request.postpath
+		if len(request.postpath) == 1:
+			data = security.getKeyInfo(request.postpath[0])
+			if data is not None:
+				return data
+		return self.error(request, self.NOT_FOUND, "Key not specified, not recognized, or expired.")

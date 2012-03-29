@@ -6,6 +6,9 @@ from fb.db import db, OID
 from fb.api.core import api
 from fb.api.util import APIResponse, APIError, returnjson
 from fb.api.simple import SimpleFunction, SimpleData
+from fb import security
+
+from fb.modules.facts import commands
 
 class FactsAPIModule:
 	zope.interface.implements(IModule)
@@ -20,11 +23,16 @@ class FactsAPIModule:
 
 class FactObj(dict):
 	def __init__(self, row):
+		self.row = row
 		self['id'] = str(row['_id'])
 		self['created'] = str(row['created'])
 		self['factoids'] = row['factoids']
 		self['count'] = row['count']
 		self['triggers'] = row['triggers']
+		if 'removed' in row:
+			self['removed'] = row['removed']
+		else:
+			self['removed'] = False
 		for factoid in self['factoids']:
 			factoid['created'] = str(factoid['created'])
 
@@ -56,6 +64,20 @@ class FactsList(APIResponse):
 		return {'facts': factlist}			
 
 class FactItem(SimpleData):
-	pass
+	
+	@returnjson
+	def render_DELETE(self, request):
+		if 'key' in request.args:
+			data = security.getKeyInfo(request.args['key'][0])
+			if data is not None:
+				self.data.row['removed'] = data['userid']
+				db.facts.update({'_id': OID(self.data['id'])}, self.data.row)
+				commands.module.refresh()
+				return FactObj(self.data.row)
+
+		return self.error(request, self.UNAUTHORIZED)
+		
+
+		
 
 module = FactsAPIModule()
