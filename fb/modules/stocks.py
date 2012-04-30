@@ -30,6 +30,7 @@ class StocksModule:
 		stock_results = stock_response.read()
 		if len(stock_results) > 0:
 			stock_results = stock_results[3:]
+			stock_results = stock_results.replace('\\x26','&')
 			results = json.loads(stock_results)
 			msg = 'Stock Prices for ' + query + '\n'
 			for data in results:
@@ -37,7 +38,6 @@ class StocksModule:
 				msg += data['name'] + ' Yesterday Close: $' + closed + ' Today Open: $' + data['op'] + ' and is currently at  $' + data["l"] + ' (' + data["cp"] + '% from Close)\n'
 		else:
 			msg = 'No stocks found for ' + query
-		
 		return msg.strip()
 		
 	@response
