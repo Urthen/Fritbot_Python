@@ -62,7 +62,7 @@ class TwitterModule:
 				msg = "Slow your roll {0}, Twitter doesn't have anything new yet.".format(user['nick'])
 			else:
 				msg = "Sorry, {0}, Twitter doesn't know what you are talking about.".format(user['nick'])
-		return msg
+		return "I'm sorry {0}, I'm afraid I can't do that.".format(user['nick'])
 
 	@response
 	def twitterClear(self, bot, room, user, args):
