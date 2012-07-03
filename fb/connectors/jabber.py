@@ -66,6 +66,9 @@ class JabberConnector(muc.MUCClient):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
         log.msg("Initializing Jabber connection...")
 
+        self._User = JUser;
+        self._Room = JRoom;
+
         try:
             import OpenSSL
         except:
@@ -110,7 +113,7 @@ class JabberConnector(muc.MUCClient):
             log.msg("New room created: " + room.roomJID.user)
             config_form = yield self.getConfiguration(room.roomJID)
             # set config default
-            config_result = yield self.configure(room.roomJID)  
+            config_result = yield self.configure(room.roomJID, None)  
         FritBot.bot.initRoom(r)
         
     def joinRoom(self, room, nick):
@@ -126,7 +129,19 @@ class JabberConnector(muc.MUCClient):
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to user and nickname information.
     -----------------------------------------------------------------------------------------------------------------------------------------'''
-        
+    
+    def getUser(self, uid):
+        if '@' in uid:
+            ujid = uid
+            uid = ujid.split('@')[0]
+        else:
+            ujid = "{0}@{1}".format(uid, config.JABBER['server'])
+
+        ujid = jid.internJID(ujid)
+        user = JUser(ujid, uid, uid, self)
+        user.refresh()
+        return user
+
     def userJoinedRoom(self, room, user):
         '''Called when a user joins a room'''
         self.userUpdatedStatus(room, user, None, None)
@@ -140,6 +155,7 @@ class JabberConnector(muc.MUCClient):
         else:
             ujid = user.jid
             uid = user.jid.resource
+        print "creating user with", ujid, uid, user.nick, self
         u = db.getUser(JUser(ujid, uid, user.nick, self))
         if hasattr(room, 'info'):
             r = room.info

@@ -13,6 +13,8 @@ from wokkel.client import XMPPClient
 from fb.audit import log
 from fb.connectors.jabber import JabberConnector
 from fb.fritbot import bot
+import fb
+print fb.__dict__.keys()
 import config
 
 try:
@@ -38,6 +40,7 @@ bot.registerConnector(connection)
 connection.setHandlerParent(xmppclient)
 xmppclient.setServiceParent(application)
 
+
 if hasattr(config, 'API'):
 	from fb.api.core import api
-	api.launch(application)
+	api.launch(bot, application)

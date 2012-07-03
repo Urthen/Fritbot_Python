@@ -174,7 +174,7 @@ class User(Route):
         mdbUser= db.db.users.find_one({"resource": self.uid})
 
         if mdbUser is None:
-            log.msg("Not found, creating new user in DB.")
+            log.msg("{0} not found, creating new user in DB.".format(self.uid))
             mdbUser = {
                 "resource": self.uid,
                 "nick": self['nick']
@@ -218,3 +218,6 @@ class IConnector(zope.interface.Interface):
 
     def leaveRoom(self, room, nick):
         """Tells the connector to leave a given room/channel/etc."""
+
+    def getUser(self, uid):
+        """Retrieves a user from the connector as appropriate per the protocol in use"""

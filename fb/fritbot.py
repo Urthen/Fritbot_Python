@@ -83,6 +83,15 @@ class FritBot(object):
         del self.rooms[room.uid]
 
 
+    def getRoom(self, uid):
+        if uid in self.rooms:
+            return self.rooms[uid]
+        else:
+            return None
+
+    def getUser(self, uid):
+        return self._connection.getUser(uid)
+
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions directly relate to sending and recieving messages.
     -----------------------------------------------------------------------------------------------------------------------------------------'''
