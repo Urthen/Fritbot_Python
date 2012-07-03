@@ -27,6 +27,7 @@ class APIMessageModule(APIResponse):
 				return self.error(request, self.UNAUTHORIZED)
 		else:
 			return self.error(request, self.UNAUTHORIZED)
+
 		if not 'id' in request.args:
 			return self.error(request, 400, "Room id not specified.")
 		if not 'message' in request.args:
@@ -42,6 +43,13 @@ class APIMessageModule(APIResponse):
 
 	@returnjson
 	def user_message(self, request):
+		if 'key' in request.args:
+			data = security.getKeyInfo(request.args['key'][0])
+			if data is None:
+				return self.error(request, self.UNAUTHORIZED)
+		else:
+			return self.error(request, self.UNAUTHORIZED)
+
 		if not 'id' in request.args:
 			return self.error(request, 400, "User id not specified.")
 		if not 'message' in request.args:

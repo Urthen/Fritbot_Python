@@ -32,7 +32,7 @@ class SecurityModule:
 		if result is None:
 			return "That key appears to be valid, but the requestor is no longer listening. You may have closed a web page. Since these are one-use keys, you must request a new key. and attempt to authorize again."
 		elif result is False:
-			return "That doesn't seem to be a valid token, lol!"
+			return "That doesn't seem to be a valid token!"
 		else:
 			return """Token accepted for application '{0}'. This application has been provided an API key and will now be able to issue commands to Fritbot as if they were you.\n
 If this is not what you meant to do, or you wish to later on revoke access to this application, type 'revoke "{0}"'.\n
