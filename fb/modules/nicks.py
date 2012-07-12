@@ -32,10 +32,10 @@ class NicknameModule:
 		logstatement = "Changed nick from {0} to {1}".format(room['nick'], newnick)
 		log.msg(logstatement)
 		try:
-			room['nick'] = newnick
 			room.setNick(newnick)
 			return "Behold! By the power of {0}, I am now {1}!".format(user['nick'], newnick)
-		except:
+		except Exception as e:
+			log.msg(e)
 			return "Something went haywire, there's probably already someone by that name!"
 
 	@base.room_only
