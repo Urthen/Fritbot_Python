@@ -51,8 +51,9 @@ def inRoster(name, room=None, special=None):
 		names.append((user['nick'], user))
 		names.append((user['resource'], user))
 
-	for nick, user in room.roster.items():
-		names.append((nick, user.info))
+	if room is not None:
+		for nick, user in room.roster.items():
+			names.append((nick, user.info))
 
 	#print names
 
@@ -156,7 +157,7 @@ def sayQuotes(room, user, nick, segment, min=1, max=1):
 		quotes = getSubset(quotes, min, max)
 		lines = []
 		for quote in quotes:
-			lines.append("<{0}>: {1}".format(quote['user']['nick'], quote['body']))
+			lines.append(u"<{0}>: {1}".format(quote['user']['nick'], quote['body']))
 		msg = '\n'.join(lines)
 
 	return msg
@@ -206,21 +207,22 @@ class QuotesModule:
 			text = " ".join(args[1:])
 
 			for u in tuser:
-				query = {"user.id": u[0]["_id"], "room": room.info["_id"], "body": {"$regex": text, '$options': 'i'}, "command": False}
+				query = {"user.id": u[0]["_id"], "room": room.info["_id"], "body": {"$regex": text, '$options': 'i'}, 
+					"command": False, 'date': {'$gt': datetime.datetime.now() - datetime.timedelta(hours=3)}}
 
 				quote = db.db.history.find_one(query, sort=[("date", DESCENDING)])
-				#print "query:", query
+				print "query:", query
 				#print "quote:", quote
 
 				if quote:
 					if quote['user']['id'] == user['_id']:
 						return "Sorry, {0}, but you can't quote yourself! Try saying someone funnier and maybe someone else will remember you.".format(user['nick'])
 					if "remembered" in quote:
-						return "Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"])
+						return u"Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"])
 					else:
 						quote["remembered"] = {"user": user["_id"], "nick": user["nick"], "time": datetime.datetime.now()}
 						db.db.history.save(quote)
-						return "Ok, {0}, remembering <{1}>: {2}".format(user["nick"], quote['user']['nick'], quote["body"])
+						return u"Ok, {0}, remembering <{1}>: {2}".format(user["nick"], quote['user']['nick'], quote["body"])
 
 			return "Sorry, {0}, I haven't heard anything like '{1}' by anyone named {2}.".format(user["nick"], text, args[0])
 

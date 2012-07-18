@@ -6,8 +6,8 @@ import fb.intent as intent
 from fb.modules.base import IModule, response
 from fb.db import db
 
-min_repeat = 300
-max_repeat = 600
+min_repeat = datetime.timedelta(minutes=5)
+max_repeat = datetime.timedelta(minutes=10)
 
 try:
 	from fb.modules.items import module as itemmodule
@@ -54,11 +54,11 @@ class FactsCommandModule:
 					fact = db.facts.find_one({'_id': factid})
 					match = trigger['rex'].match(body)
 					if trigger['triggered'] is not None and (match is None or match.group() != body):
-						delta = (datetime.datetime.now() - trigger['triggered']).total_seconds()
+						delta = datetime.datetime.now() - trigger['triggered']
 						if delta < min_repeat:
 							print "Would have spouted fact {0} but was too soon (absolute)".format(str(fact['triggers']))
 							continue
-						elif (delta - min_repeat) > random.randrange(1, max_repeat - min_repeat):
+						elif (delta - min_repeat) > datetime.timedelta(seconds=random.randrange(1, (max_repeat - min_repeat).seconds)):
 							print "Would have spouted fact {0} but was too soon (random)".format(str(fact['triggers']))
 							continue
 

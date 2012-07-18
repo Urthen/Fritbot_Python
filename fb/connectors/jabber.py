@@ -156,7 +156,6 @@ class JabberConnector(muc.MUCClient):
         else:
             ujid = user.jid
             uid = user.jid.resource
-        print "creating user with", ujid, uid, user.nick, self
         u = db.getUser(JUser(ujid, uid, user.nick, self))
         if hasattr(room, 'info'):
             r = room.info
