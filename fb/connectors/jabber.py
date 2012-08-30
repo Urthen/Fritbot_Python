@@ -30,6 +30,7 @@ class JRoom(Room):
 
     def setNick(self, nick):
         self._interface.nick(self._room.occupantJID.userhostJID(), nick)
+        Room.setNick(self, nick)
 
     def setTopic(self, topic):
         self._interface.subject(self._room.occupantJID.userhostJID(), topic)
@@ -155,7 +156,6 @@ class JabberConnector(muc.MUCClient):
         else:
             ujid = user.jid
             uid = user.jid.resource
-        print "creating user with", ujid, uid, user.nick, self
         u = db.getUser(JUser(ujid, uid, user.nick, self))
         if hasattr(room, 'info'):
             r = room.info

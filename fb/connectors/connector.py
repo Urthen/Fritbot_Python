@@ -133,7 +133,7 @@ class Room(Route):
         self.info = mdbRoom
 
     def setNick(self, nick):
-        raise NotImplementedError("setNick() must be implemented by a sub-class.")
+        self['nick'] = nick
 
     def setTopic(self, topic):
         raise NotImplementedError("setTopic() must be implemented by a sub-class.")

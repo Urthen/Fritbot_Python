@@ -2,6 +2,7 @@
 ###################
 *.pyc
 *.pid
+*.iml
 bv*.py
 config.py
 db

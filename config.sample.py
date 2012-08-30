@@ -3,7 +3,7 @@
 
 # Twistd application settings
 APPLICATION = {
-    "name": "fritbot"
+    "name": "fritbot",
     "modules": ['core', 'weather', 'google', 'nicks']
 }
 
