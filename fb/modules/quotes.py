@@ -172,6 +172,7 @@ class QuotesModule:
 		intent.service.registerCommand("quote", self.quote, self, "Name", "Recalls a random quote, optionally from a specific person and/or containing specific text.")
 		intent.service.registerCommand("quotemash", self.quotemash, self, "Name", "Recalls 3-6 random quotes, optionally from a specific person or containing specific text.")
 		intent.service.registerCommand("remember", self.remember, self, "Remember", "Remembers a quotation with 'remember \"nickname\" \"quote to remember\"'")
+		intent.service.registerCommand("quotestats", self.quotestats, self, "Statistics", "Responds with statistics about users' quotes and remembers.")
 
 	@response
 	def quote(self, bot, room, user, args):
@@ -228,5 +229,14 @@ class QuotesModule:
 			return "Hrm, the name {0} doesn't ring any bells.".format(args[0])
 		else:
 			return "Sorry, {0} isn't unique enough. Too many users matched!".format(args[0])
+
+	@response
+	def quotestats(self, bot, room, user, args):
+		quotes_query = {"user.id": user["_id"], 'remembered': {'$exists': True}}	
+		quotes = db.db.history.find(quotes_query).count()
+		remembered_query = {"remembered.user": user["_id"]}
+		remembered = db.db.history.find(remembered_query).count()
+
+		return "{0} was quoted {1} times and has remembered {2} quotes.".format(user['nick'], quotes, remembered)
 
 module = QuotesModule()
