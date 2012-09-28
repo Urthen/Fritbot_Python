@@ -1,7 +1,7 @@
 from twisted.python import log
 
 
-from twisted.web.error import NoResource
+from twisted.web.resource import NoResource
 
 from fb import db
 from fb.api.util import returnjson, APIResponse

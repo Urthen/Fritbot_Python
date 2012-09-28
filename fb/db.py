@@ -7,7 +7,7 @@ import datetime
 from twisted.python import log
 import pymongo
 from pymongo import Connection, errors as PyMongoErrors
-from pymongo.objectid import ObjectId
+from bson.objectid import ObjectId
 
 import config
 

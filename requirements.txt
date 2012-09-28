@@ -1,0 +1,6 @@
+Twisted==12.2.0
+pyOpenSSL==0.13
+pymongo==2.3
+python-dateutil==2.1
+six==1.2.0
+zope.interface==4.0.1
