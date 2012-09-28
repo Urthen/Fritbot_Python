@@ -52,13 +52,15 @@ def user_only(f):
 
 	return roomcheck
 
-def ratelimit(rate):	
+def ratelimit(rate, message=None, passthrough=True):	
 	def ratelimitgen(f):
 		name = f.__name__
 		def ratelimited(self, bot, room, user, args):
 			if room and name in room.ratelimit and room.ratelimit[name] > datetime.now():
 				log.msg("Almost executed {0} in {1} but it was too soon.".format(name, room))
-				return
+				if message:
+					user.send(message)
+				return not passthrough
 			else:
 				room.ratelimit[name] = datetime.now() + timedelta(seconds=rate)
 				log.msg("Won't execute {0} again until {1}.".format(name, room.ratelimit[name]))
@@ -66,6 +68,17 @@ def ratelimit(rate):
 
 		return ratelimited
 	return ratelimitgen
+
+def require_auth(permission, message=None, passthrough=True):
+	def reqauthgen(f):
+		def authrequired(self, bot, room, user, args):
+			if room is None or room.allowed(permission):
+				return f(self, bot, room, user, args)
+			elif message:
+				user.send(message.format(room['name']))			
+			return not passthrough
+		return authrequired
+	return reqauthgen
 
 class IModule(zope.interface.Interface):
 	

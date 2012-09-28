@@ -5,7 +5,7 @@ from twisted.internet import reactor
 import zope.interface
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import IModule, ratelimit, require_auth, response
 
 from fb.db import db
 
@@ -19,8 +19,6 @@ class MarkovModule:
 	punc = re.compile("[,\.!\?-_:;]( +|$)")
 
 	END = "__end__"
-
-	maximum = 1
 
 	def register(self):
 		intent.service.registerCommand("babble", self.babble, self, "Babble", "Say a randomly generated phrase.")
@@ -80,14 +78,10 @@ class MarkovModule:
 		else:
 			user.send(string.lstrip())
 
-		self.stacked -= 1
-
+	@require_auth('stupid', "I can't babble here!", False)
+	@ratelimit(4, "Slow your roll! I need time for my creative genius!", False)
 	def babble(self, bot, room, user, args):
-		if self.stacked > 1:
-			user.send("One is more than enough for me to generate at one time, thanks.")
-		else:	
-			self.stacked += 1
-			reactor.callLater(0, self.doMarkov, room, user)
+		reactor.callLater(0, self.doMarkov, room, user)
 		return True
 
 module = MarkovModule()

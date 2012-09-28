@@ -26,8 +26,6 @@ log.start(application)
 
 # Set up Fritbot chat instance
 
-
-
 if hasattr(config, 'API'):
 	from fb.api.core import api
 	api.launch(application)

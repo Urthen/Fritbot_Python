@@ -8,7 +8,7 @@ from pymongo import ASCENDING, DESCENDING
 from fb.db import db
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import IModule, require_auth, response
 
 MULT_EXACT = 1.0
 MULT_CASE_WRONG = 0.9
