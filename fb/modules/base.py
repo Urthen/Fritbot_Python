@@ -1,4 +1,5 @@
 from twisted.python import log
+from datetime import datetime, timedelta
 import zope.interface
  	
 def response(f):
@@ -50,6 +51,21 @@ def user_only(f):
 			return True
 
 	return roomcheck
+
+def ratelimit(rate):	
+	def ratelimitgen(f):
+		name = f.__name__
+		def ratelimited(self, bot, room, user, args):
+			if room and name in room.ratelimit and room.ratelimit[name] > datetime.now():
+				log.msg("Almost executed {0} in {1} but it was too soon.".format(name, room))
+				return
+			else:
+				room.ratelimit[name] = datetime.now() + timedelta(seconds=rate)
+				log.msg("Won't execute {0} again until {1}.".format(name, room.ratelimit[name]))
+				return f(self, bot, room, user, args)
+
+		return ratelimited
+	return ratelimitgen
 
 class IModule(zope.interface.Interface):
 	

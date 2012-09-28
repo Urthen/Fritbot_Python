@@ -1,7 +1,8 @@
+from twisted.python import log
 import zope.interface
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import IModule, ratelimit, response
 
 class StupidModule:
 	zope.interface.implements(IModule)
@@ -11,10 +12,10 @@ class StupidModule:
 	author="Tom Grochowicz (tom.grochowicz@bazaarvoice.com)"
 
 	def register(self):
-
 		intent.service.registerListener(r"\bex\w*\b", self.sex, self, "Extra sex", "Someone said something sexy.")
 
-	@response
+	@response	
+	@ratelimit(30)
 	def sex(self, bot, room, user, args):
 		if not room.allowed('stupid'):
 			return False

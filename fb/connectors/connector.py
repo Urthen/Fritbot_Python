@@ -27,6 +27,8 @@ class Route(object):
     '''When was this route last refreshed?'''
 
     active = False
+
+    ratelimit = {}
     
     def __getitem__(self, key):
         '''Getter for contained MongoDB info object. Returns None if key is not found.'''
