@@ -3,4 +3,6 @@ pyOpenSSL==0.13
 pymongo==2.3
 python-dateutil==2.1
 six==1.2.0
+wokkel==0.7.0
+wsgiref==0.1.2
 zope.interface==4.0.1
