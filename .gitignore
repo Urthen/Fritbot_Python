@@ -7,6 +7,11 @@ bv*.py
 config.py
 db
 twisted_env
+backup*
+build
+distribute*
+get-pip.py
+pip-log.txt
 
 # Ignore Logs #
 ###############

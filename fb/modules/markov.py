@@ -19,6 +19,8 @@ class MarkovModule:
 	punc = re.compile("[,\.!\?-_:;]( +|$)")
 
 	END = "__end__"
+	
+	maximum = 1
 
 	def register(self):
 		intent.service.registerCommand("babble", self.babble, self, "Babble", "Say a randomly generated phrase.")
