@@ -62,5 +62,3 @@ for wordFrom in stats:
 	done += 1
 	if done % 2500 == 0:
 		print "{0}/{1}".format(done, len(stats))
-
-print doc

@@ -9,7 +9,7 @@ FritBot is a bot designed, in theory, to be a largely service-independent, modul
 Installation & Setup
 --------------------
 
-Prerequisites: Before starting, you should have installed virtualenv and virtualenvwrapper with `pip install virtualenv virtualenvwrapper` if you don't have them already. Additionally,
+Prerequisites: Before starting, you should have installed virtualenv and virtualenvwrapper with `pip install virtualenv virtualenvwrapper` if you don't have them already. They are awesome and you will love them. Additionally,
 you should install mongodb (v1.6+ required, 2.2+ preferred) as platform appropriate.
 
 1. Fork this repo so you can make your own changes / additions.
