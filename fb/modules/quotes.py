@@ -200,7 +200,7 @@ class QuotesModule:
 			min = 3
 			max = 6
 
-		return sayQuotes(room, user, nick, "poop", min, max)
+		return sayQuotes(room, user, nick, "p[o]{2,}p", min, max)
 
 	@response
 	def remember(self, bot, room, user, args):
