@@ -175,7 +175,8 @@ class QuotesModule:
 		intent.service.registerCommand("remember", self.remember, self, "Remember", "Remembers a quotation with 'remember \"nickname\" \"quote to remember\"'")
 		intent.service.registerCommand("quotestats", self.quotestats, self, "Statistics", "Responds with statistics about users' quotes and remembers.")
 		intent.service.registerCommand("poopmash", self.poopmash, self, "Name", "Recalls 3-6 random quotes about poop, optionally from a specific person.")
-        intent.service.registerCommand("choadmash", self.choadmash, self, "Name", "Recalls 3-6 random quotes about choads, optionally from a specific person.")
+		intent.service.registerCommand("choadmash", self.choadmash, self, "Name", "Recalls 3-6 random quotes about choads, optionally from a specific person.")
+
 	@response
 	def quote(self, bot, room, user, args):
 		nick, segment, min, max = parseQuoteArgs(args, room)
@@ -237,6 +238,8 @@ class QuotesModule:
 				if quote:
 					if quote['user']['id'] == user['_id']:
 						return "Sorry, {0}, but you can't quote yourself! Try saying someone funnier and maybe someone else will remember you.".format(user['nick'])
+					if quote['echo'] == True:
+						return "Oh no! I have amnesia! I can't remember anything I've said!"
 					if "remembered" in quote:
 						return u"Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"])
 					else:
