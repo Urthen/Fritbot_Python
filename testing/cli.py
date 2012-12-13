@@ -35,7 +35,7 @@ class RepairTool(cmd.Cmd):
 		"""Scans for abandonded nicknames (those without ID)"""
 		print "Scanning"
 		self.nicks = {}
-		results = db.history.find({'user.id': {'$exists': False}}, {'user.nick'})
+		results = db.history.find({'user.id': {'$exists': False}}, {'user.nick': 1})
 		for result in results:
 			nick = result['user']['nick']
 			self.nicks[nick] = None

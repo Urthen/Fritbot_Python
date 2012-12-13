@@ -92,6 +92,10 @@ class Database(object):
             self._userCache[user.uid] = user
         user.refresh()
 
-        return user  
+        return user
+        
+    def select_alt(self):
+        config.select_alt(config)
+        self._db = self._connection[config.DB['name']]
 
 db = Database()
