@@ -238,7 +238,7 @@ class QuotesModule:
 				if quote:
 					if quote['user']['id'] == user['_id']:
 						return "Sorry, {0}, but you can't quote yourself! Try saying someone funnier and maybe someone else will remember you.".format(user['nick'])
-					if quote['echo'] == True:
+					if "echo" in quote and quote['echo'] == True:
 						return "Oh no! I have amnesia! I can't remember anything I've said!"
 					if "remembered" in quote:
 						return u"Sorry, {0}, I already knew about <{1}>: {2}".format(user["nick"], quote['user']["nick"], quote["body"])

@@ -96,14 +96,15 @@ class FritBot(object):
     The following functions directly relate to sending and recieving messages.
     -----------------------------------------------------------------------------------------------------------------------------------------'''
 
-    def addHistory(self, room, user, nick, body, command = False):
+    def addHistory(self, room, user, nick, body, command = False, echo = False):
         history = {
             "body": body,
             "user": {
                 "nick": nick,
                 "id": user["_id"]},
             "date": datetime.datetime.now(),
-            "command": command
+            "command": command,
+            "echo": echo
         }
         if room is not None:
             history['room'] = room['_id']
