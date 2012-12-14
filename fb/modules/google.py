@@ -42,21 +42,21 @@ class GoogleSearchModule:
 				msg = ''
 				num = 1
 				for result in data['results']:
-					msg += "{0}: {1} - {2}\n".format(str(num), result['titleNoFormatting'], result['url'])
+					msg += u"{0}: {1} - {2}\n".format(str(num), result['titleNoFormatting'], result['url'])
 					num += 1
 
-				msg += "For more results, see %s" % data['cursor']['moreResultsUrl']
+				msg += u"For more results, see %s" % data['cursor']['moreResultsUrl']
 			else:
-				msg = "{0} - {1}\n".format(data['results'][0]['titleNoFormatting'], data['results'][0]['url'])
+				msg = u"{0} - {1}\n".format(data['results'][0]['titleNoFormatting'], data['results'][0]['url'])
 		else:
-			msg = "Sorry, {0}, Google doesn't seem to know anything about that.".format(user['nick'])
+			msg = u"Sorry, {0}, Google doesn't seem to know anything about that.".format(user['nick'])
 		return msg
 
 	@response
 	def youtube(self, bot, room, user, args):
 		if not self.gdata_supported:
 			import config
-			return "Google data API not installed, contact your {0} admin.".format(config.CONFIG['name'])
+			return u"Google data API not installed, contact your {0} admin.".format(config.CONFIG['name'])
 
 		if args[0] == "more":
 			more = True
