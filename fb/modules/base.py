@@ -23,7 +23,7 @@ def response(f):
 
 def admin(f):
 	def admincheck(self, bot, room, user, args):
-		if user['admin']:
+		if user.admin:
 			return f(self, bot, room, user, args)
 		else:
 			log.msg("User {0} ({1}) attempted to run a function without authorization.".format(user['nick'], user.uid))

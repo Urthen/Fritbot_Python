@@ -131,6 +131,9 @@ class FactsCommandModule:
 		trigger = args[0]
 		factoid = args[1]
 
+		if len(trigger) < 4:
+			return "Trigger word must be longer than that, jerkwad."
+
 		fact = db.facts.find_one({"triggers": trigger})
 
 		if fact is not None:

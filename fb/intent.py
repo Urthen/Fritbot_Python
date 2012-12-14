@@ -162,6 +162,10 @@ class IntentService(object):
         
         #Check to see if this is a command
         if address is not None or room is None:
+            if user.banned and not user.admin:
+                user.send("You've lost your bot privledges, reason: " + user["banned"])
+                return True
+
             words = cutString(body)
 
             for command in self._commands:
@@ -192,6 +196,9 @@ class IntentService(object):
                                     return True
 
         if room is None or (room is not None and room.squelched == False):
+            if user.banned:
+                return False
+
             for listener in self._listeners:
                 for rex in listener['patterns']:
                     match = rex.search(cleanString(body))

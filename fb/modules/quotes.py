@@ -1,5 +1,4 @@
 import random, re, datetime
-from operator import itemgetter
 
 import zope.interface
 
@@ -9,12 +8,8 @@ from fb.db import db
 
 import fb.intent as intent
 from fb.modules.base import IModule, require_auth, response
+from fb.modules.util import getUser
 
-MULT_EXACT = 1.0
-MULT_CASE_WRONG = 0.9
-MULT_PART_WORD = 0.8
-MULT_PART_FIRST = 0.6
-MULT_PART_OTHER = 0.4
 
 def getRandom(cursor):
 	count = cursor.count()
@@ -35,54 +30,6 @@ def getSubset(cursor, min, max=None):
 		out.append(cursor[subset.pop(random.randrange(0, len(subset)))])
 
 	return out
-
-def inRoster(name, room=None, special=None):
-
-	if special=="quotes":
-		query = {'user.nick': {'$regex': name, '$options': 'i'}}
-		quotes = db.db.history.find(query)
-		if quotes.count() > 0:
-			return True
-
-	names = []
-
-	users = db.db.users.find()
-	for user in users:
-		names.append((user['nick'], user))
-		names.append((user['resource'], user))
-
-	if room is not None:
-		for nick, user in room.roster.items():
-			names.append((nick, user.info))
-
-	#print names
-
-	results = []
-
-	def compare(search, result):
-		if search == result:
-			return MULT_EXACT
-		if result[:len(search)] == search:
-			return MULT_PART_FIRST
-		else:
-			return MULT_PART_OTHER
-
-	for item in names:
-		v = 0
-		n = item[0]
-		if name in n:
-			#print name, "in", n
-			v = compare(name, n)
-		elif name.lower() in n.lower():
-			#print name, "lower in", n
-			v = compare(name.lower(), n.lower()) * MULT_CASE_WRONG
-		if v > 0:
-			results.append((item[1], v))
-
-	if len(results) > 0:
-		return sorted(results, key=itemgetter(1), reverse=True)
-	else:
-		return False
 
 def parseQuoteArgs(args, room):
 	user = None
@@ -111,7 +58,7 @@ def parseQuoteArgs(args, room):
 
 	if len(args) > 0:
 		if args[0] not in ['anyone', 'anybody', 'all', '*', '%']:
-			tuser = inRoster(args[0], room, special="quotes")
+			tuser = getUser(args[0], room, special="quotes")
 			if tuser:
 				user = args[0]
 				args = args[1:]
@@ -133,7 +80,7 @@ def sayQuotes(room, user, nick, segment, min=1, max=1):
 	query = {'remembered': {'$exists': True}}
 	if nick is not None:
 		nickq = {'user.nick': {'$regex': nick, '$options': 'i'}}
-		ids = inRoster(nick)
+		ids = getUser(nick)
 		if ids:
 			idq = {'user.id': {'$in': map(lambda x: x[0]['_id'], ids)}}
 			query['$or'] = [nickq, idq]
@@ -221,7 +168,7 @@ class QuotesModule:
 		if len(args) == 0:
 			return "Remember what, exactly?"
 
-		tuser = inRoster(args[0], room)
+		tuser = getUser(args[0], room)
 
 		#print "tuser:", tuser
 		if tuser and len(tuser) >= 1:

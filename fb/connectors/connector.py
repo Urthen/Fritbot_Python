@@ -185,6 +185,14 @@ class User(Route):
             db.db.users.insert(mdbUser)
 
         self.info = mdbUser
+
+    @property
+    def banned(self):
+        return self.info.get("banned", False)
+
+    @property
+    def admin(self):
+        return self.info.get("admin", False)
     
     def allowed(self, permissions):
         return True #everything's allowed when you're having fun alone
