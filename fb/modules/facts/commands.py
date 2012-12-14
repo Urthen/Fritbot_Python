@@ -1,9 +1,11 @@
 import re, random, datetime
 
+from twisted.python import log
+
 import zope.interface
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import IModule, response, room_only
 from fb.db import db
 
 min_repeat = datetime.timedelta(minutes=5)
@@ -23,6 +25,8 @@ class FactsCommandModule:
 
 	def register(self, parent):
 		intent.service.registerListener("^.*$", self.checkfacts, parent, "Fact Listener", "Listen for fact triggers and respond as appropriate")
+		intent.service.registerCommand("what was that", self.describeFact, parent, "What was that", "Returns what the last fact spouted in the room was.")
+		intent.service.registerCommand("learn", self.learnFact, parent, "Learn Fact", "Learns a fact response. Use: fb learn 'hello fritbot' 'hello $who'")
 		self.refresh()
 
 	def refresh(self):
@@ -58,7 +62,7 @@ class FactsCommandModule:
 						if delta < min_repeat:
 							print "Would have spouted fact {0} but was too soon (absolute)".format(str(fact['triggers']))
 							continue
-						elif (delta - min_repeat) > datetime.timedelta(seconds=random.randrange(1, (max_repeat - min_repeat).seconds)):
+						elif (delta - min_repeat) < datetime.timedelta(seconds=random.randrange(1, (max_repeat - min_repeat).seconds)):
 							print "Would have spouted fact {0} but was too soon (random)".format(str(fact['triggers']))
 							continue
 
@@ -74,14 +78,14 @@ class FactsCommandModule:
 		db.facts.update({'_id': response['_id']}, response)
 		triggered['triggered'] = datetime.datetime.now()
 
-		reply = random.choice(response['factoids'])['reply']
+		factoid = random.choice(response['factoids'])
 
 		try:
 			what = args.group('what')
 		except IndexError:
 			what = itemmodule.getSomething()
 
-		reply = reply.replace('$who', user['nick']).replace('$what', what)
+		reply = factoid["reply"].replace('$who', user['nick']).replace('$what', what)
 
 		while '$something' in reply:
 			reply = reply.replace('$something', itemmodule.getSomething(), 1)
@@ -103,10 +107,53 @@ class FactsCommandModule:
 
 		if room is not None:
 			room.send(reply, delay=True)
+			room["factSpouted"] = {"fact": response, "trigger": triggered["original"], "factoid": factoid}
+			room.save()
 		else:
 			user.send(reply, delay=True)
 			
 		return True
+
+	
+	@response
+	def describeFact(self, bot, room, user, args):
+		try:
+			return "{0}: Triggered by '{1}', authored by {2}, {3}".format(room["factSpouted"]["factoid"]["reply"], room["factSpouted"]["trigger"], room["factSpouted"]["factoid"]["author"], room["factSpouted"]["factoid"]["created"])
+		except KeyError:
+			log("Exception getting last factoid, probably hasn't triggered here yet: " + str(e))
+			return "I haven't triggered anything here recently!"
+
+	@response
+	def learnFact(self, bot, room, user, args):
+		if len(args) != 2:
+			return "I'm expecting two arguments with quotes around them, for example, fb learn 'facts' 'facts are easy to teach'"
+
+		trigger = args[0]
+		factoid = args[1]
+
+		fact = db.facts.find_one({"triggers": trigger})
+
+		if fact is not None:
+			fact["factoids"].append({"reply": reply, "author": user["nick"], "authorid": user["_id"], "created": datetime.datetime.now()})
+			db.facts.update({"_id": fact["_id"]}, fact)
+		else:
+			fact = {
+				"created": datetime.datetime.now(),
+				"count": 0,
+				"triggers": [trigger],
+				"factoids": [{
+					"reply": factoid,
+					"created": datetime.datetime.now(),
+					"author": user["nick"],
+					"authorid": user["_id"]
+				}]
+			}
+			db.facts.insert(fact)
+			self.refresh()
+
+		return "Fact learned successfully!"
+
+
 
 
 module = FactsCommandModule()
