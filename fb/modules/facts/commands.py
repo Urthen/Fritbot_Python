@@ -36,8 +36,13 @@ class FactsCommandModule:
 		for triggerset in triggers:
 			for trigger in triggerset['triggers']:
 				if trigger not in self.trigger_cache:
-					self.trigger_cache[trigger] = {'rex': re.compile(trigger), 'original': trigger, 'facts': [], 'triggered': None}
-				
+					try:
+						self.trigger_cache[trigger] = {'rex': re.compile(trigger), 'original': trigger, 'facts': [], 'triggered': None}
+					except Exception as e:
+						print "Error compiling fact:", trigger
+						print e			
+						continue
+
 				if triggerset['_id'] not in self.trigger_cache[trigger]['facts']:
 					self.trigger_cache[trigger]['facts'].append(triggerset['_id'])
 
@@ -137,7 +142,7 @@ class FactsCommandModule:
 		fact = db.facts.find_one({"triggers": trigger})
 
 		if fact is not None:
-			fact["factoids"].append({"reply": reply, "author": user["nick"], "authorid": user["_id"], "created": datetime.datetime.now()})
+			fact["factoids"].append({"reply": factoid, "author": user["nick"], "authorid": user["_id"], "created": datetime.datetime.now()})
 			db.facts.update({"_id": fact["_id"]}, fact)
 		else:
 			fact = {
