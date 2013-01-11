@@ -149,22 +149,13 @@ class QuotesModule:
 			min = 3
 			max = 6
 
-		return sayQuotes(room, user, nick, "p[o]{2,}p", min, max)
+		return sayQuotes(room, user, nick, "(p[o]{2,}p)|(shit)", min, max)
 
 	@response
 	def custommash(self, bot, room, user, args):
-		print 'args',args
 		if args is None or len(args) == 0:
 			return 'What?'
-		if len(args) > 1 and args[1].isdigit():
-			tmp = args[0]
-			args[0] = args[1]
-			args[1] = tmp
-		nick, segment, min, max = parseQuoteArgs(args, room)
-		if min is None:
-			min = 3
-			max = 6
-		return sayQuotes(room, user, None, segment, min, max)
+		return sayQuotes(room, user, None, args[0], 3, 10)
 
 	@response
 	def remember(self, bot, room, user, args):
