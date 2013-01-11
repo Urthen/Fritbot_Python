@@ -172,15 +172,8 @@ class IntentService(object):
                         if match is not None:
                             #Pull out any matched groups...
                             args = []
-                            for x in range(1, 5):
-                                try:
-                                    arg = match.group('arg' + str(x))
-                                except:
-                                    #No arguments left (if there were any to begin with)
-                                    break
-                                
-                                ars.append(arg)
-
+			    for k in match.groups():
+				args.append(k)
                             if room is not None and room.squelched and command['core'] == False:
                                 user.send("I'm sorry, I can't do '{0}' right now as I am shut up in {2} for the next {1}.".format(command['name'], room.squelched, room.uid))
                                 return True #Since we got a valid function we should say we handled it.

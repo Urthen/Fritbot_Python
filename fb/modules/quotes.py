@@ -175,6 +175,7 @@ class QuotesModule:
 		intent.service.registerCommand("remember", self.remember, self, "Remember", "Remembers a quotation with 'remember \"nickname\" \"quote to remember\"'")
 		intent.service.registerCommand("quotestats", self.quotestats, self, "Statistics", "Responds with statistics about users' quotes and remembers.")
 		intent.service.registerCommand("poopmash", self.poopmash, self, "Name", "Recalls 3-6 random quotes about poop, optionally from a specific person.")
+		intent.service.registerCommand("([a-z]+)mash", self.custommash, self, "Name", "Name")
 	@response
 	def quote(self, bot, room, user, args):
 		nick, segment, min, max = parseQuoteArgs(args, room)
@@ -201,6 +202,21 @@ class QuotesModule:
 			max = 6
 
 		return sayQuotes(room, user, nick, "p[o]{2,}p", min, max)
+
+	@response
+	def custommash(self, bot, room, user, args):
+		print 'args',args
+		if args is None or len(args) == 0:
+			return 'What?'
+		if len(args) > 1 and args[1].isdigit():
+			tmp = args[0]
+			args[0] = args[1]
+			args[1] = tmp
+		nick, segment, min, max = parseQuoteArgs(args, room)
+		if min is None:
+			min = 3
+			max = 6
+		return sayQuotes(room, user, None, segment, min, max)
 
 	@response
 	def remember(self, bot, room, user, args):
