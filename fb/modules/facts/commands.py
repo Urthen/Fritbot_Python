@@ -87,7 +87,7 @@ class FactsCommandModule:
 		factoid = random.choice(response['factoids'])
 
 		try:
-			what = args.group('what')
+			what = args.group(1)
 		except IndexError:
 			what = itemmodule.getSomething()
 
