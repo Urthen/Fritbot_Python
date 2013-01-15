@@ -27,6 +27,7 @@ class FactsCommandModule:
 		intent.service.registerListener("^.*$", self.checkfacts, parent, "Fact Listener", "Listen for fact triggers and respond as appropriate")
 		intent.service.registerCommand("what was that", self.describeFact, parent, "What was that", "Returns what the last fact spouted in the room was.")
 		intent.service.registerCommand("learn", self.learnFact, parent, "Learn Fact", "Learns a fact response. Use: fb learn 'hello fritbot' 'hello $who'")
+		intent.service.registerCommand("forget that", self.forgetFact, parent, "Forget Fact", "Forgets the most recent fact response")
 		self.refresh()
 
 	def refresh(self):
@@ -119,13 +120,12 @@ class FactsCommandModule:
 			
 		return True
 
-	
+	@room_only
 	@response
 	def describeFact(self, bot, room, user, args):
-		try:
+		if "factSpouted" in room.info:
 			return "{0}: Triggered by '{1}', authored by {2}, {3}".format(room["factSpouted"]["factoid"]["reply"], room["factSpouted"]["trigger"], room["factSpouted"]["factoid"]["author"], room["factSpouted"]["factoid"]["created"])
-		except KeyError:
-			log("Exception getting last factoid, probably hasn't triggered here yet: " + str(e))
+		else:
 			return "I haven't triggered anything here recently!"
 
 	@response
@@ -143,6 +143,8 @@ class FactsCommandModule:
 
 		if fact is not None:
 			fact["factoids"].append({"reply": factoid, "author": user["nick"], "authorid": user["_id"], "created": datetime.datetime.now()})
+			if "removed" in fact:
+				del fact["removed"]
 			db.facts.update({"_id": fact["_id"]}, fact)
 		else:
 			fact = {
@@ -160,6 +162,32 @@ class FactsCommandModule:
 			self.refresh()
 
 		return "Fact learned successfully!"
+
+	@room_only
+	@response
+	def forgetFact(self, bot, room, user, args):
+		if "factSpouted" in room.info:
+		 	fact = room["factSpouted"]["fact"]
+		 	factoid = room["factSpouted"]["factoid"]
+		 	try:
+		 		fact["factoids"].remove(factoid)
+		 	except ValueError:
+		 		del room.info["factSpouted"]
+				room.save()
+		 		return "Looks like that was already removed somehow..."
+
+		 	if len(fact["factoids"]) == 0:
+		 		fact["removed"] = user["_id"]
+		 	
+		 	db.facts.update({"_id": fact["_id"]}, fact)
+			del room.info["factSpouted"]
+			room.save()
+			self.refresh()
+
+		 	return "{0} factoid removed!".format(factoid["reply"])
+		else:
+			return "Hey, I didn't say anything yet."
+
 
 
 
