@@ -186,7 +186,6 @@ class JabberConnector(muc.MUCClient):
 
         #If we think this is from the bot itself, log it. If it's from someone else, try and handle it.
         if ujid.resource == config.JABBER['resource'] or ujid.resource == room.nick:
-            print "Recieved echo message"
             FritBot.bot.addHistory(room.info, u, user.nick, message.body, echo = True)
         else:
             FritBot.bot.receivedGroupChat(room.info, u, message.body, nick=user.nick)

@@ -1,4 +1,4 @@
-import datetime
+import datetime, random
 
 import zope.interface
 
@@ -67,8 +67,11 @@ class Route(object):
             message = message.encode('utf-8')
 
         time = 0.2
-        if delay:
-            time = 2.5
+        if type(delay) is int:
+            time = delay
+        elif delay is True:
+            time = 1.5 + random.random() * 2
+
         log.msg("Sending <{0}>: {1}".format(self.uid, message))
         reactor.callLater(time, self._send, unicode(message, 'utf-8'))
 

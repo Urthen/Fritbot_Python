@@ -8,8 +8,9 @@ import fb.intent as intent
 from fb.modules.base import IModule, response, room_only
 from fb.db import db
 
+short_time = datetime.timedelta(minutes=3)
 min_repeat = datetime.timedelta(minutes=5)
-max_repeat = datetime.timedelta(minutes=10)
+max_repeat = datetime.timedelta(minutes=15)
 
 try:
 	from fb.modules.items import module as itemmodule
@@ -24,6 +25,7 @@ class FactsCommandModule:
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	def register(self, parent):
+		self.triggered = {}
 		intent.service.registerListener("^.*$", self.checkfacts, parent, "Fact Listener", "Listen for fact triggers and respond as appropriate")
 		intent.service.registerCommand("what was that", self.describeFact, parent, "What was that", "Returns what the last fact spouted in the room was.")
 		intent.service.registerCommand("learn", self.learnFact, parent, "Learn Fact", "Learns a fact response. Use: fb learn 'hello fritbot' 'hello $who'")
@@ -54,8 +56,10 @@ class FactsCommandModule:
 		body = args.group()
 
 		response = None
-		triggered = None
 		count = None
+
+		if room is not None and room["_id"] in self.triggered and (self.triggered[room["_id"]]['count'] > 3 and datetime.datetime.now() - self.triggered[room["_id"]]['time'] < min_repeat):	
+			return
 
 		for trigger in self.trigger_cache.values():
 			check = trigger['rex'].search(body)
@@ -80,9 +84,20 @@ class FactsCommandModule:
 		if response is None:
 			return False
 
+		if room is not None:
+			if room["_id"] not in self.triggered:
+				self.triggered[room["_id"]] = {'count': 1, 'time': datetime.datetime.now()}
+			else:
+				if datetime.datetime.now() - self.triggered[room["_id"]]['time'] < short_time:
+					self.triggered[room["_id"]] = {'count': self.triggered[room["_id"]]['count'] + 1, 'time': datetime.datetime.now()}
+				else:
+					self.triggered[room["_id"]] = {'count': 1, 'time': datetime.datetime.now()}
+
+
 		response['count'] = response['count'] + 1
+		response['triggered'] = datetime.datetime.now()
+		triggered['triggered'] = response['triggered']
 		db.facts.update({'_id': response['_id']}, response)
-		triggered['triggered'] = datetime.datetime.now()
 
 		factoid = random.choice(response['factoids'])
 
@@ -115,8 +130,13 @@ class FactsCommandModule:
 			room.send(reply, delay=True)
 			room["factSpouted"] = {"fact": response, "trigger": triggered["original"], "factoid": factoid}
 			room.save()
+
+			if self.triggered[room["_id"]]['count'] > 3:
+				room.send("/me sparks and sputters. He's shorted out!", 5)
+				print "shorted out until " + str(self.triggered[room["_id"]]['time'] + min_repeat)
 		else:
 			user.send(reply, delay=True)
+
 			
 		return True
 
