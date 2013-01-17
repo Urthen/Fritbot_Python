@@ -204,7 +204,8 @@ class QuotesModule:
 		quotes = db.db.history.find(quotes_query).count()
 		remembered_query = {"remembered.user": user["_id"]}
 		remembered = db.db.history.find(remembered_query).count()
-
-		return "{0} was quoted {1} times and has remembered {2} quotes.".format(user['nick'], quotes, remembered)
+		inquote_query = {"remembered": {'$exists': True}, "body": {"$regex": '\\b' + user['nick'] + '\\b', '$options': 'i'}}
+		inquote = db.db.history.find(inquote_query).count()
+		return "{0} was quoted {1} times and has remembered {2} quote and has been mentioned in {3} quotes".format(user['nick'], quotes, remembered, inquote)
 
 module = QuotesModule()
