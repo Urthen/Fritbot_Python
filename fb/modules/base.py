@@ -56,15 +56,18 @@ def ratelimit(rate, message=None, passthrough=True):
 	def ratelimitgen(f):
 		name = f.__name__
 		def ratelimited(self, bot, room, user, args):
-			if room and name in room.ratelimit and room.ratelimit[name] > datetime.now():
-				log.msg("Almost executed {0} in {1} but it was too soon.".format(name, room))
-				if message:
-					user.send(message)
-				return not passthrough
-			else:
-				room.ratelimit[name] = datetime.now() + timedelta(seconds=rate)
-				log.msg("Won't execute {0} again until {1}.".format(name, room.ratelimit[name]))
-				return f(self, bot, room, user, args)
+			if room:
+				if name in room.ratelimit and room.ratelimit[name] > datetime.now():
+					log.msg("Almost executed {0} in {1} but it was too soon.".format(name, room))
+					if message:
+						user.send(message)
+					return not passthrough
+				else:
+					room.ratelimit[name] = datetime.now() + timedelta(seconds=rate)
+					log.msg("Won't execute {0} again until {1}.".format(name, room.ratelimit[name]))
+					return f(self, bot, room, user, args)
+			else: #user case
+				return f(self, bot, room, user, args) 
 
 		return ratelimited
 	return ratelimitgen
