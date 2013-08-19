@@ -80,7 +80,7 @@ class MarkovModule:
 		else:
 			user.send(string.lstrip())
 
-	@require_auth('stupid', "I can't babble here!", False)
+	@require_auth('babble', "I can't babble here!", False)
 	@ratelimit(4, "Slow your roll! I need time for my creative genius!", False)
 	def babble(self, bot, room, user, args):
 		reactor.callLater(0, self.doMarkov, room, user)

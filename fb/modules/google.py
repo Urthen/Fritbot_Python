@@ -23,7 +23,7 @@ class GoogleSearchModule:
 		intent.service.registerCommand("google", self.google, self, "Google Search", "Returns Google 'I'm feeling lucky' result. Use 'google more' to return multiple ranked results.")
 		intent.service.registerCommand("youtube", self.youtube, self, "YouTube Search", "Returns YouTube search result. Use 'youtube more' to return up to 5 ranked results.")
 
-	@require_auth('search')
+	@require_auth('search', "Search isn't allowed here!", False)
 	@response
 	def google(self, bot, room, user, args):
 		if args[0] == "more":
@@ -53,7 +53,7 @@ class GoogleSearchModule:
 			msg = u"Sorry, {0}, Google doesn't seem to know anything about that.".format(user['nick'])
 		return msg
 
-	@require_auth('search')
+	@require_auth('search', "Search isn't allowed here!", False)
 	@response
 	def youtube(self, bot, room, user, args):
 		if not self.gdata_supported:

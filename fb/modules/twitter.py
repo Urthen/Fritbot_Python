@@ -21,7 +21,7 @@ class TwitterModule:
 		intent.service.registerCommand("twitter", self.twitter, self, "Twitter Search", "Returns all results from Twitter Search API")
 		intent.service.registerCommand("twitterclear", self.twitterClear, self, "Twitter Clear", "Clears recent history for all or specific query")
 
-	@require_auth('twitter')
+	@require_auth('twitter', "Twitter isn't allowed here!", False)
 	@response
 	def twitter(self, bot, room, user, args):
 		query = urllib.urlencode({'q':' '.join(args)})

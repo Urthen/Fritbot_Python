@@ -124,7 +124,7 @@ class QuotesModule:
 		intent.service.registerCommand("poopmash", self.poopmash, self, "Name", "Recalls 3-6 random quotes about poop, optionally from a specific person.")
 		intent.service.registerCommand("([a-z]+)mash", self.custommash, self, "Name", "Name")
 
-	@require_auth('quotes')
+	@require_auth('quotes', "Quotes aren't allowed here!", False)
 	@response
 	def quote(self, bot, room, user, args):
 		nick, segment, min, max = parseQuoteArgs(args, room)
@@ -134,7 +134,7 @@ class QuotesModule:
 
 		return sayQuotes(room, user, nick, segment, min, max)
 
-	@require_auth('quotes')
+	@require_auth('quotes', "Quotes aren't allowed here!", False)
 	@response
 	def quotemash(self, bot, room, user, args):
 		nick, segment, min, max = parseQuoteArgs(args, room)
@@ -144,7 +144,7 @@ class QuotesModule:
 
 		return sayQuotes(room, user, nick, segment, min, max)
 
-	@require_auth('quotes')
+	@require_auth('quotes', "Quotes aren't allowed here!", False)
 	@response
 	def poopmash(self, bot, room, user, args):
 		nick, segment, min, max = parseQuoteArgs(args, room)
@@ -154,14 +154,14 @@ class QuotesModule:
 
 		return sayQuotes(room, user, nick, "(p[o]{2,}p)|(shit)", min, max)
 
-	@require_auth('quotes')
+	@require_auth('quotes', "Quotes aren't allowed here!", False)
 	@response
 	def custommash(self, bot, room, user, args):
 		if args is None or len(args) == 0:
 			return 'What?'
 		return sayQuotes(room, user, None, args[0], 3, 10)
 
-	@require_auth('quotes')
+	@require_auth('quotes', "Quotes aren't allowed here!", False)
 	@response
 	def remember(self, bot, room, user, args):
 		if room is None:
@@ -203,7 +203,7 @@ class QuotesModule:
 		else:
 			return "Sorry, {0} isn't unique enough. Too many users matched!".format(args[0])
 
-	@require_auth('quotes')
+	@require_auth('quotes', "Quotes aren't allowed here!", False)
 	@response
 	def quotestats(self, bot, room, user, args):
 		quotes_query = {"user.id": user["_id"], 'remembered': {'$exists': True}}	

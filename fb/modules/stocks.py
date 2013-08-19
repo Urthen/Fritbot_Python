@@ -21,7 +21,7 @@ class StocksModule:
 		intent.service.registerCommand("stock", self.stock, self, "Stock Quote", "Returns current Stock Price")
 		intent.service.registerCommand("stocktopic", self.stocktopic, self, "Stock Quote  Topic", "Returns current Stock Price to Topic")
 
-	@require_auth('stocks')
+	@require_auth('stocks', "Stock search isn't allowed here!", False)
 	@response
 	def stock(self, bot, room, user, args):
 		query = ','.join(args)
@@ -41,7 +41,7 @@ class StocksModule:
 			msg = 'No stocks found for ' + query
 		return msg.strip()
 		
-	@require_auth('stocks')
+	@require_auth('stocks', "Stock search isn't allowed here!", False)
 	@response
 	def stocktopic(self, bot, room, user, args):
 		query = ','.join(args)
