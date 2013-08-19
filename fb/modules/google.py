@@ -8,7 +8,7 @@ from twisted.python import log
 
 import config
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import IModule, require_auth, response
 
 class GoogleSearchModule:
 	zope.interface.implements(IModule)
