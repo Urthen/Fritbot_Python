@@ -8,7 +8,7 @@ from fb.db import db
 from twisted.python import log
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import IModule, require_auth, response
 
 class StocksModule:
 	zope.interface.implements(IModule)
@@ -21,6 +21,7 @@ class StocksModule:
 		intent.service.registerCommand("stock", self.stock, self, "Stock Quote", "Returns current Stock Price")
 		intent.service.registerCommand("stocktopic", self.stocktopic, self, "Stock Quote  Topic", "Returns current Stock Price to Topic")
 
+	@require_auth('stocks')
 	@response
 	def stock(self, bot, room, user, args):
 		query = ','.join(args)
@@ -40,6 +41,7 @@ class StocksModule:
 			msg = 'No stocks found for ' + query
 		return msg.strip()
 		
+	@require_auth('stocks')
 	@response
 	def stocktopic(self, bot, room, user, args):
 		query = ','.join(args)

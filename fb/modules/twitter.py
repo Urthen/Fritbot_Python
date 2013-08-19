@@ -8,7 +8,7 @@ from fb.db import db
 from twisted.python import log
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import IModule, require_auth, response
 
 class TwitterModule:
 	zope.interface.implements(IModule)
@@ -21,6 +21,7 @@ class TwitterModule:
 		intent.service.registerCommand("twitter", self.twitter, self, "Twitter Search", "Returns all results from Twitter Search API")
 		intent.service.registerCommand("twitterclear", self.twitterClear, self, "Twitter Clear", "Clears recent history for all or specific query")
 
+	@require_auth('twitter')
 	@response
 	def twitter(self, bot, room, user, args):
 		query = urllib.urlencode({'q':' '.join(args)})
