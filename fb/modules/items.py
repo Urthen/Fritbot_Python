@@ -2,6 +2,8 @@ import random, datetime, re
 
 import zope.interface
 
+from twisted.internet import reactor
+
 import fb.intent as intent
 from fb.modules.base import IModule, response
 
@@ -29,6 +31,20 @@ class ItemsModule:
 		item = re.sub(r'\bmy\b', user['nick'] + "'s", item)
 
 		self.takeItem(item, user)
+
+		inventory = self.getItems(owned=True)
+		if len(inventory) > 10:
+			kill = random.choice(range(4))
+			if kill == 0:
+				reactor.callLater(2.0, room.send, "Here, %s, take %s. I don't want it anymore." % (random.choice(room.roster.values())['nick'], self.giveItem()))
+			elif kill == 1:
+				reactor.callLater(2.0, room.send, "Whoops... I dropped %s down the stairs, though, so, I don't have that anymore." % self.giveItem())
+			elif kill == 2:
+				reactor.callLater(2.0, room.send, "/me smashes %s into %s, breaking them both into bits. Confetti for everyone!" % (self.giveItem(), self.giveItem()))
+			elif kill == 3:
+				reactor.callLater(2.0, room.send, "I may have accidentally... er... lost %s and %s." % (self.giveItem(), self.giveItem()))
+			if random.choice(range(2)) == 1:
+				reactor.callLater(4.0, room.send, "... coincidentally, I set %s on fire." % self.giveItem())
 
 		return "Thanks for {0}!".format(outitem)
 
