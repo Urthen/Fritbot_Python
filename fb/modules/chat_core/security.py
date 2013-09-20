@@ -1,7 +1,7 @@
 import zope.interface
 
 import fb.intent as intent
-from fb import security
+from fb.api import security
 from fb.modules.base import IModule, response
 
 class SecurityModule:
@@ -11,7 +11,7 @@ class SecurityModule:
 	description="Security and API access related commands"
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
+	def register(self, parent):
 		intent.service.registerCommand("authorize", self.authorize, self, "Authorize", "Authorizes given API Key")
 		intent.service.registerCommand("revoke", self.revoke, self, "Revoke", "Revokes given application authorization")
 		intent.service.registerCommand("list keys", self.authorizations, self, "Key List", "List all authorized API Keys and what applications they go to")

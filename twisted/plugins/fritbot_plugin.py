@@ -22,7 +22,7 @@ class Options(usage.Options):
 class FritbotFactory(object):
 	implements(IServiceMaker, IPlugin)
 	tapname = "fritbot"
-	description = "The angriest bot."
+	description = "The Angriest bot."
 	options = Options
 
 	def makeService(self, options):
@@ -54,6 +54,14 @@ class FritbotFactory(object):
 
 		log.msg("Successfully loaded connector %s" % cfg.connect.method)
 
-		return connector.createService()
+		app = service.MultiService()
+
+		connector.createService().setServiceParent(app)
+
+		from fb.api.core import api
+		api.launch(app)
+
+		return app
+
 
 fritbotFactory = FritbotFactory();

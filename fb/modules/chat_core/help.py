@@ -10,7 +10,7 @@ class HelpModule:
 	description="Functions to document what commands the bot currently has available."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
+	def register(self, parent):
 		intent.service.registerCommand(["help", "manual"], self.help, self, "Help", "List all available commands.")
 		intent.service.registerListener(["man fritbot"], self.help, self, "Help", "List all available commands")
 

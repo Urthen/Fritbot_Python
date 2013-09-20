@@ -7,9 +7,11 @@ bot:
     nicknames:
         - fb
 
-    # Modules to load by default
+    # Modules to always load, and cannot be turned off by the admin panel. 
+    # This should not need to normally be changed - you can load more modules from the admin panel - but these ones are REQUIRED for operation.
     modules:
-        - core
+        - chat_core
+        - api_core
 
 # Who gets to be a superadmin? Set this to the user's UID - depends on connection type
 super_admins:

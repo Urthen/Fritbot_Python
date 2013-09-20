@@ -14,7 +14,7 @@ class NicknameModule:
 
 	def register(self):
 		intent.service.registerCommand(['become', 'ghost', 'you are', 'your (nick)?name is', 'nickname'], self.ghost, self, "Change Bot Nickname", "Change the nickname of the bot in the current room with 'become SuperBot'.")
-		intent.service.registerCommand(['identify'], self.name, self, "View Bot Nickname", "View the nickname of the bot in the current room with 'identify'.")
+		intent.service.registerCommand(['identify'], self.getName, self, "View Bot Nickname", "View the nickname of the bot in the current room with 'identify'.")
 		intent.service.registerCommand(['i am', 'my (nick)?name is', 'call me'], self.callMe, self, "Change User Nickname", "Change the bot's nickname of the user with 'my name is Awesome Dude'.")
 		intent.service.registerCommand(['what((s)| is) my (nick)?name', 'who am i'], self.myname, self, "Get User Nickname", "Responds with what the bot calls the user.")
 
@@ -40,7 +40,7 @@ class NicknameModule:
 
 	@base.room_only
 	@base.response
-	def name(self, bot, room, user, args):
+	def getName(self, bot, room, user, args):
 
 		if room is None:
 			return "This isn't a chat room!"

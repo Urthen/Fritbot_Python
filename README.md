@@ -12,14 +12,13 @@ Installation & Setup
 Prerequisites: Before starting, you should have installed virtualenv and virtualenvwrapper with `pip install virtualenv virtualenvwrapper` if you don't have them already. They are awesome and you will love them. Additionally,
 you should install mongodb (v1.6+ required, 2.2+ preferred) as platform appropriate.
 
-1. Fork this repo so you can make your own changes / additions.
-2. Checkout _your_ repo to your local machine, and add the repo directory to your system path.
-3. Make a virtual environment for fritbot with `mkvirtualenv fb`. You can leave this virtual environment with `deactivate` and get back in later with `workon fb`. Read the virtualenvwrapper documentation for more info.
-4. Install requirements with `pip install -r requirements.txt` (Note: If you have problems installing pyOpenSSL on an ubuntu machine, run `apt-get install libssl-dev` first)
-6. You will need to add your own config .yaml file to overwrite the defaults. See `default.yaml` for all available options. `.gitignore` automatically ignores files that look like `my*.yaml` so name it something like `my_config.yaml` to make sure you never check it in by accident. Don't expose your passwords! For more information, see the configuration section below.
+1. Check out the repo! Yay! If you want to make updates to fritbot itself, fork the repo and check out your own copy, then open pull requests.
+2. Make a virtual environment for fritbot with `mkvirtualenv fb`. You can leave this virtual environment with `deactivate` and get back in later with `workon fb`. Read the virtualenvwrapper documentation for more info.
+3. Install requirements with `pip install -r requirements.txt` (Note: If you have problems installing pyOpenSSL on an ubuntu machine, run `apt-get install libssl-dev` first)
+4. You will need to add your own config .yaml file to overwrite the defaults. See `default.yaml` for all available options. `.gitignore` automatically ignores files that look like `my*.yaml` so name it something like `my_config.yaml` to make sure you never check it in by accident. Don't expose your passwords! For more information, see the configuration section below.
 5. Run mongodb however is appropriate
-7. Run the bot with `twistd -n fritbot my_config.yaml` to start in daemonzied mode: All output will be logged to the console, useful for debugging. Press ctrl-c to exit.
-8. If you would like to run a more permanent instance, remove the `-n` option. Output will be logged to file and the bot must be shut down via a shutdown command from chat or kill command from the console.
+6. Run the bot with `twistd -n fritbot my_config.yaml` to start in daemonzied mode: All output will be logged to the console, useful for debugging. Press ctrl-c to exit.
+7. If you would like to run a more permanent instance, remove the `-n` option. Output will be logged to file and the bot must be shut down via a shutdown command from chat or kill command from the console.
 
 Configuration
 -------------

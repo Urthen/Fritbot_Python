@@ -18,7 +18,7 @@ class CoreCommandsModule:
 	description="Core Fritbot Commands, minimum functionality."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
+	def register(self, parent):
 		intent.service.registerCommand("reload ?modules", self.reloadModules, self, "Reload Modules", "(admin) Reload installed modules", True)
 		intent.service.registerCommand("allow", self.allow, self, "Allow", "(admin) Assigns an authorization to the current room", True)
 		intent.service.registerCommand("disallow", self.disallow, self, "Disallow", "(admin) Unassigns an authorization to the current room", True)

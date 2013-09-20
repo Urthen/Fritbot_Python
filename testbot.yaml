@@ -4,25 +4,6 @@ bot:
     rooms:
     - bottest
 
-    modules:
-    - core
-    - bvuas
-    - confluence
-    - decisions
-    - google
-    - hello
-    - help
-    - history
-    - items
-    - markov
-    - nicks
-    - quotes
-    - security
-    - stocks
-    - stupid
-    - twitter
-    - weather
-
 logging:
     filename: logs/testbot.log
 
