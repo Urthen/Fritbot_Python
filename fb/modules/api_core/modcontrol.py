@@ -8,7 +8,7 @@ from fb.modules.base import IModule
 from fb.api import security
 from fb.api.core import api
 from fb.config import cfg
-from fb import intent
+from fb.modulecontrol import moduleLoader
 
 class ModuleControlAPIModule(APIResponse):
 	zope.interface.implements(IModule)
@@ -39,7 +39,7 @@ class ModuleController(APIResponse):
 			return FactItem(FactObj(fact))
 
 	@returnjson
-	def apilist(self, request):
+	def module_list(self, request):
 		pass
 
 module = ModuleControlAPIModule()
