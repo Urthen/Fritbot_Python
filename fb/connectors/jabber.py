@@ -9,12 +9,13 @@ from twisted.python import log
 import zope.interface
 
 from wokkel import muc, xmppim, ping
+from wokkel.client import XMPPClient
 
 import fb.fritbot as FritBot
 from connector import IConnector, User, Room
 from fb.db import db
-import config, fb.intent as intent
-
+from fb.config import cfg
+import fb.intent as intent
 
 CHAT = muc.MESSAGE + '[@type="chat"]'
 
@@ -77,14 +78,14 @@ class JabberConnector(muc.MUCClient):
 
         self._presence = xmppim.PresenceClientProtocol()
         self._ping = ping.PingHandler()
-        self.defaultConnections = config.JABBER['rooms']
+        self.defaultConnections = cfg.connect.jabber.rooms
         muc.MUCClient.__init__(self)
 
     def setHandlerParent(self, parent):
         '''Set handler parent of subhandlers'''
         muc.MUCClient.setHandlerParent(self, parent)
         self._presence.setHandlerParent(parent)
-        self._presence.available(statuses={None: config.CONFIG["status"]})
+        self._presence.available(statuses={None: cfg.connect.jabber.status})
         self._ping.setHandlerParent(parent)
        
     def connectionInitialized(self):
@@ -94,7 +95,7 @@ class JabberConnector(muc.MUCClient):
         self.xmlstream.addObserver(CHAT, self.receivedPrivateChat)
         
         for room in self.defaultConnections:
-            self.joinRoom(room[0], room[1])
+            self.joinRoom(room, cfg.bot.name)
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to joining, creating, and leaving rooms.
@@ -119,7 +120,7 @@ class JabberConnector(muc.MUCClient):
         
     def joinRoom(self, room, nick):
         '''Join a room'''
-        rjid = jid.internJID("%s@%s/%s" % (room, config.JABBER['confserver'], nick))
+        rjid = jid.internJID("%s@%s/%s" % (room, cfg.connect.jabber.confserver, nick))
         self.join(rjid, nick).addCallback(self.initRoom)                           
         
     def leaveRoom(self, room):
@@ -136,7 +137,7 @@ class JabberConnector(muc.MUCClient):
             ujid = uid
             uid = ujid.split('@')[0]
         else:
-            ujid = "{0}@{1}".format(uid, config.JABBER['server'])
+            ujid = "{0}@{1}".format(uid, cfg.connect.jabber.server)
 
         ujid = jid.internJID(ujid)
         user = JUser(ujid, uid, uid, self)
@@ -185,7 +186,7 @@ class JabberConnector(muc.MUCClient):
         u.doNickUpdate(room.info, user.nick)
 
         #If we think this is from the bot itself, log it. If it's from someone else, try and handle it.
-        if ujid.resource == config.JABBER['resource'] or ujid.resource == room.nick:
+        if ujid.resource == cfg.connect.jabber.resource or ujid.resource == room.nick:
             FritBot.bot.addHistory(room.info, u, user.nick, message.body, echo = True)
         else:
             FritBot.bot.receivedGroupChat(room.info, u, message.body, nick=user.nick)
@@ -202,3 +203,15 @@ class JabberConnector(muc.MUCClient):
         user = db.getUser(JUser(user_jid, user_jid.user, nick, self))
 
         FritBot.bot.receivedPrivateChat(user, unicode(msg.body))
+
+def createService():
+    bot_jid = "{0}@{1}/{2}".format(cfg.connect.jabber.jid, cfg.connect.jabber.server, cfg.connect.jabber.resource)
+    xmppclient = XMPPClient(jid.internJID(bot_jid), cfg.connect.jabber.password, cfg.connect.jabber.server)
+    xmppclient.logTraffic = cfg.connect.jabber.log_traffic == "True"
+
+    # Hook chat instance into main app
+    connection = JabberConnector()
+    FritBot.bot.registerConnector(connection)
+    connection.setHandlerParent(xmppclient)
+    
+    return xmppclient

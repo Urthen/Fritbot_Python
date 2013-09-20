@@ -5,8 +5,8 @@ import zope.interface
 from twisted.internet import defer, reactor
 from twisted.python import log
 
-import config
 from fb.db import db
+from fb.config import cfg
 
 class Route(object):
     '''A valid route for sending messages. Currently, this could be a room or a user.'''
@@ -83,7 +83,7 @@ class Route(object):
         if self._refreshed is None:
             return True
         else:
-            return (datetime.datetime.now() - self._refreshed) > datetime.timedelta(seconds=config.CONFIG["refresh"])
+            return (datetime.datetime.now() - self._refreshed) > datetime.timedelta(seconds=cfg.mongo.refresh)
 
     def refresh(self):
         '''Template to refresh the mongodb information for this route. Must be implemented in a subclass.'''
@@ -113,7 +113,7 @@ class Room(Route):
     roster = {}
     '''Dict of User objects currently in this room, by uid'''
 
-    def __init__(self, uid, nick=config.CONFIG["name"]):
+    def __init__(self, uid, nick=cfg.bot.name):
         self['nick'] = nick
         self._collection = db.db.rooms
         Route.__init__(self, uid)
@@ -195,7 +195,7 @@ class User(Route):
 
     @property
     def admin(self):
-        return self.info.get("admin", False)
+        return self.uid in cfg.super_admins or self.info.get("admin", False)
     
     def allowed(self, permissions):
         return True #everything's allowed when you're having fun alone

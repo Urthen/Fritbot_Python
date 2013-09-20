@@ -2,7 +2,6 @@ import zope.interface
 
 from pymongo import ASCENDING, DESCENDING
 
-import config
 from fb.db import db
 
 import fb.intent as intent

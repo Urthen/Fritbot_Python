@@ -9,7 +9,7 @@ import pymongo
 from pymongo import Connection, errors as PyMongoErrors
 from bson.objectid import ObjectId
 
-import config
+from fb.config import cfg
 
 ASCENDING = pymongo.ASCENDING
 DESCENDING = pymongo.DESCENDING
@@ -35,17 +35,16 @@ class Database(object):
             except PyMongoErrors.AutoReconnect:
                 raise AssertionError("Error connecting to the MongoDB instance. Is mongod running?")
 
-            self._db = self._connection[config.DB['name']]
+            self._db = self._connection[cfg.mongo.db]
 
         return self._db
 
     def __getattr__(self, collection):
-        return getattr(self.db, collection)
+        return getattr(self._db, collection)
 
     def getRoom(self, room):
         if room.uid in self._roomCache:
             room = self._roomCache[room.uid]
-            #print "found in cache", room.uid, room._refreshed
         else:
             log.msg("Room not found in cache and will be loaded: {0}".format(room.uid))
             self._roomCache[room.uid] = room
@@ -66,7 +65,7 @@ class Database(object):
         info = None
         if rid in self._roomIDCache:
             info = self._roomIDCache[rid]
-            if (datetime.datetime.now() - info['_refreshed']) > datetime.timedelta(seconds=config.CONFIG["refresh"]):
+            if (datetime.datetime.now() - info['_refreshed']) > datetime.timedelta(seconds=cfg.mongo.refresh):
                 info = self._db.rooms.find_one({'_id': rid})
                 if info:
                     info['_refreshed'] = datetime.datetime.now()
@@ -86,16 +85,11 @@ class Database(object):
 
         if user.uid in self._userCache:
             user = self._userCache[user.uid]
-            #print "found in cache", user.uid, user._refreshed
         else:
             log.msg("User not found in cache and will be loaded: {0}".format(user.uid))
             self._userCache[user.uid] = user
         user.refresh()
 
         return user
-        
-    def select_alt(self):
-        config.select_alt(config)
-        self._db = self._connection[config.DB['name']]
 
 db = Database()

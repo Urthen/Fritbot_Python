@@ -6,9 +6,9 @@ import zope.interface
 
 from twisted.python import log
 
-import config
 import fb.intent as intent
 from fb.modules.base import IModule, require_auth, response
+from fb.config import cfg
 
 class GoogleSearchModule:
 	zope.interface.implements(IModule)
@@ -57,8 +57,7 @@ class GoogleSearchModule:
 	@response
 	def youtube(self, bot, room, user, args):
 		if not self.gdata_supported:
-			import config
-			return u"Google data API not installed, contact your {0} admin.".format(config.CONFIG['name'])
+			return u"Google data API not installed, contact your bot admin."
 
 		if args[0] == "more":
 			more = True
@@ -70,7 +69,7 @@ class GoogleSearchModule:
 		query = gdata.youtube.service.YouTubeVideoQuery()
 		
 		try:
-			if config.CONFIG["racy"]:
+			if cfg.google.racy:
 				query.racy = "include"
 			else:
 				query.racy = "exclude"

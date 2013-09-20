@@ -2,23 +2,13 @@ from twisted.python import log
 
 import zope.interface
 
-import config
 import fb.intent as intent
 from fb.modules.base import IModule, response
+from fb.config import cfg
 
 #for jira ticket info
 import SOAPpy, getpass, datetime, array, base64, random
 from SOAPpy import Types
-
-# Add to config.py
-#JIRA = {
-#    "enabled": True,
-#    "url": "http://bits.bazaarvoice.com:8080/jira/rpc/soap/jirasoapservice-v2?wsdl",
-#    "username": "username",
-#    "password": "password",
-#    "link_prefix": "https://bits.bazaarvoice.com/jira/browse/",
-#    "default_project": "BVC-" # Also include the -, ie. "PRJ-"
-#}
 
 class JIRAModule:
 	zope.interface.implements(IModule)
@@ -32,22 +22,19 @@ class JIRAModule:
 
 	@response
 	def jira(self, bot, room, user, args):
-		print config.JIRA
-		if not config.JIRA["enabled"]:
-			return 'JIRA Disabled'
+		if 'jira' not in cfg._cfg:
+			return 'JIRA disabled, must be added to config'
 			
 		try:
 			eol = '\r\n '
 			ticketNum = args[0]
 			if ticketNum.isdigit():
-				ticketNum = config.JIRA["default_project"] + ticketNum
+				ticketNum = cfg.jira.default_project + ticketNum
 			print ticketNum
-			soap = SOAPpy.WSDL.Proxy(config.JIRA["url"])
-			jirauser=config.JIRA["username"]
-			passwd=config.JIRA["password"]
-			auth = soap.login(jirauser, passwd)
+			soap = SOAPpy.WSDL.Proxy(cfg.jira.url)
+			auth = soap.login(cfg.jira.username, cfg.jira.password)
 			myissue = soap.getIssue(auth, ticketNum)
-			link = config.JIRA["link_prefix"] + ticketNum;
+			link = cfg.jira.link_prefix + ticketNum;
 			
 			returnString = link+ eol
 			returnString += myissue.summary + eol
@@ -62,5 +49,6 @@ class JIRAModule:
 			
 			return returnString
 		except:
-			return 'oh no! jira down'
+			return 'Oh no! Jira errors bad!'
+
 module = JIRAModule()

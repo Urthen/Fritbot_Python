@@ -58,12 +58,14 @@ class HistoryList(APIResponse):
 		sort = [('date', db.DESCENDING)]
 		quotes.sort(sort)
 
-		limit = config.API['default_limit']
+		limit = cfg.api.default_limit
 		if 'limit' in request.args:
 			try:
 				limit = int(request.args['limit'][0])
 			except:
 				return self.error(request, self.BAD_REQUEST, "Limit couldn't be parsed into an integer.")
+			if limit > cfg.api.max_limit:
+				limit = cfg.api.max_limit
 
 		
 		quotes.limit(limit)

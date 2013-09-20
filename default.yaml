@@ -1,0 +1,86 @@
+# Bot personality settings
+bot:
+    # Name the bot identifies itself as by default
+    name: FritBot
+
+    # Other names the bot will respond to, as in 'fb say hello'
+    nicknames:
+        - fb
+
+    # Modules to load by default
+    modules:
+        - core
+
+# Who gets to be a superadmin? Set this to the user's UID - depends on connection type
+super_admins:
+- your_jid
+
+# Chat Connection Settings
+connect:
+    
+    # what method to connect with - must be one of the installed connector types
+    method: jabber
+
+    # if connecting with jabber, use these settings. Obviously, you'll need to change these.
+    jabber:
+        # This is as in the format your_jid@your_host.example.com/your_resource
+        jid: your_jid
+        resource: your_resource
+        password: your_password
+        server: yourhost.example.com
+        # Conference server host used to connect to group chats, frequently the conference. subdomain of your jabber server.
+        confserver: conference.yourhost.example.com
+
+        status: The Angriest Bot
+
+        # A list of rooms for the bot to join at startup
+        rooms:
+            - bottest
+
+        # Set to true to log all traffic running through xmpp. Not recommended except for low-level debugging.
+        log_traffic: False
+
+    # if connecting with irc, use these settings.
+    irc:
+
+        # Selected server & port
+        server: irc.example.net
+        port: 6667
+
+        # Will attempt to identify as the following. Will disconnect if it can't identify.
+        nick: your_nick
+        password: your_password
+
+        # Channels to join at startup
+        channels:
+            - '#fritbot'
+
+
+# Logging settings
+logging:
+    filename: logs/fritbot.log
+
+# Database Settings
+mongo:
+    # db name
+    db: fritbot
+    # minimum refresh time for cached data from the DB
+    refresh: 1
+
+# API Service Settings
+api:
+    # Debug mode - turn off for production servers
+    debug: True
+
+    # Default limit length for requests
+    default_limit: 10
+
+    # Max length limit
+    max_limit: 100
+
+    # Port to listen to
+    port: 4886
+
+    # Time a user has to confirm an API key, in minutes.
+    login_timeout: 5
+

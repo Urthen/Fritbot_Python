@@ -4,7 +4,7 @@ from twisted.web.resource import Resource
 from twisted.web.server import NOT_DONE_YET
 
 from fb import db
-import config
+from fb.config import cfg
 
 def parseSortOptions(options):
 	out = []
@@ -25,7 +25,7 @@ def returnjson(f):
 		try:
 			out = f(self, request)
 		except:
-			if 'debug' in config.API and config.API['debug']:
+			if cfg.api.debug == "True":
 				raise
 			else:
 				out = self.error(request)

@@ -3,7 +3,7 @@ import logging, sys
 from twisted.python.logfile import DailyLogFile
 from twisted.python import log as twistedlogger
 
-import config
+from fb.config import cfg
 
 class Auditor(object):
 
@@ -13,17 +13,18 @@ class Auditor(object):
 	INFO = 3
 	DEBUG = 4
 
-	def start(self, application):
+	def start(self, service):
 		try:
-			logfile = DailyLogFile(config.LOG["filename"], config.LOG["directory"])
+			logfile = DailyLogFile.fromFullPath(cfg.logging.filename)
 		except AssertionError:
-			raise AssertionError("Assertion error attempting to open the log file. Does the directory {0} exist?".format(config.LOG["directory"]))
+			raise AssertionError("Assertion error attempting to open the log file: {0}. Does the directory exist?".format(cfg.logging.filename))
 
-		application.setComponent(twistedlogger.ILogObserver, twistedlogger.FileLogObserver(logfile).emit)
+		service.setComponent(twistedlogger.ILogObserver, twistedlogger.FileLogObserver(logfile).emit)
 		twistedlogger.startLogging(sys.stdout)
 
 	def msg(self, text, level=INFO):
 		twistedlogger.msg(text)
+		print text
 
 	def auditCommand(self, room, user, command):
 		pass

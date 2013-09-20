@@ -11,7 +11,8 @@ from wokkel import muc, xmppim
 
 from fb.connectors.connector import Room, User
 from fb.db import db
-import config, fb.intent as intent
+from fb.config import cfg
+import fb.intent as intent
 
 class FritBot(object):
     '''Main fritbot class, handles connecting to the server as well as input/output.'''

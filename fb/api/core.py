@@ -8,8 +8,7 @@ from fb.api.messaging import GroupChat
 from fb.api.auth import Retriever
 from fb.api.simple import SimpleModule
 from fb.api import util
-
-import config
+from fb.config import cfg
 
 class APIRegistrationError(Exception):
 	pass
@@ -40,14 +39,14 @@ class APIWrapper(object):
 		self.preregistered = {}
 
 	def launch(self, bot, application):
-		if 'security' not in config.APPLICATION['modules']:
+		if 'security' not in cfg.application.modules:
 			log.msg("Warning: You have the API enabled, but not the 'security' module. You will be unable to accept any keys.")
 
 		# Initialize the API
 		self.root = APIRoot()
 		self.bot = bot
 
-		TCPServer(config.API['port'], Site(self.root)).setServiceParent(application)
+		TCPServer(cfg.api.port, Site(self.root)).setServiceParent(application)
 		for module in self.preregistered:
 			self.root.addModule(module, self.preregistered[module])
 

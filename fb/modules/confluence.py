@@ -4,9 +4,9 @@ from twisted.python import log
 
 import zope.interface
 
-import config
 import fb.intent as intent
 from fb.modules.base import IModule, response
+from fb.config import cfg
 
 class ConfluenceModule:
 	zope.interface.implements(IModule)
@@ -29,14 +29,14 @@ class ConfluenceModule:
 
 		
 		try:
-			s = xmlrpclib.Server(config.CONFLUENCE["url"])
+			s = xmlrpclib.Server(cfg.confluence.url)
 		except:
-			return "Confluence URL failure, cannot search Confluence. Contact your {0} admin.".format(config.CONFIG['name'])
+			return "Confluence URL failure, cannot search Confluence. Contact your bot admin."
 
 		try:
-			token = s.confluence1.login(config.CONFLUENCE["username"], config.CONFLUENCE["password"])
+			token = s.confluence1.login(cfg.confluence.username, cfg.confluence.password)
 		except:
-			return "Login failure, cannot search Confluence. Contact your {0} admin.".format(config.CONFIG['name'])
+			return "Login failure, cannot search Confluence. Contact your bot admin."
 
 		search = s.confluence1.search(token, ' '.join(args), results)
 

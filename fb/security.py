@@ -4,7 +4,7 @@ from twisted.python import log
 from twisted.internet import reactor
 
 from fb import db
-import config
+from fb.config import cfg
 
 _tokens = {}
 
@@ -12,7 +12,7 @@ def getLoginToken(application):
 	token = str(uuid.uuid4())
 	_tokens[token] = {'application': application, 'callbacks': []}
 	log.msg("Assigned token %s for login" % token)
-	reactor.callLater(config.API['login_timeout'] * 60, cancelLogin, token)
+	reactor.callLater(cfg.api.login_timeout * 60, cancelLogin, token)
 	return token
 
 def listenForLogin(token, callback):

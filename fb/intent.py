@@ -1,7 +1,7 @@
 import re, datetime, random, sys
-from twisted.python import log
 
-import config
+from fb.audit import log
+from fb.config import cfg
 from fb.db import db
 
 CAPTURE_BEGIN = ['"', "'"] #, '{', '(', '[']
@@ -63,8 +63,12 @@ class IntentService(object):
         self._bot = bot
 
     def registerModule(self, module, name):
-        log.msg("Registering module:", name)
-        moduleobject = module.module
+        log.msg("Registering module: " + name)
+        try:
+            moduleobject = module.module
+        except:
+            log.msg("Error loading module: " + name)
+            raise
         self._modules[name] = moduleobject
         moduleobject.register()
 
@@ -108,7 +112,7 @@ class IntentService(object):
     def loadModules(self):
         log.msg("Loading modules...")
         #reload the config, in case it's changed since we started
-        reload(config)
+        cfg.loadConfig()
 
         old_listeners = self._listeners
         self._listeners = []
@@ -116,7 +120,7 @@ class IntentService(object):
         self._commands = []
 
         # Import and register configured modules.
-        for name in config.APPLICATION['modules']:
+        for name in cfg.bot.modules:
             log.msg("Loading module {0}...".format(name))
             fullname = "fb.modules." + name            
                 
@@ -143,8 +147,8 @@ class IntentService(object):
     def addressedToBot(self, text, room=None):
         '''Attempts to determine if a piece of text is addressed to the bot, as in, prefixed with its nickname.'''
         #TODO: Fix this so it works with multiple-work nicknames!
-        nicknames = [cleanString(config.CONFIG['name'])]
-        nicknames.extend(config.CONFIG['nicknames'])
+        nicknames = [cleanString(cfg.bot.name)]
+        nicknames.extend(cfg.bot.nicknames)
         if room is not None:
             nicknames.append(room["nick"])
 

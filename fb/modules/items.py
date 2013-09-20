@@ -34,7 +34,7 @@ class ItemsModule:
 
 		inventory = self.getItems(owned=True)
 		if len(inventory) > 10:
-			kill = random.choice(range(4))
+			kill = random.choice(range(5))
 			if kill == 0:
 				reactor.callLater(2.0, room.send, "Here, %s, take %s. I don't want it anymore." % (random.choice(room.roster.values())['nick'], self.giveItem()))
 			elif kill == 1:
@@ -43,8 +43,8 @@ class ItemsModule:
 				reactor.callLater(2.0, room.send, "/me smashes %s into %s, breaking them both into bits. Confetti for everyone!" % (self.giveItem(), self.giveItem()))
 			elif kill == 3:
 				reactor.callLater(2.0, room.send, "I may have accidentally... er... lost %s and %s." % (self.giveItem(), self.giveItem()))
-			if random.choice(range(2)) == 1:
-				reactor.callLater(4.0, room.send, "... coincidentally, I set %s on fire." % self.giveItem())
+			elif kill == 4:
+				reactor.callLater(2.0, room.send, "... coincidentally, I set %s on fire." % self.giveItem())
 
 		return "Thanks for {0}!".format(outitem)
 

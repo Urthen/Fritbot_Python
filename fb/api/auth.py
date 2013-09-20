@@ -4,7 +4,7 @@ from twisted.web.server import NOT_DONE_YET
 
 from fb.api.util import returnjson, APIResponse
 from fb import security
-import config
+from fb.config import cfg
 
 
 class Retriever(APIResponse):
@@ -26,7 +26,7 @@ class KeyRequest(APIResponse):
 			if request.args['application'] == 'all':
 				return self.error(request, self.IM_A_TEAPOT, "'all' is not a valid application name, but hey, nice try.")
 			token = security.getLoginToken(request.args['application'][0])
-			return {'token': token, 'timeout': config.API['login_timeout']}
+			return {'token': token, 'timeout': cfg.api.login_timeout}
 		else:
 			return self.error(request, self.BAD_REQUEST, "You must specify an application name for your request.")
 

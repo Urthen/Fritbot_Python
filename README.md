@@ -13,12 +13,12 @@ Prerequisites: Before starting, you should have installed virtualenv and virtual
 you should install mongodb (v1.6+ required, 2.2+ preferred) as platform appropriate.
 
 1. Fork this repo so you can make your own changes / additions.
-2. Checkout _your_ repo to your local machine.
+2. Checkout _your_ repo to your local machine, and add the repo directory to your system path.
 3. Make a virtual environment for fritbot with `mkvirtualenv fb`. You can leave this virtual environment with `deactivate` and get back in later with `workon fb`. Read the virtualenvwrapper documentation for more info.
 4. Install requirements with `pip install -r requirements.txt` (Note: If you have problems installing pyOpenSSL on an ubuntu machine, run `apt-get install libssl-dev` first)
-5. Run mongodb with `./go-mongo.sh` if you don't already have some way to start mongo. This script will create a logs directory and output all logs there.
-6. You will need to copy the sample config and name it `config.py`. You will need to edit, at minimum, the Jabber settings (assuming you are using Jabber). You will likely also want to edit the enabled modules.
-7. Run the bot with `twistd -ny jabberbot.tac` to start in daemonzied mode: All output will be logged to the console, useful for debugging. Press ctrl-c to exit.
+6. You will need to add your own config .yaml file to overwrite the defaults. See `default.yaml` for all available options.
+5. Run mongodb however is appropriate
+7. Run the bot with `twistd -n fritbot your_config.yaml` to start in daemonzied mode: All output will be logged to the console, useful for debugging. Press ctrl-c to exit.
 8. If you would like to run a more permanent instance, run the bot with `-y` instead of `-ny`. Output will be logged to file and the bot must be shut down via a shutdown command from chat or kill command from the console.
 
 Creating a module

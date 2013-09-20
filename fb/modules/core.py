@@ -9,7 +9,7 @@ import fb.intent as intent
 import fb.modules.base as base
 from fb.modules.util import getUser
 from fb.db import db
-import config
+from fb.config import cfg
 
 class CoreCommandsModule:
 	zope.interface.implements(base.IModule)
@@ -38,7 +38,7 @@ class CoreCommandsModule:
 			return "Join where?"
 
 		join = args.pop(0)
-		nick = config.CONFIG['name']
+		nick = cfg.bot.name
 
 		if len(args) >= 2:
 			if args[0] == "as":
