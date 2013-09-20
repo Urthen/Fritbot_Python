@@ -4,7 +4,7 @@ FritBot - The Angriest Bot
 Introduction
 ------------
 
-FritBot is a bot designed, in theory, to be a largely service-independent, modularly expandable chat bot. In reality, he mostly just yells indecent things at you and breaks himself. Use with caution.
+FritBot is a bot designed, in theory, to be a largely service-independent, modularly expandable chat bot. In reality, he mostly just yells at you and breaks things. Use with caution.
 
 Installation & Setup
 --------------------
@@ -16,10 +16,15 @@ you should install mongodb (v1.6+ required, 2.2+ preferred) as platform appropri
 2. Checkout _your_ repo to your local machine, and add the repo directory to your system path.
 3. Make a virtual environment for fritbot with `mkvirtualenv fb`. You can leave this virtual environment with `deactivate` and get back in later with `workon fb`. Read the virtualenvwrapper documentation for more info.
 4. Install requirements with `pip install -r requirements.txt` (Note: If you have problems installing pyOpenSSL on an ubuntu machine, run `apt-get install libssl-dev` first)
-6. You will need to add your own config .yaml file to overwrite the defaults. See `default.yaml` for all available options.
+6. You will need to add your own config .yaml file to overwrite the defaults. See `default.yaml` for all available options. `.gitignore` automatically ignores files that look like `my*.yaml` so name it something like `my_config.yaml` to make sure you never check it in by accident. Don't expose your passwords! For more information, see the configuration section below.
 5. Run mongodb however is appropriate
-7. Run the bot with `twistd -n fritbot your_config.yaml` to start in daemonzied mode: All output will be logged to the console, useful for debugging. Press ctrl-c to exit.
-8. If you would like to run a more permanent instance, run the bot with `-y` instead of `-ny`. Output will be logged to file and the bot must be shut down via a shutdown command from chat or kill command from the console.
+7. Run the bot with `twistd -n fritbot my_config.yaml` to start in daemonzied mode: All output will be logged to the console, useful for debugging. Press ctrl-c to exit.
+8. If you would like to run a more permanent instance, remove the `-n` option. Output will be logged to file and the bot must be shut down via a shutdown command from chat or kill command from the console.
+
+Configuration
+-------------
+
+Configuration is done through layered YAML files. This means if you have configurations that may want to inherit - for example, a normal connection config and a minor tweak for testing, as I have - you can split them up into two YAML files and specify them both on the commandline. The later files will take precedence whenever there is a conflict. Here's what I normally run when testing: `twistd -n fritbot my_jabber.yaml testbot.yaml`
 
 Creating a module
 -----------------
