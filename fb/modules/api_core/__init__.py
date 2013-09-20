@@ -1,7 +1,7 @@
 import zope.interface
 
 from fb.modules.base import IModule
-from fb.modules.api_core import auth
+from fb.modules.api_core import auth, modcontrol
 
 class APICoreModule:
 	zope.interface.implements(IModule)
@@ -12,6 +12,7 @@ class APICoreModule:
 
 	def register(self):
 		auth.module.register(self)
+		modcontrol.module.register(self)
 				
-children = [auth]
+children = [auth, modcontrol]
 module = APICoreModule()

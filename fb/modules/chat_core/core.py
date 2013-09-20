@@ -10,6 +10,7 @@ import fb.modules.base as base
 from fb.modules.util import getUser
 from fb.db import db
 from fb.config import cfg
+from fb.modulecontrol import moduleLoader
 
 class CoreCommandsModule:
 	zope.interface.implements(base.IModule)
@@ -69,13 +70,12 @@ class CoreCommandsModule:
 	@base.admin
 	def reloadModules(self, bot, room, user, args):
 
-		try:
-			intent.service.loadModules()
-		except:
+		errors = moduleLoader.loadModules()
+		if (errors):
 			user.send("Modules did not reload successfully, check the error log.")
-			raise
-
-		user.send("Modules loaded successfully!")
+		else:
+			user.send("Modules loaded successfully!")
+			
 		return True
 
 	@base.admin

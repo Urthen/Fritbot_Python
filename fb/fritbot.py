@@ -12,6 +12,7 @@ from wokkel import muc, xmppim
 from fb.connectors.connector import Room, User
 from fb.db import db
 from fb.config import cfg
+from fb.modulecontrol import moduleLoader
 import fb.intent as intent
 
 class FritBot(object):
@@ -39,7 +40,7 @@ class FritBot(object):
 
         # Configure internals
         intent.service.link(self)
-        intent.service.loadModules()
+        moduleLoader.loadModules()
 
     def registerConnector(self, connector):
         log.msg("Connecting bot to requested chat service...")

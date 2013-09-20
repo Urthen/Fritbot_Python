@@ -17,7 +17,7 @@ class APIAuthModule(APIResponse):
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	def register(self, parent):
-		apimodule = api.registerModule('auth')
+		apimodule = api.registerModule('auth', self)
 		apimodule.putChild('request', KeyRequest())
 		apimodule.putChild('response', KeyListener())
 		apimodule.putChild('info', KeyInfo())
