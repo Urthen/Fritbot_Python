@@ -27,7 +27,7 @@ class FactsCommandModule:
 	def register(self, parent):
 		self.triggered = {}
 		intent.service.registerListener("^.*$", self.checkfacts, parent, "Fact Listener", "Listen for fact triggers and respond as appropriate")
-		intent.service.registerCommand("what was that", self.describeFact, parent, "What was that", "Returns what the last fact spouted in the room was.")
+		intent.service.registerCommand("what.*was that", self.describeFact, parent, "What was that", "Returns what the last fact spouted in the room was.")
 		intent.service.registerCommand("learn", self.learnFact, parent, "Learn Fact", "Learns a fact response. Use: fb learn 'hello fritbot' 'hello $who'")
 		intent.service.registerCommand("forget that", self.forgetFact, parent, "Forget Fact", "Forgets the most recent fact response")
 		self.refresh()
