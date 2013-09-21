@@ -11,8 +11,8 @@ class FactsModule:
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	def register(self):
-		api.module.register(self)
-		commands.module.register(self)
+		api.module().register(self)
+		commands.module().register(self)
 				
 children = [api, commands]
-module = FactsModule()
+module = FactsModule

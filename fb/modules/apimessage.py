@@ -63,4 +63,4 @@ class APIMessageModule(APIResponse):
 
 		return {'state': 'Message sent.'}
 
-module = APIMessageModule()
+module = APIMessageModule

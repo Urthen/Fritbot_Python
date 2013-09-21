@@ -214,4 +214,4 @@ class QuotesModule:
 		inquote = db.db.history.find(inquote_query).count()
 		return "{0} was quoted {1} times and has remembered {2} quote and has been mentioned in {3} quotes".format(user['nick'], quotes, remembered, inquote)
 
-module = QuotesModule()
+module = QuotesModule

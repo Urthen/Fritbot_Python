@@ -140,4 +140,4 @@ class ItemsModule:
 				db.items.insert(doc)
 				return item
 
-module = ItemsModule()
+module = ItemsModule

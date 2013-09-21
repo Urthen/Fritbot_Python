@@ -76,8 +76,5 @@ class FactItem(SimpleData):
 				return FactObj(self.data.row)
 
 		return self.error(request, self.UNAUTHORIZED)
-		
 
-		
-
-module = FactsAPIModule()
+module = FactsAPIModule

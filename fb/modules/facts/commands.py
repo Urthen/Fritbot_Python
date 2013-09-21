@@ -209,8 +209,4 @@ class FactsCommandModule:
 		else:
 			return "Hey, I didn't say anything yet."
 
-
-
-
-
-module = FactsCommandModule()
+module = FactsCommandModule

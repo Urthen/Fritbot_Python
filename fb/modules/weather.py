@@ -39,4 +39,4 @@ class WeatherModule:
 
 		return 'Current Weather in ' + current['display_location']['full'] + ': ' + current['weather'] + ', ' + current['temperature_string']
 
-module = WeatherModule()
+module = WeatherModule

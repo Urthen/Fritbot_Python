@@ -56,4 +56,4 @@ class ModuleController(APIResponse):
 
 		return {"modules": modules}
 
-module = ModuleControlAPIModule()
+module = ModuleControlAPIModule

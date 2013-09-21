@@ -51,4 +51,4 @@ class JIRAModule:
 		except:
 			return 'Oh no! Jira errors bad!'
 
-module = JIRAModule()
+module = JIRAModule

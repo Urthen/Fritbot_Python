@@ -16,4 +16,4 @@ class SubModuleOne:
 	def function(self, bot, room, user, args):
 		return "Test One is yes!"
 
-module = SubModuleOne()
+module = SubModuleOne

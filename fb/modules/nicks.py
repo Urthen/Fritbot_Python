@@ -76,4 +76,4 @@ class NicknameModule:
 		print user['nick']
 		return "Your name is {0}".format(user['nick'])
 
-module = NicknameModule()
+module = NicknameModule

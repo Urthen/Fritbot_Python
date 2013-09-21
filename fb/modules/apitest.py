@@ -20,5 +20,4 @@ class APITestModule:
 	def hello(self, request):
 		return {'greeting': 'Hello, the API works!'}
 
-
-module = APITestModule()
+module = APITestModule

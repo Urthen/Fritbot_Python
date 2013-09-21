@@ -24,7 +24,6 @@ class MarkovModule:
 
 	def register(self):
 		intent.service.registerCommand("babble", self.babble, self, "Babble", "Say a randomly generated phrase.")
-		self.stacked = 0
 
 	def doMarkov(self, room, user):
 		state = [""]
@@ -86,4 +85,4 @@ class MarkovModule:
 		reactor.callLater(0, self.doMarkov, room, user)
 		return True
 
-module = MarkovModule()
+module = MarkovModule

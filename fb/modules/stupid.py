@@ -21,5 +21,4 @@ class StupidModule:
 		keyword = args.group(0)
 		return keyword.capitalize() +"? More like S"+keyword.upper()+"!"
 
-
-module = StupidModule()
+module = StupidModule

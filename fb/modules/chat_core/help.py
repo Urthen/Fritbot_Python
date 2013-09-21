@@ -37,4 +37,4 @@ class HelpModule:
 		return True
 
 
-module = HelpModule()
+module = HelpModule

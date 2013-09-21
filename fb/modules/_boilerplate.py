@@ -17,5 +17,4 @@ class MyModule:
 		intent.service.registerCommand("keywords", self.function, self, "Name", "Description")
 		intent.service.registerListener("keywords", self.function, self, "Name", "Description")
 
-
-module = MyModule()
+module = MyModule

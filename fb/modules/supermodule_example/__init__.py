@@ -10,8 +10,8 @@ class SuperModule:
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	def register(self):
-		subone.module.register(self)
-		subtwo.module.register(self)
+		subone.module().register(self)
+		subtwo.module().register(self)
 
 children = [subone, subtwo]
-module = SuperModule()
+module = SuperModule

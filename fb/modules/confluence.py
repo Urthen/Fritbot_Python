@@ -53,4 +53,4 @@ class ConfluenceModule:
 		else:
 			return "Sorry {0}, Confluence reports no results for that query.".format(user['nick'])
 
-module = ConfluenceModule()
+module = ConfluenceModule

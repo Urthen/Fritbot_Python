@@ -11,9 +11,9 @@ class ChatCoreModule:
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	def register(self):
-		core.module.register(self)
-		help.module.register(self)
-		security.module.register(self)
+		core.module().register(self)
+		help.module().register(self)
+		security.module().register(self)
 				
 children = [core, help, security]
-module = ChatCoreModule()
+module = ChatCoreModule

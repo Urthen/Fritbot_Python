@@ -64,5 +64,4 @@ To see all keys you currently have approved, type 'list keys'.""".format(result)
 		else:
 			return "You don't have any applications authorized to use Fritbot as you, so there is nothing to revoke."
 
-
-module = SecurityModule()
+module = SecurityModule

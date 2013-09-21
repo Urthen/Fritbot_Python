@@ -70,8 +70,4 @@ class TwitterModule:
 		db.db.twittersearch.remove()
 		return 'Removed all twitter search history'
 
-	
-
-module = TwitterModule()
-
-
+module = TwitterModule

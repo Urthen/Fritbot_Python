@@ -61,6 +61,4 @@ class StocksModule:
 		room.setTopic(msg.strip())
 		return False
 
-module = StocksModule()
-
-
+module = StocksModule

@@ -167,4 +167,4 @@ class HistoryModule:
 				else:
 					user.send("I can't find any history of '{1}'.".format(user['nick'], text))
 
-module = HistoryModule()
+module = HistoryModule

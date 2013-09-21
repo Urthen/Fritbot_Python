@@ -11,12 +11,18 @@ class ModuleLoader(object):
 	def registerModule(self, module, name):
 		log.msg("Registering module: " + name)
 		try:
-			moduleobject = module.module
+			moduleobject = module.module()
 		except:
-			log.msg("'module' object not created in module: " + name, log.ERROR)
+			log.msg("Error initializing module " + name, log.ERROR)
 			raise
+
 		self._modules[name] = moduleobject
-		moduleobject.register()
+
+		try:
+			moduleobject.register()
+		except:
+			log.msg("Error registering module " + name, log.ERROR)
+			raise
 
 	def loadModules(self):
 		log.msg("Loading modules...")

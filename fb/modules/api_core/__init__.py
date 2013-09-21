@@ -11,8 +11,8 @@ class APICoreModule:
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	def register(self):
-		auth.module.register(self)
-		modcontrol.module.register(self)
+		auth.module().register(self)
+		modcontrol.module().register(self)
 				
 children = [auth, modcontrol]
-module = APICoreModule()
+module = APICoreModule

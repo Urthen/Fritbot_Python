@@ -65,4 +65,4 @@ class KeyInfo(APIResponse):
 				return data
 		return self.error(request, self.NOT_FOUND, "Key not specified, not recognized, or expired.")
 
-module = APIAuthModule()
+module = APIAuthModule

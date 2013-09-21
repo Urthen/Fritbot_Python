@@ -23,4 +23,4 @@ class HelloWorldModule:
 	def sayHello(self, bot, room, user, args):
 		return "Hello, " + user['nick']
 
-module = HelloWorldModule()
+module = HelloWorldModule

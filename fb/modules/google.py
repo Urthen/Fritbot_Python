@@ -91,7 +91,7 @@ class GoogleSearchModule:
 		
 		return "Sorry {0}, I can't find any videos for that query.".format(user['nick'])
 
-module = GoogleSearchModule()
+module = GoogleSearchModule
 
 try:
 	import gdata.youtube.service

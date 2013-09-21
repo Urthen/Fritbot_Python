@@ -36,4 +36,4 @@ class DecisionsModule:
 				choice = "All of the above!"
 		return "{0}: {1}".format(user['nick'], choice)
 
-module = DecisionsModule()
+module = DecisionsModule

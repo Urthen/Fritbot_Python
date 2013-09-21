@@ -157,4 +157,4 @@ class CoreCommandsModule:
 			outlist = ", ".join([u["nick"] for u in banned])
 			return "Banned Users: " + outlist
 
-module = CoreCommandsModule()
+module = CoreCommandsModule
