@@ -6,6 +6,7 @@ from twisted.web.server import NOT_DONE_YET
 from fb.api.util import returnjson, APIResponse
 from fb.modules.base import IModule
 from fb.api import security
+from fb.api.simple import SimpleFunction
 from fb.api.core import api
 from fb.config import cfg
 from fb.modulecontrol import moduleLoader
@@ -18,12 +19,11 @@ class ModuleControlAPIModule(APIResponse):
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	def register(self, parent):
-		apimodule = api.registerModule('modcontrol', ModuleController)
+		apimodule = api.registerModule('modcontrol', ModuleController())
 
 class ModuleController(APIResponse):
 
 	def getChild(self, name, request):
-		
 		if name is "":
 			return SimpleFunction(self.module_list)
 		else:
@@ -40,6 +40,20 @@ class ModuleController(APIResponse):
 
 	@returnjson
 	def module_list(self, request):
-		pass
+		
+		modules = []
+
+		for name, module in moduleLoader._modules.items():
+			item = {
+				"id": name,
+				"locked": name in cfg.bot.modules,
+				"name": module.name,
+				"author": module.author,
+				"description": module.description,
+				"loaded": True
+			}
+			modules.append(item)
+
+		return {"modules": modules}
 
 module = ModuleControlAPIModule()

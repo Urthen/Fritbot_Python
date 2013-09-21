@@ -1,4 +1,4 @@
-import sys, traceback
+import sys, traceback, random
 
 from fb.config import cfg
 from fb.audit import log
@@ -13,7 +13,7 @@ class ModuleLoader(object):
 		try:
 			moduleobject = module.module
 		except:
-			log.msg("'module' object not created in module: " + name)
+			log.msg("'module' object not created in module: " + name, log.ERROR)
 			raise
 		self._modules[name] = moduleobject
 		moduleobject.register()

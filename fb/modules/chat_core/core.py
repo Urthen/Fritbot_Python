@@ -69,7 +69,6 @@ class CoreCommandsModule:
 	
 	@base.admin
 	def reloadModules(self, bot, room, user, args):
-
 		errors = moduleLoader.loadModules()
 		if (errors):
 			user.send("Modules did not reload successfully, check the error log.")
@@ -157,7 +156,5 @@ class CoreCommandsModule:
 			banned = db.users.find({"banned": True})
 			outlist = ", ".join([u["nick"] for u in banned])
 			return "Banned Users: " + outlist
-
-
 
 module = CoreCommandsModule()

@@ -13,6 +13,9 @@ class Auditor(object):
 	INFO = 3
 	DEBUG = 4
 
+	def __init__(self):
+		self._started = False
+
 	def start(self, service):
 		try:
 			logfile = DailyLogFile.fromFullPath(cfg.logging.filename)
@@ -22,9 +25,13 @@ class Auditor(object):
 		service.setComponent(twistedlogger.ILogObserver, twistedlogger.FileLogObserver(logfile).emit)
 		twistedlogger.startLogging(sys.stdout)
 
+		self._started = True
+
 	def msg(self, text, level=INFO):
-		twistedlogger.msg(text)
-		print text
+		if self._started:
+			twistedlogger.msg(text)
+		else:
+			print text
 
 	def auditCommand(self, room, user, command):
 		pass
