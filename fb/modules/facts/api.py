@@ -6,7 +6,7 @@ from fb.db import db, OID
 from fb.api.core import api
 from fb.api.util import APIResponse, APIError, returnjson
 from fb.api.simple import SimpleFunction, SimpleData
-from fb import security
+from fb.api import security
 
 from fb.modules.facts import commands
 

@@ -1,7 +1,7 @@
 import zope.interface
 
 from fb.modules.base import IModule, response
-from fb.modules.supermodule import subone, subtwo
+from fb.modules.supermodule_example import subone, subtwo
 
 class SuperModule:
 	zope.interface.implements(IModule)

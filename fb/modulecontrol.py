@@ -2,16 +2,69 @@ import sys, traceback, random
 
 from fb.config import cfg
 from fb.audit import log
+import fb.modules
 
 class ModuleLoader(object):
 
 	def __init__(self):
 		self._modules = {}
+		self._available_modules = {}
+
+	def refreshAvailableModules(self): 		
+		self._available_modules = {}
+		errors = False
+
+		#Check to see if we've installed any new modules
+		reload(fb.modules)
+
+		for name in fb.modules.__all__:
+			if name[0] == '_':
+				continue #Not a real module
+
+			fullname = "fb.modules." + name           
+				
+			try:
+				if fullname in sys.modules:
+					reload(sys.modules[fullname])
+					if 'children' in sys.modules[fullname].__dict__.keys():
+						for child in sys.modules[fullname].children:
+							reload(child)
+				else:
+					_module = __import__(fullname, globals(), locals(), ['module'], -1)
+			except:
+				log.msg("Error loading module: " + fullname + "\n" + traceback.format_exc(), log.ERROR)				
+				errors = True
+				continue
+			
+			try:
+				module = sys.modules[fullname].module
+			except AttributeError:
+				pass #not a real module, pass.
+			else:
+				self._available_modules[name] = module
+
+		log.msg("Available modules: " + str(self._available_modules.keys()))
+
+		return errors
+
+	@property
+	def available_modules(self): 
+		result = []
+		for uid, module in self._available_modules.items():
+			result.append({
+				'id': uid,
+				'name': module.name,
+				'author': module.author,
+				'description': module.description,
+				'locked': uid in cfg.bot.modules,
+				'loaded': uid in self._modules
+			})
+		return result
 
 	def registerModule(self, module, name):
 		log.msg("Registering module: " + name)
 		try:
-			moduleobject = module.module()
+			moduleobject = module()
 		except:
 			log.msg("Error initializing module " + name, log.ERROR)
 			raise
@@ -21,7 +74,7 @@ class ModuleLoader(object):
 		try:
 			moduleobject.register()
 		except:
-			log.msg("Error registering module " + name, log.ERROR)
+			log.msg("Error registering module " + name + "\nSystem may be in a bad state.", log.ERROR)
 			raise
 
 	def loadModules(self):
@@ -34,30 +87,14 @@ class ModuleLoader(object):
 			log.msg("Error loading config:\n" + traceback.format_exc(), log.ERROR)
 			return True
 
-		errors = False
+		errors = self.refreshAvailableModules()
 
-		# Import and register configured modules.
+		# Register active modules.
 		for name in cfg.bot.modules:
-			log.msg("Loading module {0}...".format(name))
-			fullname = "fb.modules." + name           
-				
-			try:
-				if fullname in sys.modules:
-					reload(sys.modules[fullname])
-					if 'children' in sys.modules[fullname].__dict__.keys():
-						for child in sys.modules[fullname].children:
-							reload(child)
-				else:
-					__import__(fullname, globals(), locals(), [], -1)
-
-			except:
-				log.msg("Error loading module: " + fullname + "\n" + traceback.format_exc(), log.ERROR)
-				errors = True
-				
-			else:	
-				if fullname in sys.modules:
-					module = sys.modules[fullname]
-					self.registerModule(module, name)
+			if name in self._available_modules:
+				self.registerModule(self._available_modules[name], name)
+			else:
+				log.msg("%s not found in available modules, cannot be activated." % name, log.ERROR)
 
 		return errors
 

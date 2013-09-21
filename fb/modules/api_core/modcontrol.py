@@ -43,17 +43,6 @@ class ModuleController(APIResponse):
 		
 		modules = []
 
-		for name, module in moduleLoader._modules.items():
-			item = {
-				"id": name,
-				"locked": name in cfg.bot.modules,
-				"name": module.name,
-				"author": module.author,
-				"description": module.description,
-				"loaded": True
-			}
-			modules.append(item)
-
-		return {"modules": modules}
+		return {"modules": moduleLoader.available_modules}
 
 module = ModuleControlAPIModule

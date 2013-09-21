@@ -5,7 +5,7 @@ from fb.api.util import returnjson, APIResponse
 from fb.modules.base import IModule
 from fb.api.simple import SimpleFunction
 from fb.api.core import api
-from fb import security
+from fb.api import security
 
 class APIMessageModule(APIResponse):
 	zope.interface.implements(IModule)

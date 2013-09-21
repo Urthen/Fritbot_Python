@@ -25,7 +25,7 @@ def returnjson(f):
 		try:
 			out = f(self, request)
 		except:
-			if cfg.api.debug == "True":
+			if cfg.api.debug == True:
 				raise
 			else:
 				out = self.error(request)
