@@ -11,9 +11,11 @@ min_repeat = datetime.timedelta(minutes=5)
 max_repeat = datetime.timedelta(minutes=15)
 
 try:
-	from fb.modules.items import module as itemmodule
+	from fb.modules.items import module as itemmodule_class
 except ImportError:
 	raise ImportError, "Can't find the items module, which is required for the facts commands module!"
+
+itemmodule = itemmodule_class()
 
 class FactsCommandModule(Module):
 
@@ -25,7 +27,7 @@ class FactsCommandModule(Module):
 	listeners = {
 		"message": {
 			"keywords": "^.+$",
-			"function": "checkFacts",
+			"function": "checkfacts",
 			"name": "Fact Listener",
 			"description": "Listen for fact triggers and respond as appropriate"
 		}
@@ -52,8 +54,8 @@ class FactsCommandModule(Module):
 		}
 	}
 
-	def __init__(self, parent):
-		Module.__init__(self, parent)
+	def __init__(self):
+		Module.__init__(self)
 		self.triggered = {}
 		self.refresh()
 

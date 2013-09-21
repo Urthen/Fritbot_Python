@@ -17,7 +17,7 @@ class ItemsModule(Module):
 	commands = {
 		"gave": {
 			"keywords": ["have", "take"], 
-			"function": "ommandgive", 
+			"function": "commandgive", 
 			"name": "Give Item", 
 			"description": "Gives an item to fritbot, as in 'Fritbot, have a banana'"
 		},
@@ -110,9 +110,10 @@ class ItemsModule(Module):
 		return out
 
 	def getSomething(self):
-		out = random.choice(self.getItems())
-		if not out:
-			out = 'something'
+		try:
+			out = random.choice(self.getItems())
+		except IndexError:
+			out = "something"
 		return out
 
 	def getPosesssion(self):

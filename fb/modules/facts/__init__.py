@@ -7,10 +7,7 @@ class FactsModule(Module):
 	name="Facts"
 	description="Responds to other users' chats with super A+ userful factoids."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
-
-	def register(self):
-		api.module().register(self)
-		commands.module().register(self)
 				
-children = [api, commands]
+	children = [api, commands]
+	
 module = FactsModule

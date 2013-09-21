@@ -124,7 +124,7 @@ class Module():
 
 		for key, listener in self.listeners.items():
 			try:
-				fb.intent.service.registerListener(listener['keywords'], getattr(self, command['function']), self.uid + ":listener." + key)
+				fb.intent.service.registerListener(listener['keywords'], getattr(self, listener['function']), self.uid + ":listener." + key)
 			except:
 				log.msg("Error registering %s listener %s:" % (self.uid, key), log.ERROR)
 				raise
