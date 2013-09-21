@@ -51,54 +51,34 @@ class IntentService(object):
 	def link(self, bot):
 		self._bot = bot
 
-	def registerCommand(self, keywords=None, function=None, module=None, name=None, description='No description provided.', core=False):
+	def registerCommand(self, keywords=None, function=None, uid=None, core=False):
 		assert keywords is not None, "Command registration called without keywords."
 		assert function is not None, "Command registration called without function."
-		assert module is not None, "Command registration called without module."
+		assert uid is not None, "Command registration called without uid."
 
-		uid_hash = hashlib.md5()
-		
 		if type(keywords) != type([]):
 			keywords = [keywords]
-
-		for word in keywords:
-			uid_hash.update(word)
-
-		uid = uid_hash.digest()
-
-		if name is None:
-			name = keywords[0]
 
 		rexwords = []
 		for word in keywords:
 			rexwords.append(re.compile('^' + word + "$", re.I))
 
-		command = {'keywords': rexwords, 'originals': keywords, 'function': function, 'name': name, 'description': description, 'module': module, 'core': core}
+		command = {'keywords': rexwords, 'originals': keywords, 'function': function, 'core': core}
 		self._commands[uid] = command
 
-	def registerListener(self, patterns=None, function=None, module=None, name=None, description='No description provided.'):
+	def registerListener(self, patterns=None, function=None, uid=None):
 		assert patterns is not None, "Listener registration called without pattern(s)"
 		assert function is not None, "Listener registration called without function"
-		assert module is not None, "Listener registration called without module"
-
-		uid_hash = hashlib.md5()
+		assert uid is not None, "Listener registration called without uid"
 
 		if type(patterns) != type([]):
 			patterns = [patterns]
-
-		for word in patterns:
-			uid_hash.update(word)
-
-		uid = uid_hash.digest()
-
-		if name is None:
-			name = patterns[0]
 
 		rexwords = []
 		for word in patterns:
 			rexwords.append(re.compile(word, re.I))
 
-		listener = {'patterns': rexwords, 'function': function, 'name': name, 'description': description, 'module': module}
+		listener = {'patterns': rexwords, 'function': function}
 		self._listeners[uid] = listener
 
 	def addressedToBot(self, text, room=None):

@@ -1,26 +1,20 @@
 import json
 
-import zope.interface
 from twisted.web.server import NOT_DONE_YET
 
 from fb.api.util import returnjson, APIResponse
-from fb.modules.base import IModule
+from fb.modules.base import Module
 from fb.api import security
 from fb.api.core import api
 from fb.config import cfg
 
-class APIAuthModule(APIResponse):
-	zope.interface.implements(IModule)
+class KeyAPI(APIResponse):
 
-	name="API Authentication Module"
-	description="Authentication module for requesting keys to be verified by users."
-	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
-
-	def register(self, parent):
-		apimodule = api.registerModule('auth', self)
-		apimodule.putChild('request', KeyRequest())
-		apimodule.putChild('response', KeyListener())
-		apimodule.putChild('info', KeyInfo())
+	def __init__(self):
+		APIResponse.__init__(self)
+		self.putChild('request', KeyRequest())
+		self.putChild('response', KeyListener())
+		self.putChild('info', KeyInfo())
 
 class KeyRequest(APIResponse):
 	@returnjson
@@ -64,5 +58,17 @@ class KeyInfo(APIResponse):
 			if data is not None:
 				return data
 		return self.error(request, self.NOT_FOUND, "Key not specified, not recognized, or expired.")
+
+
+class APIAuthModule(Module):
+
+	uid="api_core.auth"
+	name="API Authentication Module"
+	description="Authentication module for requesting keys to be verified by users."
+	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
+
+	apis={
+		'auth': KeyAPI()
+	}
 
 module = APIAuthModule

@@ -2,16 +2,15 @@ from __future__ import division
 import re, random, math
 
 from twisted.internet import reactor
-import zope.interface
 
 import fb.intent as intent
-from fb.modules.base import IModule, ratelimit, require_auth, response
+from fb.modules.base import Module, ratelimit, require_auth, response
 
 from fb.db import db
 
-class MarkovModule:
-	zope.interface.implements(IModule)
+class MarkovModule(Module):
 
+	uid="markov"
 	name="Markov Chains"
 	description="Adds babbling functionality by randomly selecting old snippets of text from historical conversations."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
@@ -22,8 +21,14 @@ class MarkovModule:
 	
 	maximum = 1
 
-	def register(self):
-		intent.service.registerCommand("babble", self.babble, self, "Babble", "Say a randomly generated phrase.")
+	commands = {
+		"babble": {
+			"keywords": "babble",
+			"function": "babble",
+			"name": "Babble",
+			"description": "Say a randomly generated phrase"
+		}
+	}
 
 	def doMarkov(self, room, user):
 		state = [""]

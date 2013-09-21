@@ -1,23 +1,16 @@
-import zope.interface
-
 from fb.api.core import api
 from fb.api.util import returnjson, APIResponse
-from fb.modules.base import IModule
+from fb.modules.base import Module
 from fb.api.simple import SimpleFunction
 from fb.api.core import api
 from fb.api import security
 
-class APIMessageModule(APIResponse):
-	zope.interface.implements(IModule)
+class APIMessageResponse(APIResponse):
 
-	name="API Messaging Service"
-	description="Simple messaging service to allow external programs to direct the bot to message users or rooms."
-	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
-
-	def register(self):
-		apimodule = api.registerModule('message')
-		apimodule.putChild('room', SimpleFunction(self.room_message))
-		apimodule.putChild('user', SimpleFunction(self.user_message))
+	def __init__(self):
+		APIResponse.__init__(self)
+		self.putChild('room', SimpleFunction(self.room_message))
+		self.putChild('user', SimpleFunction(self.user_message))
 
 	@returnjson
 	def room_message(self, request):
@@ -62,5 +55,16 @@ class APIMessageModule(APIResponse):
 		user.send(request.args['message'][0])
 
 		return {'state': 'Message sent.'}
+
+class APIMessageModule(Module):
+	
+	uid="apimessage"
+	name="API Messaging Service"
+	description="Simple messaging service to allow external programs to direct the bot to message users or rooms."
+	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
+
+	apis = {
+		"message": APIMessageResponse()
+	}
 
 module = APIMessageModule

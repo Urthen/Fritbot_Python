@@ -1,7 +1,5 @@
-import zope.interface
-
 import fb.intent as intent
-from fb.modules.base import IModule
+from fb.modules.base import Module
 from fb.db import db, OID
 from fb.api.core import api
 from fb.api.util import APIResponse, APIError, returnjson
@@ -9,17 +7,6 @@ from fb.api.simple import SimpleFunction, SimpleData
 from fb.api import security
 
 from fb.modules.facts import commands
-
-class FactsAPIModule:
-	zope.interface.implements(IModule)
-
-
-	name="Facts API Module"
-	description="API Segment of the Facts module."
-	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
-
-	def register(self, parent):
-		apimodule = api.registerModule('facts', FactsList())
 
 class FactObj(dict):
 	def __init__(self, row):
@@ -76,5 +63,16 @@ class FactItem(SimpleData):
 				return FactObj(self.data.row)
 
 		return self.error(request, self.UNAUTHORIZED)
+
+class FactsAPIModule(Module):
+
+	uid="facts.api"
+	name="Facts API Module"
+	description="API Segment of the Facts module."
+	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
+
+	apis={
+		"facts": FactsList()
+	}
 
 module = FactsAPIModule

@@ -1,16 +1,21 @@
-import zope.interface
-
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import Module, response
 
 class SubModuleTwo:
-	zope.interface.implements(IModule)
+
+	uid="supermodule_example.subtwo"
 	name="SubModuleTwo"
 	description="Testing !!! Two!! "
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self, parent):
-		intent.service.registerCommand("test2", self.function, parent, "Test 2", "Second test function")
+	commands = {
+		"test": {
+			"keywords": "test2",
+			"function": "function",
+			"name": "Test 2",
+			"description": "Second Test Function"
+		}
+	}
 
 	@response
 	def function(self, bot, room, user, args):

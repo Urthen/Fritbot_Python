@@ -1,20 +1,34 @@
-import zope.interface
-
 import fb.intent as intent
 from fb.api import security
-from fb.modules.base import IModule, response
+from fb.modules.base import Module, response
 
-class SecurityModule:
-	zope.interface.implements(IModule)
+class SecurityModule(Module):
 
+	uid="chat_core.security"
 	name="Security"
 	description="Security and API access related commands"
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self, parent):
-		intent.service.registerCommand("authorize", self.authorize, self, "Authorize", "Authorizes given API Key")
-		intent.service.registerCommand("revoke", self.revoke, self, "Revoke", "Revokes given application authorization")
-		intent.service.registerCommand("list keys", self.authorizations, self, "Key List", "List all authorized API Keys and what applications they go to")
+	commands = {
+		"authorize": {
+			"keywords": "authorize",
+			"function": "authorize",
+			"name": "Authorize",
+			"description": "Authorize given API key"
+		},
+		"revoke": {
+			"keywords": "revoke",
+			"function": "revoke",
+			"name": "Revoke",
+			"description": "Revokes given API key authorization"
+		},
+		"listkeys": {
+			"keywords": "list keys",
+			"function": "authorizations",
+			"name": "Key List",
+			"description": "List all authorized API Keys and what applications they go to"
+		}
+	}
 
 	@response
 	def authorize(self, bot, room, user, args):

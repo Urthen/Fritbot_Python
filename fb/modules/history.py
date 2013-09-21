@@ -1,22 +1,26 @@
-import zope.interface
-
 from pymongo import ASCENDING, DESCENDING
 
 from fb.db import db
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import Module, response
 
-class HistoryModule:
-	zope.interface.implements(IModule)
+class HistoryModule(Module):
 
+	uid="history"
 	name="History"
 	description="Searches the Fritbot history"
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
-		intent.service.registerCommand("search", self.history, self, "History Search", "Searches the Fritbot history. Say 'search help' for more info.")
-
+	commands = {
+		"search": {
+			"keywords": "search",
+			"function": "history",
+			"name": "History Search",
+			"description": "Searches the Fritbot history. Say 'search help' for more info."
+		}
+	}
+	
 	def history(self, bot, room, user, args):
 		if not args:
 			args = ['help']

@@ -1,18 +1,30 @@
-import zope.interface
-
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import Module, response
 
-class HelpModule:
-	zope.interface.implements(IModule)
+class HelpModule(Module):
 
+	uid="chat_core.help"
 	name="Help Functions"
 	description="Functions to document what commands the bot currently has available."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self, parent):
-		intent.service.registerCommand(["help", "manual"], self.help, self, "Help", "List all available commands.")
-		intent.service.registerListener(["man fritbot"], self.help, self, "Help", "List all available commands")
+	commands = {
+		"help": {
+			"keywords": ["help", "manual"],
+			"function": "help",
+			"name": "Help",
+			"description": "List all available commands"
+		}
+	}
+
+	listeners = {
+		"help": {
+			"keywords": ["man fritbot"],
+			"function": "help",
+			"name": "Help",
+			"description": "List all available commands"
+		}
+	}
 
 	def help(self, bot, room, user, args):
 		out = ["Available commands:"]

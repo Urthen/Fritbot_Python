@@ -49,17 +49,27 @@ class ModuleLoader(object):
 
 	@property
 	def available_modules(self): 
-		result = []
-		for uid, module in self._available_modules.items():
-			result.append({
+
+		def renderModule(module):
+			return {
 				'id': uid,
 				'name': module.name,
 				'author': module.author,
 				'description': module.description,
 				'locked': uid in cfg.bot.modules,
 				'loaded': uid in self._modules
-			})
+			}
+
+		result = []
+		for uid, module in self._available_modules.items():
+			result.append(renderModule(module))
 		return result
+
+	def installModule(self, name):		
+		if name in self._available_modules:
+			self.registerModule(self, self._available_modules[name], name)
+		else:
+			raise KeyError(name + " not found in available modules!")
 
 	def registerModule(self, module, name):
 		log.msg("Registering module: " + name)

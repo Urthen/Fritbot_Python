@@ -1,25 +1,35 @@
 #Searching Twitter
 
 import json, urllib
-import zope.interface
 
 from fb.db import db
 
 from twisted.python import log
 
 import fb.intent as intent
-from fb.modules.base import IModule, require_auth, response
+from fb.modules.base import Module, require_auth, response
 
-class TwitterModule:
-	zope.interface.implements(IModule)
+class TwitterModule(Module):
 
+	uid="twitter"
 	name="Twitter"
 	description="Functionality for searching Twitter"
 	author="Kyle Varga (kyle.varga@bazaarvoice.com)"
 
-	def register(self):
-		intent.service.registerCommand("twitter", self.twitter, self, "Twitter Search", "Returns all results from Twitter Search API")
-		intent.service.registerCommand("twitterclear", self.twitterClear, self, "Twitter Clear", "Clears recent history for all or specific query")
+	commands = {
+		"twitter": {
+			"keywords": "twitter",
+			"function": "twitter",
+			"name": "Twitter Search",
+			"description": "Returns all results from Twitter Search API"
+		}, 
+		"twitterclear": {
+			"keywords": "twitterclear",
+			"function": "twitterClear",
+			"name": "Twitter Clear",
+			"description": "Clears recent history for all or a specific query"
+		}
+	}
 
 	@require_auth('twitter', "Twitter isn't allowed here!", False)
 	@response

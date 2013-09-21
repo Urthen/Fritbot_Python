@@ -2,21 +2,25 @@ import xmlrpclib
 
 from twisted.python import log
 
-import zope.interface
-
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import Module, response
 from fb.config import cfg
 
-class ConfluenceModule:
-	zope.interface.implements(IModule)
+class ConfluenceModule(Module):
 
+	uid="confluence"
 	name="Confluence"
 	description="Functionality for searching Confluence"
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
-		intent.service.registerCommand("confluence", self.confluence, self, "Confluence Search", "Returns confluence search result, use 'confluence more' to find up to 5 results.")
+	commands = {
+		"confluence": {
+			"keywords": "confluence",
+			"function": "confluence",
+			"name": "Confluence Search",
+			"description": "Returns first confluence search result, use 'confluence more' to find up to 5 results."
+		}
+	}
 
 	@response
 	def confluence(self, bot, room, user, args):

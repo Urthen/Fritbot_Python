@@ -13,10 +13,8 @@ class APIRoot(Resource):
 		log.msg("Starting up the API...")
 		TCPServer(cfg.api.port, Site(self)).setServiceParent(service)
 
-	def registerModule(self, name, module = None):
-		print "Registering API", name, module
-		if module is None:
-			module = SimpleModule()
+	def registerModule(self, name, module ):
+		log.msg("Registering API path " + name)
 
 		if name in self.children:
 			del self.children[name]

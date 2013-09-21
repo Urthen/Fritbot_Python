@@ -2,26 +2,43 @@
 
 import json, urllib
 
-import zope.interface
-
 from twisted.python import log
 
 import fb.intent as intent
-from fb.modules.base import IModule, require_auth, response
+from fb.modules.base import Module, require_auth, response
 from fb.config import cfg
 
-class GoogleSearchModule:
-	zope.interface.implements(IModule)
 
+_gdata_supported = False
+try:
+	import gdata.youtube.service
+	_gdata_supported = True
+except:
+	log.msg("gdata.youtube.service not found, did you install the python google data api library? Running without it for now.")
+
+class GoogleSearchModule(Module):
+
+	uid="google"
 	name="Google Search"
 	description="Functionality for searching Google Web and YouTube"
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	gdata_supported = False
+	gdata_supported = _gdata_supported
 
-	def register(self):
-		intent.service.registerCommand("google", self.google, self, "Google Search", "Returns Google 'I'm feeling lucky' result. Use 'google more' to return multiple ranked results.")
-		intent.service.registerCommand("youtube", self.youtube, self, "YouTube Search", "Returns YouTube search result. Use 'youtube more' to return up to 5 ranked results.")
+	commands = {
+		"google": {
+			"keywords": "google",
+			"function": "google",
+			"name": "Google Search",
+			"description": "Returns Google 'I'm feeling lucky' result. Use 'google more' to return multiple ranked results."
+		},
+		"youtube": {
+			"keywords": "youtube",
+			"function": "youtube",
+			"name": "Youtube Search",
+			"description": "Returns YouTube search result. Use 'youtube more' to return up to 5 ranked results."
+		}
+	}
 
 	@require_auth('search', "Search isn't allowed here!", False)
 	@response
@@ -92,10 +109,3 @@ class GoogleSearchModule:
 		return "Sorry {0}, I can't find any videos for that query.".format(user['nick'])
 
 module = GoogleSearchModule
-
-try:
-	import gdata.youtube.service
-	module.gdata_supported = True
-except:
-	log.msg("gdata.youtube.service not found, did you install the python google data api library? Running without it for now.")
-

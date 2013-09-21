@@ -1,25 +1,14 @@
 import json
 
-import zope.interface
 from twisted.web.server import NOT_DONE_YET
 
 from fb.api.util import returnjson, APIResponse
-from fb.modules.base import IModule
+from fb.modules.base import Module
 from fb.api import security
 from fb.api.simple import SimpleFunction
 from fb.api.core import api
 from fb.config import cfg
 from fb.modulecontrol import moduleLoader
-
-class ModuleControlAPIModule(APIResponse):
-	zope.interface.implements(IModule)
-
-	name="Module Control API"
-	description="Module to manage the loading/disabling of other modules via api."
-	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
-
-	def register(self, parent):
-		apimodule = api.registerModule('modcontrol', ModuleController())
 
 class ModuleController(APIResponse):
 
@@ -44,5 +33,17 @@ class ModuleController(APIResponse):
 		modules = []
 
 		return {"modules": moduleLoader.available_modules}
+
+
+class ModuleControlAPIModule(Module):
+
+	uid="api_core.modcontrol"
+	name="Module Control API"
+	description="Module to manage the loading/disabling of other modules via api."
+	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
+
+	apis = {
+		'modcontrol': ModuleController()
+	}
 
 module = ModuleControlAPIModule

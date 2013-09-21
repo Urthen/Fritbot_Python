@@ -2,10 +2,8 @@ import re, random, datetime
 
 from twisted.python import log
 
-import zope.interface
-
 import fb.intent as intent
-from fb.modules.base import IModule, response, room_only
+from fb.modules.base import Module, response, room_only
 from fb.db import db
 
 short_time = datetime.timedelta(minutes=3)
@@ -17,19 +15,46 @@ try:
 except ImportError:
 	raise ImportError, "Can't find the items module, which is required for the facts commands module!"
 
-class FactsCommandModule:
-	zope.interface.implements(IModule)
+class FactsCommandModule(Module):
 
+	uid="facts.commands"
 	name="Facts Command Module"
 	description="Listener to respond to other users' chats with super A+ userful factoids."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self, parent):
+	listeners = {
+		"message": {
+			"keywords": "^.+$",
+			"function": "checkFacts",
+			"name": "Fact Listener",
+			"description": "Listen for fact triggers and respond as appropriate"
+		}
+	}
+
+	commands = {
+		"wtf": {
+			"keywords": "what.*was that",
+			"function": "describeFact",
+			"name": "What was that",
+			"description": "Returns what the last fact spouted in the room was"
+		},
+		"learn": {
+			"keywords": "learn",
+			"function": "learnFact",
+			"name": "Learn Fact",
+			"description": "Learns a fact response. Use: fb learn 'hello fritbot' 'hello $who'"
+		},
+		"forget": {
+			"keywords": "forget that",
+			"function": "forgetFact",
+			"name": "Forget Fact",
+			"description": "Forgets the most recent fact response"
+		}
+	}
+
+	def __init__(self, parent):
+		Module.__init__(self, parent)
 		self.triggered = {}
-		intent.service.registerListener("^.*$", self.checkfacts, parent, "Fact Listener", "Listen for fact triggers and respond as appropriate")
-		intent.service.registerCommand("what.*was that", self.describeFact, parent, "What was that", "Returns what the last fact spouted in the room was.")
-		intent.service.registerCommand("learn", self.learnFact, parent, "Learn Fact", "Learns a fact response. Use: fb learn 'hello fritbot' 'hello $who'")
-		intent.service.registerCommand("forget that", self.forgetFact, parent, "Forget Fact", "Forgets the most recent fact response")
 		self.refresh()
 
 	def refresh(self):

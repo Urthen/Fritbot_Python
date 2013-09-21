@@ -1,7 +1,5 @@
 import datetime
 
-import zope.interface
-
 from twisted.python import log
 from twisted.internet import reactor
 
@@ -12,24 +10,85 @@ from fb.db import db
 from fb.config import cfg
 from fb.modulecontrol import moduleLoader
 
-class CoreCommandsModule:
-	zope.interface.implements(base.IModule)
-	
+class CoreCommandsModule(base.Module):
+
+	uid="chat_core.commands"	
 	name="Core Commands"
 	description="Core Fritbot Commands, minimum functionality."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self, parent):
-		intent.service.registerCommand("reload ?modules", self.reloadModules, self, "Reload Modules", "(admin) Reload installed modules", True)
-		intent.service.registerCommand("allow", self.allow, self, "Allow", "(admin) Assigns an authorization to the current room", True)
-		intent.service.registerCommand("disallow", self.disallow, self, "Disallow", "(admin) Unassigns an authorization to the current room", True)
-		intent.service.registerCommand("auths", self.auths, self, "Authorizations", "Lists current authorizations for the current room", True)
-		intent.service.registerCommand(["shut ?up", "(be )?quiet"], self.quiet, self, "Shut Up", "Shuts up the bot for non-core functions for 5 minutes", True)
-		intent.service.registerCommand("come back", self.unquiet, self, "Come Back", "Allows the bot to talk again if shut up.", True)
-		intent.service.registerCommand("shut ?down", self.shutdown, self, "Shutdown", "(admin) Turns the bot off entirely", True)
-		intent.service.registerCommand(["ignore", "ban"], self.ignore, self, "Ignore", "(admin) Sets the bot to ignore a user", True)
-		intent.service.registerCommand(['join', 'enter', 'go ?(to)?'], self.join, self, "Join Room", "Joins designated room with 'join roomname', optionally with a nickname with 'join roomname as nickname'.", True)
-		intent.service.registerCommand(['get out', 'leave'], self.leave, self, "Leave Room", "Leaves current room, or leaves another room with 'leave roomname'", True)
+	commands = {
+		"reloadmodules": {
+			"keywords": "reload ?modules",
+			"function": "reloadModules",
+			"name": "Reload Modules",
+			"description": "(admin) Reload Installed Modules",
+			"core": True
+		},
+		"allow": {
+			"keywords": "allow",
+			"function": "allow",
+			"name": "Allow",
+			"description": "(admin) Allows functionality in room",
+			"core": True
+		},
+		"disallow": {
+			"keywords": "disallow",
+			"function": "disallow",
+			"name": "Disallow",
+			"description": "(admin) Disallow funcionality in a room",
+			"core": True
+		},
+		"auths": {
+			"keywords": "auths",
+			"function": "auths",
+			"name": "Authorizations",
+			"description": "Lists available functionaity in a room",
+			"core": True
+		},
+		"shutup": {
+			"keywords": ["shut ?up", "(be )?quiet"],
+			"function": "quiet",
+			"name": "Shut Up",
+			"description": "Shuts up the bot for non-core functions for 5 minutes",
+			"core": True
+		},
+		"comeback": {
+			"keywords": "come back",
+			"function": "unquiet",
+			"name": "Come Back",
+			"description": "Allows the bot to talk again if shut up",
+			"core": True
+		},
+		"shutdown": {
+			"keywords": "shut ?down",
+			"function": "shutdown",
+			"name": "Shut Down",
+			"description": "(admin) Turns off the bot entirely",
+			"core": True
+		},
+		"ignore": {
+			"keywords": ["ignore", "ban"],
+			"function": "ignore",
+			"name": "Ignore",
+			"description": "(admin) Sets the bot to ignore a user",
+			"core": True
+		},
+		"join": {
+			"keywords": ['join', 'enter', 'go ?(to)?'],
+			"function": "join",
+			"name": "Join Room",
+			"description": "Joins designated room with 'join roomname', optionally with nickname as 'join roomname FunBotName'",
+			"core": True
+		},
+		"leave": {
+			"keywords": ['get out', 'leave'],
+			"function": "leave",
+			"name": "Leave",
+			"description": "Leaves current room, or leaves another room with 'leave roomname'",
+			"core": True
+		}
+	}
 
 	@base.response
 	def join(self, bot, room, user, args):
