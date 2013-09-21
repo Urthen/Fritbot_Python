@@ -1,7 +1,7 @@
 import fb.intent as intent
 from fb.modules.base import Module, response
 
-class SubModuleTwo:
+class SubModuleTwo(Module):
 
 	uid="supermodule_example.subtwo"
 	name="SubModuleTwo"

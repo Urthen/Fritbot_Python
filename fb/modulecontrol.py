@@ -47,22 +47,25 @@ class ModuleLoader(object):
 
 		return errors
 
+	def renderModule(self, module):
+		return {
+			'id': module.uid,
+			'name': module.name,
+			'author': module.author,
+			'description': module.description,
+			'locked': module.uid in cfg.bot.modules,
+			'loaded': module.uid in self._modules,
+			'children': [self.renderModule(child.module) for child in module.children],
+			'commands': module.commands,
+			'listeners': module.listeners,
+			'apis': module.apis.keys()
+		}
+
 	@property
 	def available_modules(self): 
-
-		def renderModule(module):
-			return {
-				'id': uid,
-				'name': module.name,
-				'author': module.author,
-				'description': module.description,
-				'locked': uid in cfg.bot.modules,
-				'loaded': uid in self._modules
-			}
-
 		result = []
-		for uid, module in self._available_modules.items():
-			result.append(renderModule(module))
+		for module in self._available_modules.values():
+			result.append(self.renderModule(module))
 		return result
 
 	def installModule(self, name):		

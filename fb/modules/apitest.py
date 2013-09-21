@@ -14,7 +14,7 @@ class APITestResponse(APIResponse):
 	def hello(self, request):
 		return {'greeting': 'Hello, the API works!'}
 
-class APITestModule:
+class APITestModule(Module):
 	
 	uid="apitest"
 	name="API Test"
