@@ -4,7 +4,7 @@ from fb.modulecontrol import moduleLoader
 
 class ModuleCommandsModule(Module):
 	
-	uid="modcontrol"
+	uid="chat_core.modcontrol"
 	name="Module Control Commands"
 	description="Chat commands to alter loaded modules"
 	author="Michael Pratt (michael.pratt@bazaaarvoice.com)"
