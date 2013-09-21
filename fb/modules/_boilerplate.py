@@ -35,9 +35,5 @@ class MyModule(Module):
 	apis = {
 		"path": SomeModule
 	}
-
-	def register(self):
-		intent.service.registerCommand("keywords", self.function, self, "Name", "Description")
-		intent.service.registerListener("keywords", self.function, self, "Name", "Description")
-
+	
 module = MyModule

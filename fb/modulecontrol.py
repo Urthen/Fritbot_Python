@@ -68,6 +68,13 @@ class ModuleLoader(object):
 			result.append(self.renderModule(module))
 		return result
 
+	@property
+	def installed_modules(self): 
+		result = []
+		for module in self._modules.values():
+			result.append(self.renderModule(module))
+		return result
+
 	def installModule(self, name):		
 		if name in self._available_modules:
 			self.registerModule(self, self._available_modules[name], name)
