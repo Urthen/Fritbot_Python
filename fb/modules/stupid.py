@@ -9,7 +9,7 @@ class StupidModule(Module):
 	uid="stupid"
 	name="Stupid"
 	description="This is stupid."
-	author="Tom Grochowicz (tom.grochowicz@bazaarvoice.com)"
+	author="Tom Grochowicz (tom.grochowicz@bazaarvoice.com), Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	listeners = {
 		"sexy": {
@@ -17,6 +17,12 @@ class StupidModule(Module):
 			"function": "sex",
 			"name": "Extra Sex",
 			"description": "Someone said something sexy."
+		}, 
+		"poopmash": {
+			"keywords": "poopmash",
+			"function": "poopmash",
+			"name": "Poopmash",
+			"description": "Returns quotes about poop."
 		}
 	}
 
