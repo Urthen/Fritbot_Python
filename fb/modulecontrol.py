@@ -37,12 +37,8 @@ class ModuleLoader(object):
 				errors = True
 				continue
 			
-			try:
-				module = sys.modules[fullname].module
-			except AttributeError:
-				pass #not a real module, pass.
-			else:
-				self._available_modules[name] = module
+			if 'module' in sys.modules[fullname].__dict__:
+				self._available_modules[name] = sys.modules[fullname].module
 
 		log.msg("Available modules: " + str(self._available_modules.keys()))
 
@@ -78,9 +74,18 @@ class ModuleLoader(object):
 
 	def installModule(self, name):		
 		if name in self._available_modules:
-			self.registerModule(self, self._available_modules[name], name)
+			self.registerModule(self._available_modules[name], name)
 		else:
 			raise KeyError(name + " not found in available modules!")
+
+	def uninstallModule(self, name):
+		if name in cfg.bot.modules:
+			log.msg("Attempted to uninstall core module " + name)
+			raise ValueError
+
+		log.msg("Uninstalling module: " + name)
+		self._modules[name].unregister()
+		del self._modules[name]
 
 	def registerModule(self, module, name):
 		log.msg("Registering module: " + name)

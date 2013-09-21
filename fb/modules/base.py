@@ -141,3 +141,16 @@ class Module():
 
 	def unregister(self):
 		"""Functionality to unload the module from the intent & api services."""
+
+		for child in self._children.values():
+			child.unregister()
+
+		for path in self.apis.keys():
+			api.removeModule(path)
+
+		for key in self.listeners.keys():
+			fb.intent.service.unregisterCommand(self.uid + ":listener." + key)
+
+		for key in self.commands.keys():
+			fb.intent.service.unregisterCommand(self.uid + ":command." + key)
+

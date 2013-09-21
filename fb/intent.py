@@ -66,6 +66,10 @@ class IntentService(object):
 		command = {'keywords': rexwords, 'originals': keywords, 'function': function, 'core': core}
 		self._commands[uid] = command
 
+	def unregisterCommand(self, uid):
+		if uid in self._commands:
+			del self._commands[uid]
+
 	def registerListener(self, patterns=None, function=None, uid=None):
 		assert patterns is not None, "Listener registration called without pattern(s)"
 		assert function is not None, "Listener registration called without function"
@@ -80,6 +84,10 @@ class IntentService(object):
 
 		listener = {'patterns': rexwords, 'function': function}
 		self._listeners[uid] = listener
+
+	def unregisterListener(self, uid):
+		if uid in self._listeners:
+			del self._listeners[uid]
 
 	def addressedToBot(self, text, room=None):
 		'''Attempts to determine if a piece of text is addressed to the bot, as in, prefixed with its nickname.'''

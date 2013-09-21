@@ -15,6 +15,18 @@ class ModuleCommandsModule(Module):
 			"function": "list",
 			"name": "List Modules",
 			"description": "List all available modules. To limit to only installed & active modules, use 'list modules installed'"
+		},
+		"install": {
+			"keywords": "install module",
+			"function": "install",
+			"name": "Install Module",
+			"description": "Installs available module, by ID as returned by 'list modules'"
+		},
+		"remove": {
+			"keywords": "(remove|uninstall) module",
+			"function": "remove",
+			"name": "Remove Module",
+			"description": "Removes available module, by ID as returned by 'list modules installed'"
 		}
 	}
 
@@ -26,5 +38,31 @@ class ModuleCommandsModule(Module):
 			available = ["%s - %s" % (mod['id'], mod['name']) for mod in moduleLoader.available_modules]
 
 		return '\n'.join(available)
+
+	@response
+	def install(self, bot, room, user, args):
+		if len(args) < 1:
+			return "Must specify a module to install!"
+
+		try:
+			moduleLoader.installModule(args[0])
+		except KeyError:
+			return "Module %s not available!" % args[0]
+
+		return "Module %s installed!" % args[0]
+
+	@response
+	def remove(self, bot, room, user, args):
+		if len(args) < 1:
+			return "Must specify a module to remove!"
+
+		try:
+			moduleLoader.uninstallModule(args[1])
+		except KeyError:
+			return "Module %s not installed, nothing to do." % args[1]
+		except ValueError:
+			return "Module %s cannot be uninstalled." % args[1]
+		else:
+			return "Module %s uninstalled!" % args[1]
 
 module = ModuleCommandsModule

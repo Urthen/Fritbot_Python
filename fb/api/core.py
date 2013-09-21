@@ -22,5 +22,9 @@ class APIRoot(Resource):
 		self.putChild(name, module)
 
 		return module
+
+	def removeModule(name):
+		if name in self.children:
+			del self.children[name]
 	
 api = APIRoot()
