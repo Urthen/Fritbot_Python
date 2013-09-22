@@ -2,12 +2,12 @@
 
 require([
   'cookies',
-  'ModuleSet',
+  'Navigation',
   'underscore',
   'backbone.min',
   'jquery.loadTemplate.min',
   'bootstrap.min'
-], function(Cookies, ModuleSet, _, Backbone, jqueryLoadTemplate, bootstrap){
+], function(Cookies, Navigation, _, Backbone, jqueryLoadTemplate, bootstrap){
 	var router,
 		AppRouter = Backbone.Router.extend({
 		routes: {
@@ -17,9 +17,9 @@ require([
 		initialize: function(){
 			this.on('route:defaultAction', function (action) {
 				if (action) {
-					if (moduleSet.modules[action]) {
-						console.log("Navigating to", moduleSet.modules[action].name);
-						moduleSet.modules[action].render();
+					if (navigation.modules[action]) {
+						console.log("Navigating to", navigation.modules[action].name);
+						navigation.modules[action].render();
 					} else {
 						console.log("Not valid action", action)
 					}
@@ -32,9 +32,9 @@ require([
 		}
 	});
 
-	var moduleSet = new ModuleSet();
+	var navigation = new Navigation();
 
-	moduleSet.onLoaded = function () {		
+	navigation.onLoaded = function () {		
 		$('#nav_target').append(this.root);
 		router = new AppRouter();
 	}

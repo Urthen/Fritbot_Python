@@ -4,7 +4,7 @@ define(['underscore'], function(_){
 
 	var instance = null;
 
-	function ModuleSet() {
+	function Navigation() {
 		this.modules = {};
 		this.sections = {};
 		this.root = $("<ul class='nav nav-list'></ul>");
@@ -27,7 +27,7 @@ define(['underscore'], function(_){
 		}, this));
 	}
 
-	ModuleSet.prototype.addModule = function (module) {
+	Navigation.prototype.addModule = function (module) {
 		this.modules[module.uid] = module
 
 		if (this.sections[module.section]) {
@@ -37,7 +37,7 @@ define(['underscore'], function(_){
 		}
 	}
 
-	ModuleSet.prototype.renderNav = function () {
+	Navigation.prototype.renderNav = function () {
 		console.log("rendering nav...");
 		_.each(this.sections, function (value, key) {
 			this.root.append("<li class='nav-header'>" + key + "</li>")
@@ -47,5 +47,5 @@ define(['underscore'], function(_){
 		}, this)
 	}
 
-	return ModuleSet;
+	return Navigation;
 });
