@@ -21,10 +21,10 @@ require([
 						console.log("Navigating to", navigation.modules[action].name);
 						navigation.modules[action].render();
 					} else {
-						console.log("Not valid action", action)
+						console.log("Not valid action", action);
 					}
 				} else {
-					console.log("Navigating to front page")
+					console.log("Navigating to front page");
 				}
 			});
 

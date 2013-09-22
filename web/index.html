@@ -10,7 +10,7 @@
 <div class="navbar navbar-inverse navbar-fixed-top">
   <div class="navbar-inner">
     <div class="container-fluid">
-      <a class="brand" href="#">FRITBOT WEB INTERFACE</a>
+      <a class="brand" href="#"><img src="img/avatar.png" style="height: 25px; margin-right: 5px"/>FRITBOT WEB INTERFACE</a>
       <div class="nav-collapse collapse">
         <p class="navbar-text pull-right hidden">
           Logged in as <a href="#" class="navbar-link" id="username">Username</a>
@@ -29,10 +29,20 @@
     </div><!--/span-->
     <div class="span9">
       <div class="hero-unit">
+        <img src="img/fritbot.jpg"/>
         <h1>FRITBOT FOR PRESIDENT</h1>
       </div>
       <div class="row-fluid">
-        <p>Poopin!</p>
+        <div class="well span6" id="login-form">
+          <form class="form-inline">                  
+            <input type="text" placeholder="API Key"/>
+            <label class="checkbox">
+              <input type="checkbox"> Remember me
+            </label>
+            <button type="submit" class="btn btn-small">Authenticate</button>
+          </form>
+          <p>Retrieve an API key from the bot via saying "get key 'web console'" in a private chat.</p>
+        </div>
       </div><!--/row-->
     </div><!--/span-->
   </div><!--/row-->
