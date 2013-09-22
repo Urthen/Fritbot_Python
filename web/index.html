@@ -1,62 +1,44 @@
 <html>
 <head>
-<!-- load the google ui -->
-<script type="text/javascript">
-    document.write([
-        '<script src="https://www.google.com/jsapi?key=', {
-            'localhost': 'ABQIAAAAZ2qk48L5eXcP4zp--PAWsBT2yXp_ZAY8_ufC3CFXhHIE1NvwkxTR2MqgVC6p5Txnk5iW1PHc_plRFw',
-            'localhost:8000': 'ABQIAAAAZ2qk48L5eXcP4zp--PAWsBT2yXp_ZAY8_ufC3CFXhHIE1NvwkxTR2MqgVC6p5Txnk5iW1PHc_plRFw',
-            'darkmatter.lab.bazaarvoice.com': 'ABQIAAAAZ2qk48L5eXcP4zp--PAWsBRroSgHH2fwSWRtimOqkFCmRddkTRSdrHSWbbAAAdrA6wZY8IrR0Q0Xwg'
-        }[window.location.host],
-        '" type="text/javascript"><\/script>'
-    ].join(''));
-</script>
 <!-- break to allow the new script tag to load, then load up some jquery -->
-<script type="text/javascript" src="js/cookies.js"></script>
-<script type="text/javascript" src="js/login.js"></script>
-<script type="text/javascript" src="js/main.js"></script>
-<link type="text/css" href="css/reset.css" rel="Stylesheet" />
-<link type="text/css" href="css/red/jquery-ui-1.8.16.custom.css" rel="Stylesheet" />
-<link type="text/css" href="css/main.css" rel="Stylesheet" />
-<script type="text/javascript">
-   google.load("jquery", "1.5.0");
-   google.load("jqueryui", "1.8.16");
-   google.setOnLoadCallback(readySteadyGo)
-</script>
-<title>Fritbot Web Admin</TITLE>
+<link rel="stylesheet" href="css/bootstrap.css"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fritbot Web Admin</title>
 </head>
-<body>
-  <div id="titlebar" class="ui-widget-header">
-    <div id="user-status" class="ui-helper-hidden">
-      Welcome, <span id="user-name">please log in!</span>
-      <a id="logout-button" href="javascript://">Logout</a>
+<body style="margin-top: 40px">
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+  <div class="navbar-inner">
+    <div class="container-fluid">
+      <a class="brand" href="#">FRITBOT WEB INTERFACE</a>
+      <div class="nav-collapse collapse">
+        <p class="navbar-text pull-right hidden">
+          Logged in as <a href="#" class="navbar-link" id="username">Username</a>
+        </p>
+      </div><!--/.nav-collapse -->
     </div>
-    <h1>Fritbot Web Administration Panel</h1>
   </div>
-  <div id="content">
-    <!-- content??? -->
-  </div>
-
-  <div id="rightbar">
-    
-  </div>
+</div>
 
 
-  <!-- other crap goes here yeahhhhh -->
-  <div id="login-request" class="ui-helper-hidden ui-widget">
-    <div class="ui-widget-overlay"></div>
-    <div id="login-window" class="ui-widget-shadow">
-      <div class="padding ui-widget-header ui-corner-top"><span class="ui-icon ui-icon-key"></span>Please log in!</div>
-      <div class="padding ui-widget-content ui-corner-bottom">
-        <p id="login-message">To log in to fritbot, you need to authorize an api key through chat. Press below to fetch a key and get started!</p>
-        <a id="login-button" href="javascript://">Request key</a>
-        <div id="login-popin" class="ui-helper-hidden">
-          <p>Copy and paste this and send it in an IM <em>directly</em> to Fritbot:</p>
-          <input id="token-input" type="text" size="45" style="text-align: center;"/>
-          <p>Do not paste this key into a chat room, only a direct IM to Fritbot will do. You must do this within the next <span id="token-time">few</span> minutes, or the token will expire.</p>
-        </div>
+<div class="container-fluid">
+  <div class="row-fluid">
+    <div class="span3">
+      <div class="well sidebar-nav" id="nav_target">
+      </div><!--/.well -->
+    </div><!--/span-->
+    <div class="span9">
+      <div class="hero-unit">
+        <h1>FRITBOT FOR PRESIDENT</h1>
       </div>
-    </div>
-  </div>
+      <div class="row-fluid">
+        <p>Poopin!</p>
+      </div><!--/row-->
+    </div><!--/span-->
+  </div><!--/row-->
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+<script data-main="js/main" src="js/require.min.js"></script>
+
 </body>
 </html>

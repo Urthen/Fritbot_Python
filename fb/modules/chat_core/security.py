@@ -1,6 +1,6 @@
 import fb.intent as intent
 from fb.api import security
-from fb.modules.base import Module, response
+from fb.modules.base import Module, response, user_only
 
 class SecurityModule(Module):
 
@@ -10,11 +10,11 @@ class SecurityModule(Module):
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	commands = {
-		"authorize": {
-			"keywords": "authorize",
-			"function": "authorize",
-			"name": "Authorize",
-			"description": "Authorize given API key"
+		"getkey": {
+			"keywords": "get key",
+			"function": "getkey",
+			"name": "Get API Key",
+			"description": "Gives you an API key for use in fritbot-enabled applications. Usage: get key 'app name'"
 		},
 		"revoke": {
 			"keywords": "revoke",
@@ -30,34 +30,23 @@ class SecurityModule(Module):
 		}
 	}
 
+	@user_only
 	@response
-	def authorize(self, bot, room, user, args):
-		if room is not None:
-			if len(args) > 0:
-				security.cancelLogin(args[0])
-			return "%s: For obvious security reasons, don't perform authentication in a public chat setting! I've deleted that token so your unscrupulous colleages don't steal it, please request another." % user['nick']
-		if len(args) == 0:
-			return "You've got to specify what login token you want to allow."
-
-		print args[0], user
-
-		result = security.tokenLogin(args[0], user)
-
-		if result is None:
-			return "That key appears to be valid, but the requestor is no longer listening. You may have closed a web page. Since these are one-use keys, you must request a new key. and attempt to authorize again."
-		elif result is False:
-			return "That doesn't seem to be a valid token!"
-		else:
-			return """Token accepted for application '{0}'. This application has been provided an API key and will now be able to issue commands to Fritbot as if they were you.\n
+	def getkey(self, bot, room, user, args):
+		result = security.getKey(args[0], user)
+		
+		return """Token granted for application '{0}': '{1}'.\nProviding this key to an application will it to issue commands to Fritbot as if they were you.
 If this is not what you meant to do, or you wish to later on revoke access to this application, type 'revoke "{0}"'.\n
-To see all keys you currently have approved, type 'list keys'.""".format(result)
+To see all keys you currently have approved, type 'list keys'.""".format(args[0], result)
 
 	@response
 	def authorizations(self, bot, room, user, args):
 		if 'authorizations' in user.info and len(user['authorizations']) > 0:
 			out = ['Below are the applications that you have granted access to.']
 			for data in user['authorizations']:
-				out.append('<{0}> granted {1}'.format(data['app'], data['date'].strftime("%H:%M %D")))
+				out.append('{2} <{0}> granted {1}'.format(data['app'], data['date'].strftime("%H:%M %D"), data['key']))
+
+			out.append("\nTo revoke a key, type revoke 'applicationname'")
 			return '\n'.join(out)
 		else:
 			return "You don't have any applications authorized to use Fritbot as you."

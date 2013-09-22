@@ -43,7 +43,7 @@ class ModuleControlAPIModule(Module):
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	apis = {
-		'modcontrol': ModuleController()
+		'modcontrol': (ModuleController(), 'api_core/static')
 	}
 
 module = ModuleControlAPIModule

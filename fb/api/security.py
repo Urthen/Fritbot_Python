@@ -1,4 +1,4 @@
-import uuid, datetime
+import random, datetime
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -6,58 +6,16 @@ from twisted.internet import reactor
 from fb import db
 from fb.config import cfg
 
-_tokens = {}
+def getKey(application, user):
+	key = '%030x' % random.randrange(16**30)
+	user['authorizations'].append({'app': application, 'key': key, 'date': datetime.datetime.now()})
+	user.save()
 
-def getLoginToken(application):
-	token = str(uuid.uuid4())
-	_tokens[token] = {'application': application, 'callbacks': []}
-	log.msg("Assigned token %s for login" % token)
-	reactor.callLater(cfg.api.login_timeout * 60, cancelLogin, token)
-	return token
-
-def listenForLogin(token, callback):
-	if token in _tokens:
-		_tokens[token]['callbacks'].append(callback)
-		log.msg("Waiting for login token %s to be approved..." % token)
-		return True
-	else:
-		log.msg("Security Alert - someone's attempted to wait for a token we aren't expecting: %s" % token)
-		return False
-
-def tokenLogin(token, user):
-	if token in _tokens:
-		if len(_tokens[token]['callbacks']) > 0:
-			key = str(uuid.uuid4())
-			for callback in _tokens[token]['callbacks']:
-				callback(user, key)
-
-			if 'authorizations' not in user.info:
-				user['authorizations'] = []
-			application = _tokens[token]['application']
-			user['authorizations'].append({'app': application, 'key': key, 'date': datetime.datetime.now()})
-			user.save()
-
-			log.msg("Login succeded with token %s to user %s, provided API key %s" % (token, user.uid, key))
-			del _tokens[token]
-			return application
-		else:
-			log.msg("Login failed with token %s to user %s, requestor was not listening." % (token, user.uid))
-			del _tokens[token]
-			return None
-	else:
-		print("User %s attempted to login with invalid or expired token, %s" % (user.uid, token))
-		return False
-
-def cancelLogin(token):
-	if token in _tokens:
-		if len(_tokens[token]['callbacks']) > 0:
-			for callback in _tokens[token]['callbacks']:
-				callback()
-		log.msg("Login token %s revoked due to timeout or cancellation" % token)
-		del _tokens[token]
+	log.msg("Assigned key {0} to user {1}, application {2}".format(key, application, user['nick']))
+	return key
 
 def revokeKey(user, application=None, key=None):
-	newauths = user['authorizations']
+	newauths = []
 	removed = False
 	for k in user['authorizations']:	
 		if k['key'] != key and k['app'] != application:

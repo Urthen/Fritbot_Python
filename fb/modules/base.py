@@ -130,7 +130,10 @@ class Module():
 				raise
 
 		for path, module in self.apis.items():
-			api.registerModule(path, module)
+			if type(module) == type(()):
+				api.registerModule(path, module[0], module[1])
+			else:
+				api.registerModule(path, module)
 
 		for name, child in self._children.items():
 			try:
