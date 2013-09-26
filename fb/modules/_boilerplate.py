@@ -1,17 +1,39 @@
-import zope.interface
+'''
+This is not a real module, of course - use this boilerplate to copy/paste into your own new modules and get started almost immediately!
+'''
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import Module, response
 
-class MyModule:
-	zope.interface.implements(IModule)
+class MyModule(Module):
+	
+	uid=""
 	name=""
 	description=""
-	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
+	author="Your Name (your.email@example.com)"
 
-	def register(self):
-		intent.service.registerCommand("keywords", self.function, self, "Name", "Description")
-		intent.service.registerListener("keywords", self.function, self, "Name", "Description")
+	children = []
 
+	listeners = {
+		"listener": {
+			keywords: "keywords",
+			function: "function",
+			name: "Name",
+			description: "Description"
+		}
+	}
 
-module = MyModule()
+	commands = {
+		"command": {
+			keywords: "keywords",
+			function: "function",
+			name: "Name",
+			description: "Description"
+		}
+	}
+
+	apis = {
+		"path": SomeModule
+	}
+	
+module = MyModule

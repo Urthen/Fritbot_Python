@@ -1,19 +1,24 @@
 import random
 from twisted.python import log
-import zope.interface
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import Module, response
 
-class DecisionsModule:
-	zope.interface.implements(IModule)
+class DecisionsModule(Module):
 
+	uid="decisions"
 	name="Decisions"
 	description="Why make decisions when you can have a robot make them for you?"
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
-		intent.service.registerCommand("choose", self.choose, self, "Choice", "Decide between multiple choices. If a choice is multiple words, use quotes.")
+	commands = {
+		"choose": {
+			"keywords": "choose",
+			"function": "choose",
+			"name": "Choice",
+			"description": "Decide between multiple choices. If a choice is multiple words, use quotes. Example: choose 'Tasty Pie' 'Gross Mushrooms'"
+		}
+	}
 
 	@response	
 	def choose(self, bot, room, user, args):
@@ -36,4 +41,4 @@ class DecisionsModule:
 				choice = "All of the above!"
 		return "{0}: {1}".format(user['nick'], choice)
 
-module = DecisionsModule()
+module = DecisionsModule

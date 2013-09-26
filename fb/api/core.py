@@ -1,69 +1,67 @@
+from os import path
+
 from twisted.python import log
 from twisted.web.resource import Resource
+from twisted.web.static import File
 from twisted.web.server import Site
 from twisted.application.internet import TCPServer
 
-from fb.api.quotes import HistoryList
-from fb.api.messaging import GroupChat
-from fb.api.auth import Retriever
 from fb.api.simple import SimpleModule
 from fb.api import util
-
-import config
-
-class APIRegistrationError(Exception):
-	pass
+from fb.config import cfg
 
 class APIRoot(Resource):
 
 	def __init__(self):
-		log.msg("Setting up the API...")
 		Resource.__init__(self)
+		self.staticRoot = Resource()
+		self.putChild('static', self.staticRoot)
+		self.staticRoot.putChild('web', File('web/'))
+		self.moduleAssist = ModuleAssist()
+		self.putChild('moduleassist', self.moduleAssist)
 
-		self.registeredModules = []
+	def launch(self, service):
+		log.msg("Starting up the API...")
+		TCPServer(cfg.api.port, Site(self)).setServiceParent(service)
 
-		self.addModule("history", HistoryList())
-		self.addModule("groupmessage", GroupChat())
-		self.addModule("auth", Retriever())
+	def registerModule(self, name, module, static_dir = None):
+		assert name not in ['static', 'web', 'moduleassist'], "Module name %s has been reserved" % name
 
-	def addModule(self, name, module):
-		if name in self.registeredModules:
-			raise APIRegistrationError("A module with the name {0} has already been registered.".format(name))
+		log.msg("Registering API path " + name)
+
+		if name in self.children:
+			del self.children[name]
 
 		self.putChild(name, module)
 
-class APIWrapper(object):
-
-	def __init__(self):
-		self.root = None
-		self.bot = None
-		self.preregistered = {}
-
-	def launch(self, bot, application):
-		if 'security' not in config.APPLICATION['modules']:
-			log.msg("Warning: You have the API enabled, but not the 'security' module. You will be unable to accept any keys.")
-
-		# Initialize the API
-		self.root = APIRoot()
-		self.bot = bot
-
-		TCPServer(config.API['port'], Site(self.root)).setServiceParent(application)
-		for module in self.preregistered:
-			self.root.addModule(module, self.preregistered[module])
-
-		self.preregistered = []
-
-	def registerModule(self, name, module = None):
-		if module is None:
-			module = SimpleModule()
-		if self.root is None:
-			if name in self.preregistered:
-				raise APIRegistrationError("A module with the name {0} has already been registered.".format(name))
-
-			self.preregistered[name] = module
-		else:
-			self.root.addModule(name, module)
+		if static_dir:
+			self.staticRoot.putChild(name, File(path.join('fb', 'modules', static_dir, '')))
+			self.moduleAssist.addModule(name, static_dir)
 
 		return module
-	
-api = APIWrapper()
+
+	def removeModule(name):
+		if name in self.children:
+			del self.children[name]
+		if name in self.staticRoot.children:
+			del self.staticRoot.children[name]
+			self.moduleAssist.removeModule(name)
+
+class ModuleAssist(util.APIResponse):
+	isLeaf=True
+
+	def __init__(self):
+		util.APIResponse.__init__(self)
+		self.modules = []
+
+	@util.returnjson
+	def render(self, request):
+		return {"modules": self.modules}
+
+	def addModule(self, name, dir):
+		self.modules.append(name)
+
+	def removeModule(self, name):
+		del self.modules[name]
+
+api = APIRoot()

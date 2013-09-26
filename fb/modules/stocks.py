@@ -1,25 +1,35 @@
 #Get Current Stock Price
 
 import json, urllib
-import zope.interface
 
 from fb.db import db
 
 from twisted.python import log
 
 import fb.intent as intent
-from fb.modules.base import IModule, require_auth, response
+from fb.modules.base import Module, require_auth, response
 
-class StocksModule:
-	zope.interface.implements(IModule)
+class StocksModule(Module):
 
+	uid="stocks"
 	name="Stocks"
 	description="Functionality for stock quotes"
 	author="Kyle Varga (kyle.varga@bazaarvoice.com)"
 
-	def register(self):
-		intent.service.registerCommand("stock", self.stock, self, "Stock Quote", "Returns current Stock Price")
-		intent.service.registerCommand("stocktopic", self.stocktopic, self, "Stock Quote  Topic", "Returns current Stock Price to Topic")
+	commands = {
+		"stock": {
+			"keywords": "stock",
+			"function": "stock",
+			"name": "Stock Quote",
+			"description": "Returns current Stock Price"
+		}, 
+		"stocktopic": {
+			"keywords": "stocktopic",
+			"function": "stocktopic",
+			"name": "Stock Quote Topic",
+			"description": "Returns currnet Stock Price to topic"
+		}
+	}
 
 	@require_auth('stocks', "Stock search isn't allowed here!", False)
 	@response
@@ -61,6 +71,4 @@ class StocksModule:
 		room.setTopic(msg.strip())
 		return False
 
-module = StocksModule()
-
-
+module = StocksModule

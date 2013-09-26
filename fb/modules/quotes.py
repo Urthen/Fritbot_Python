@@ -1,15 +1,12 @@
 import random, re, datetime
 
-import zope.interface
-
 from pymongo import ASCENDING, DESCENDING
 
 from fb.db import db
 
 import fb.intent as intent
-from fb.modules.base import IModule, require_auth, response
+from fb.modules.base import Module, require_auth, response
 from fb.modules.util import getUser
-
 
 def getRandom(cursor):
 	count = cursor.count()
@@ -109,20 +106,45 @@ def sayQuotes(room, user, nick, segment, min=1, max=1):
 
 	return msg
 
-class QuotesModule:
-	zope.interface.implements(IModule)
+class QuotesModule(Module):
 
+	uid="quotes"
 	name="Quotes"
 	description="Remember and recite quotes users have said in chat rooms."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
-		intent.service.registerCommand("quote", self.quote, self, "Name", "Recalls a random quote, optionally from a specific person and/or containing specific text.")
-		intent.service.registerCommand("quotemash", self.quotemash, self, "Name", "Recalls 3-6 random quotes, optionally from a specific person or containing specific text.")
-		intent.service.registerCommand("remember", self.remember, self, "Remember", "Remembers a quotation with 'remember \"nickname\" \"quote to remember\"'")
-		intent.service.registerCommand("quotestats", self.quotestats, self, "Statistics", "Responds with statistics about users' quotes and remembers.")
-		intent.service.registerCommand("poopmash", self.poopmash, self, "Name", "Recalls 3-6 random quotes about poop, optionally from a specific person.")
-		intent.service.registerCommand("([a-z]+)mash", self.custommash, self, "Name", "Name")
+	commands = {
+		"quote": {
+			"keywords": "quote",
+			"function": "quote", 
+			"name": "Recall Quote", 
+			"description": "Recalls a random quote, optionally from a specific person and/or containing specific text."
+		},
+		"quotemash": {
+			"keywords": "quotemash",
+			"function": "quotemash",
+			"name": "Quotemash",
+			"description": "Recalls 3-6 random quotes, optionally from a specific person or containing specific text."
+		},
+		"remember": {
+			"keywords": "remember",
+			"function": "remember",
+			"name": "Remember Quote",
+			"description": "Remembers a quotation with 'remember \"nickname\" \"quote to remember\"'"
+		},
+		"quotestats": {
+			"keywords": "quotestats",
+			"function": "quotestats",
+			"name": "Quote Statistics",
+			"description": "Responds with statistics about users' quotes and remembers."
+		},
+		"custommash": {
+			"keywords": "([a-z]+)mash",
+			"function": "custommash",
+			"name": "Custom Mash",
+			"description": "Similar to quotemash, but *mash - as in 'fb monkeymash' will perform a quotemash about monkey."
+		}
+	}
 
 	@require_auth('quotes', "Quotes aren't allowed here!", False)
 	@response
@@ -143,16 +165,6 @@ class QuotesModule:
 			max = 6
 
 		return sayQuotes(room, user, nick, segment, min, max)
-
-	@require_auth('quotes', "Quotes aren't allowed here!", False)
-	@response
-	def poopmash(self, bot, room, user, args):
-		nick, segment, min, max = parseQuoteArgs(args, room)
-		if min is None:
-			min = 3
-			max = 6
-
-		return sayQuotes(room, user, nick, "(p[o]{2,}p)|(shit)", min, max)
 
 	@require_auth('quotes', "Quotes aren't allowed here!", False)
 	@response
@@ -214,4 +226,4 @@ class QuotesModule:
 		inquote = db.db.history.find(inquote_query).count()
 		return "{0} was quoted {1} times and has remembered {2} quote and has been mentioned in {3} quotes".format(user['nick'], quotes, remembered, inquote)
 
-module = QuotesModule()
+module = QuotesModule

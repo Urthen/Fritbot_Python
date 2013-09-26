@@ -4,7 +4,7 @@
 *.pid
 *.iml
 bv*.py
-config.py
+my_*.yaml
 db
 twisted_env
 backup*
@@ -12,6 +12,7 @@ build
 distribute*
 get-pip.py
 pip-log.txt
+dropin.cache
 
 # Ignore Logs #
 ###############

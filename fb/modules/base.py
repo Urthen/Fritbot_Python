@@ -1,5 +1,9 @@
-from twisted.python import log
 from datetime import datetime, timedelta
+
+from fb.audit import log
+from fb.api.core import api
+import fb.intent
+
 import zope.interface
  	
 def response(f):
@@ -83,11 +87,73 @@ def require_auth(permission, message=None, passthrough=True):
 		return authrequired
 	return reqauthgen
 
-class IModule(zope.interface.Interface):
-	
-	name=zope.interface.Attribute("Name of the module")
-	description=zope.interface.Attribute("Description of the module")
-	author=zope.interface.Attribute("Author's name, email address if desired.")
+class Module():
+	uid="module_filename"
+	name="Module Name"
+	description="Module Description"
+	author="Module Author <author@example.com>"
+
+	children = []
+	listeners = {}
+	commands = {}
+	apis = {}
+
+	def __init__(self):
+		self._children = {}
+		for child in self.children:
+			try:
+				self._children[child.__name__] = child.module()
+			except:
+				log.msg("Error loading %s child module %s:" % (self.uid, child.__name__), log.ERROR)
+				raise
 
 	def register(self):
-		"""Functionality to register the module with the intent service."""
+		"""Functionality to register the module with the intent & api services."""
+
+		for key, command in self.commands.items():
+			isCore = False
+
+			if 'core' in command and command['core']:
+				isCore = True
+
+			try:
+				fb.intent.service.registerCommand(command['keywords'], getattr(self, command['function']), self.uid + ":command." + key, isCore)
+			except:
+				log.msg("Error registering %s command %s:" % (self.uid, key), log.ERROR)
+				raise
+
+		for key, listener in self.listeners.items():
+			try:
+				fb.intent.service.registerListener(listener['keywords'], getattr(self, listener['function']), self.uid + ":listener." + key)
+			except:
+				log.msg("Error registering %s listener %s:" % (self.uid, key), log.ERROR)
+				raise
+
+		for path, module in self.apis.items():
+			if type(module) == type(()):
+				api.registerModule(path, module[0], module[1])
+			else:
+				api.registerModule(path, module)
+
+		for name, child in self._children.items():
+			try:
+				child.register()
+			except:
+				log.msg("Error registering %s child module %s:" % (self.uid, name), log.ERROR)
+				raise
+
+	def unregister(self):
+		"""Functionality to unload the module from the intent & api services."""
+
+		for child in self._children.values():
+			child.unregister()
+
+		for path in self.apis.keys():
+			api.removeModule(path)
+
+		for key in self.listeners.keys():
+			fb.intent.service.unregisterCommand(self.uid + ":listener." + key)
+
+		for key in self.commands.keys():
+			fb.intent.service.unregisterCommand(self.uid + ":command." + key)
+

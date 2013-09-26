@@ -1,26 +1,45 @@
 import random, datetime, re
 
-import zope.interface
-
 from twisted.internet import reactor
 
 import fb.intent as intent
-from fb.modules.base import IModule, response
+from fb.modules.base import Module, response
 
 from fb.db import db
 
-class ItemsModule:
-	zope.interface.implements(IModule)
+class ItemsModule(Module):
 
+	uid="items"
 	name="Items & Inventory"
 	description="Handles a fictitious items & inventory system, allowing you to give and take items from the bot."
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
-		intent.service.registerCommand(["have", "take"], self.commandgive, self, "Give Item", "Gives an item to fritbot, as in 'Fritbot, have a banana'")
-		intent.service.registerCommand(["backpack", "inventory"], self.commandinventory, self, "List Inventory", "Replies with all items currently in the bot's backpack")
-		intent.service.registerCommand(["drop", "give me"], self.commanddrop, self, "Drop Item", "Removes an item from the bot's inventory, but it continues to exist. Works with subsets, example, 'drop apple' will drop 'an apple'.")
-		intent.service.registerCommand(["destroy"], self.commanddestroy, self, "Destory Item", "Named item will be wiped from existance, never to return again until you give it back. Does NOT work with subsets, must be exact name.")
+	commands = {
+		"gave": {
+			"keywords": ["have", "take"], 
+			"function": "commandgive", 
+			"name": "Give Item", 
+			"description": "Gives an item to fritbot, as in 'Fritbot, have a banana'"
+		},
+		"inventory": {
+			"keywords": ["backpack", "inventory"], 
+			"function": "commandinventory", 
+			"name": "List Inventory", 
+			"description": "Replies with all items currently in the bot's backpack"
+		},
+		"drop": {
+			"keywords": ["drop", "give me"], 
+			"function": "commanddrop", 
+			"name": "Drop Item", 
+			"description": "Removes an item from the bot's inventory, but it continues to exist. Works with subsets, example, 'drop apple' will drop 'an apple'."
+		},
+		"destroy": {
+			"keywords": "destroy", 
+			"function": "commanddestroy", 
+			"name": "Destory Item", 
+			"description": "Named item will be wiped from existance, never to return again until you give it back. Does NOT work with subsets, must be exact name."
+		}
+	}
 
 	@response
 	def commandgive(self, bot, room, user, args):
@@ -34,7 +53,7 @@ class ItemsModule:
 
 		inventory = self.getItems(owned=True)
 		if len(inventory) > 10:
-			kill = random.choice(range(4))
+			kill = random.choice(range(5))
 			if kill == 0:
 				reactor.callLater(2.0, room.send, "Here, %s, take %s. I don't want it anymore." % (random.choice(room.roster.values())['nick'], self.giveItem()))
 			elif kill == 1:
@@ -43,8 +62,8 @@ class ItemsModule:
 				reactor.callLater(2.0, room.send, "/me smashes %s into %s, breaking them both into bits. Confetti for everyone!" % (self.giveItem(), self.giveItem()))
 			elif kill == 3:
 				reactor.callLater(2.0, room.send, "I may have accidentally... er... lost %s and %s." % (self.giveItem(), self.giveItem()))
-			if random.choice(range(2)) == 1:
-				reactor.callLater(4.0, room.send, "... coincidentally, I set %s on fire." % self.giveItem())
+			elif kill == 4:
+				reactor.callLater(2.0, room.send, "... coincidentally, I set %s on fire." % self.giveItem())
 
 		return "Thanks for {0}!".format(outitem)
 
@@ -91,9 +110,10 @@ class ItemsModule:
 		return out
 
 	def getSomething(self):
-		out = random.choice(self.getItems())
-		if not out:
-			out = 'something'
+		try:
+			out = random.choice(self.getItems())
+		except IndexError:
+			out = "something"
 		return out
 
 	def getPosesssion(self):
@@ -140,4 +160,4 @@ class ItemsModule:
 				db.items.insert(doc)
 				return item
 
-module = ItemsModule()
+module = ItemsModule

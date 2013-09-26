@@ -1,24 +1,28 @@
-import zope.interface
 
 from fb.api.core import api
-from fb.api.util import returnjson
-from fb.modules.base import IModule
+from fb.api.util import returnjson, APIResponse
+from fb.modules.base import Module
 from fb.api.simple import SimpleFunction
 
-class APITestModule:
-	zope.interface.implements(IModule)
+class APITestResponse(APIResponse):
 
-	name="API Test"
-	description="Simple test demonstration of module API functionality"
-	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
-
-	def register(self):
-		apimodule = api.registerModule('apitest')
-		apimodule.putChild('hello', SimpleFunction(self.hello))
-
+	def __init__(self):
+		APIResponse.__init__(self)
+		self.putChild("hello", SimpleFunction(self.hello))
+	
 	@returnjson
 	def hello(self, request):
 		return {'greeting': 'Hello, the API works!'}
 
+class APITestModule(Module):
+	
+	uid="apitest"
+	name="API Test"
+	description="Simple test demonstration of module API functionality"
+	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-module = APITestModule()
+	apis = {
+		"apitest": APITestResponse()
+	}
+
+module = APITestModule

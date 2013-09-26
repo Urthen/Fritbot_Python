@@ -1,22 +1,41 @@
-import zope.interface
-
 from fb.db import db
 import fb.intent as intent
 import fb.modules.base as base
 from twisted.python import log
 
-class NicknameModule:
-	zope.interface.implements(base.IModule)
+class NicknameModule(base.Module):
 
+	uid="nicks"
 	name="Nicknames"
 	description="Simple functions to manipulate the name of the bot or the user"
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
-	def register(self):
-		intent.service.registerCommand(['become', 'ghost', 'you are', 'your (nick)?name is', 'nickname'], self.ghost, self, "Change Bot Nickname", "Change the nickname of the bot in the current room with 'become SuperBot'.")
-		intent.service.registerCommand(['identify'], self.name, self, "View Bot Nickname", "View the nickname of the bot in the current room with 'identify'.")
-		intent.service.registerCommand(['i am', 'my (nick)?name is', 'call me'], self.callMe, self, "Change User Nickname", "Change the bot's nickname of the user with 'my name is Awesome Dude'.")
-		intent.service.registerCommand(['what((s)| is) my (nick)?name', 'who am i'], self.myname, self, "Get User Nickname", "Responds with what the bot calls the user.")
+	commands={
+		"ghost": {
+			"keywords": ['become', 'ghost', 'you are', 'your (nick)?name is', 'nickname'],
+			"function": "ghost",
+			"name": "Change Bot Nickname",
+			"description": "Change the nickname of the bot on the current room"
+		},
+		"identify": {
+			"keywords": "identify",
+			"function": "getName",
+			"name": "View Bot Nickname",
+			"description": "Get the nickname of the bot in the current room"
+		},
+		"callme": {
+			"keywords": ['i am', 'my (nick)?name is', 'call me'],
+			"function": "callMe",
+			"name": "Change User Nickname",
+			"description": "Change what the bot calls you with 'my name is Awesome Dude'."
+		},
+		"whoami": {
+			"keywords": ['what((s)| is) my (nick)?name', 'who am i'],
+			"function": "myname",
+			"name": "Get User Nickname",
+			"description": "Responds with what the bot calls the user"
+		}
+	}
 
 	@base.room_only
 	@base.response
@@ -40,7 +59,7 @@ class NicknameModule:
 
 	@base.room_only
 	@base.response
-	def name(self, bot, room, user, args):
+	def getName(self, bot, room, user, args):
 
 		if room is None:
 			return "This isn't a chat room!"
@@ -76,4 +95,4 @@ class NicknameModule:
 		print user['nick']
 		return "Your name is {0}".format(user['nick'])
 
-module = NicknameModule()
+module = NicknameModule
