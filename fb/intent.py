@@ -1,4 +1,4 @@
-import re, datetime, random, sys
+import re, datetime, random, sys, traceback
 from twisted.python import log
 
 import config
@@ -184,7 +184,11 @@ class IntentService(object):
                             else:   
                                 #Anything left is added to the args
                                 args.extend(words[i:])
-                                handled = command['function'](self._bot, room, user, args)
+                                handled = False
+                                try:
+                                    handled = command['function'](self._bot, room, user, args)
+                                except:
+                                    log.msg("Error in command parser %s:\n %s" % (command["name"], traceback.format_exc()))
                                 if handled:
                                     return True
 
