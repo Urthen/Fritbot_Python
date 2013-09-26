@@ -6,6 +6,7 @@ bot:
     # Other names the bot will respond to, as in 'fb say hello'
     nicknames:
         - fb
+        - fritbot
 
     # Modules to always load, and cannot be turned off by the admin panel. 
     # This should not need to normally be changed - you can load more modules from the admin panel - but these ones are REQUIRED for operation.

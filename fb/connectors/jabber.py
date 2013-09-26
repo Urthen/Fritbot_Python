@@ -93,7 +93,7 @@ class JabberConnector(muc.MUCClient):
         muc.MUCClient.connectionInitialized(self)
         log.msg("MUC Connected.")
         self.xmlstream.addObserver(CHAT, self.receivedPrivateChat)
-        
+
         for room in self.defaultConnections:
             self.joinRoom(room, cfg.bot.name)
 
@@ -107,7 +107,7 @@ class JabberConnector(muc.MUCClient):
         Configure rooms that need to be before others can join.'''
 
 
-        log.msg("Attempting to connect to jabber room " + room.roomJID.user)
+        log.msg("Connected to jabber room " + room.roomJID.user)
         r = db.getRoom(JRoom(room, self))
         room.info = r
 
@@ -120,7 +120,7 @@ class JabberConnector(muc.MUCClient):
         
     def joinRoom(self, room, nick):
         '''Join a room'''
-        rjid = jid.internJID("%s@%s/%s" % (room, cfg.connect.jabber.confserver, nick))
+        rjid = jid.JID(tuple=(room, cfg.connect.jabber.confserver, nick))
         self.join(rjid, nick).addCallback(self.initRoom)                           
         
     def leaveRoom(self, room):
@@ -207,7 +207,7 @@ class JabberConnector(muc.MUCClient):
 def createService():
     bot_jid = "{0}@{1}/{2}".format(cfg.connect.jabber.jid, cfg.connect.jabber.server, cfg.connect.jabber.resource)
     xmppclient = XMPPClient(jid.internJID(bot_jid), cfg.connect.jabber.password, cfg.connect.jabber.server)
-    xmppclient.logTraffic = cfg.connect.jabber.log_traffic == "True"
+    xmppclient.logTraffic = cfg.connect.jabber.log_traffic
 
     # Hook chat instance into main app
     connection = JabberConnector()
