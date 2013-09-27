@@ -1,5 +1,20 @@
-import fb.intent as intent
+from fb.modulecontrol import moduleLoader
 from fb.modules.base import Module, response
+
+def renderModule(module, prefix = ""):
+	out = []
+
+	for command in module['commands'].values():
+		out.append(prefix + "\- {0}: {1} - {2}".format(command['name'], command['keywords'], command['description']))
+
+	for child in module['children']:
+		out.extend(renderModule(child, prefix + "| "))
+
+	if len(out):
+		out.insert(0, prefix + "\n" + prefix + "+ {0} - {1} ({2})".format(module['name'], module['description'], module['author']))
+
+	return out
+
 
 class HelpModule(Module):
 
@@ -27,23 +42,10 @@ class HelpModule(Module):
 	}
 
 	def help(self, bot, room, user, args):
-		out = ["Available commands:"]
-		modules = {}
+		out = ["Available Functions:"]
 
-		for command in intent.service._commands:
-			tagline = "{0} - {1} ({2})".format(command['module'].name, command['module'].description, command['module'].author)
-
-			if tagline not in modules:
-				modules[tagline] = []
-
-			modules[tagline].append("* {0}: {1} - {2}".format(command['name'], command['originals'], command['description']))
-
-		for module in sorted(modules.keys()):
-			out.append(module)
-			commands = sorted(modules[module])
-			for command in commands:
-				out.append(command)
-			out.append("")
+		for module in moduleLoader.installed_modules:
+			out.extend(renderModule(module))
 
 		user.send('\n'.join(out))
 		return True

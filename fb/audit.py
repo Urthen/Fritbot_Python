@@ -7,31 +7,23 @@ from fb.config import cfg
 
 class Auditor(object):
 
-	CRITICAL = 0
-	ERROR = 1
-	WARNING = 2
-	INFO = 3
-	DEBUG = 4
+	CRITICAL = logging.CRITICAL
+	ERROR = logging.ERROR
+	WARNING = logging.WARNING
+	INFO = logging.INFO
+	DEBUG = logging.DEBUG
 
 	def __init__(self):
-		self._started = False
-
-	def start(self, service):
 		try:
 			logfile = DailyLogFile.fromFullPath(cfg.logging.filename)
 		except AssertionError:
 			raise AssertionError("Assertion error attempting to open the log file: {0}. Does the directory exist?".format(cfg.logging.filename))
 
-		service.setComponent(twistedlogger.ILogObserver, twistedlogger.FileLogObserver(logfile).emit)
-		twistedlogger.startLogging(sys.stdout)
-
-		self._started = True
+		twistedlogger.startLogging(logfile, setStdout=False)
 
 	def msg(self, text, level=INFO):
-		if self._started:
-			twistedlogger.msg(text)
-		else:
-			print text
+		twistedlogger.msg(text)
+		print text
 
 	def auditCommand(self, room, user, command):
 		pass

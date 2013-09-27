@@ -1,11 +1,11 @@
 from os import path
 
-from twisted.python import log
 from twisted.web.resource import Resource
 from twisted.web.static import File
 from twisted.web.server import Site
 from twisted.application.internet import TCPServer
 
+from fb.audit import log
 from fb.api.simple import SimpleModule
 from fb.api import util
 from fb.config import cfg

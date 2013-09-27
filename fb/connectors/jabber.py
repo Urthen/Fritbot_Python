@@ -3,13 +3,14 @@ Connects to and handles all communication with the jabber server.'''
 
 import sys, datetime
 
-from twisted.internet import defer, reactor
+from twisted.internet import defer, reactor, task
 from twisted.words.protocols.jabber import jid
 from twisted.python import log
 import zope.interface
 
 from wokkel import muc, xmppim, ping
 from wokkel.client import XMPPClient
+from wokkel.subprotocols import XMPPHandler
 
 import fb.fritbot as FritBot
 from connector import IConnector, User, Room
@@ -204,10 +205,34 @@ class JabberConnector(muc.MUCClient):
 
         FritBot.bot.receivedPrivateChat(user, unicode(msg.body))
 
+# From https://mailman.ik.nu/pipermail/twisted-jabber/2008-October/000171.html
+# Simply sends whitespace over the XMPP stream every once in a while to let the other side know we're still there.
+# Useful for services (such as HipChat) that do not implement the ping mechanism.
+class KeepAlive(XMPPHandler):
+
+    interval = 100
+    lc = None
+
+    def connectionInitialized(self):
+        log.msg("Starting keepalive...")
+        self.lc = task.LoopingCall(self.ping)
+        self.lc.start(self.interval)
+
+    def connectionLost(self, *args):
+        log.msg("Ending keepalive...")
+        if self.lc:
+            self.lc.stop()
+
+    def ping(self):
+        self.send(" ")
+
 def createService():
     bot_jid = "{0}@{1}/{2}".format(cfg.connect.jabber.jid, cfg.connect.jabber.server, cfg.connect.jabber.resource)
     xmppclient = XMPPClient(jid.internJID(bot_jid), cfg.connect.jabber.password, cfg.connect.jabber.server)
     xmppclient.logTraffic = cfg.connect.jabber.log_traffic
+
+    # Send some whitespace every once in a while to stay alive
+    KeepAlive().setHandlerParent(xmppclient)
 
     # Hook chat instance into main app
     connection = JabberConnector()

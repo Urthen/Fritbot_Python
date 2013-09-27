@@ -1,5 +1,4 @@
 import re, datetime, random, sys, traceback
-from twisted.python import log
 
 from fb.audit import log
 from fb.config import cfg
@@ -64,7 +63,7 @@ class IntentService(object):
 		for word in keywords:
 			rexwords.append(re.compile('^' + word + "$", re.I))
 
-		command = {'keywords': rexwords, 'originals': keywords, 'function': function, 'core': core}
+		command = {'keywords': rexwords, 'originals': keywords, 'function': function, 'core': core, 'name': uid}
 		self._commands[uid] = command
 
 	def unregisterCommand(self, uid):
@@ -83,7 +82,7 @@ class IntentService(object):
 		for word in patterns:
 			rexwords.append(re.compile(word, re.I))
 
-		listener = {'patterns': rexwords, 'function': function}
+		listener = {'patterns': rexwords, 'function': function, 'name': uid}
 		self._listeners[uid] = listener
 
 	def unregisterListener(self, uid):
@@ -134,13 +133,12 @@ class IntentService(object):
 							else:   
 								#Anything left is added to the args
 								args.extend(words[i:])
+
 								try:
-									handled = command['function'](self._bot, room, user, args)
+									return command['function'](self._bot, room, user, args)
 								except:
-									log.msg("Error in command parser %s:\n %s" % (command["name"], traceback.format_exc()))
-									
-								if handled:
-									return True
+									log.msg("Error in command parser %s: %s" % (command["name"], traceback.format_exc()), log.ERROR)
+									return False
 
 		if room is None or (room is not None and room.squelched == False):
 			if user.banned:
