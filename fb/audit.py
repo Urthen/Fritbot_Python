@@ -22,7 +22,6 @@ class Auditor(object):
 		twistedlogger.startLogging(logfile, setStdout=False)
 
 	def msg(self, text, level=INFO):
-		twistedlogger.msg(text)
 		print text
 
 	def auditCommand(self, room, user, command):

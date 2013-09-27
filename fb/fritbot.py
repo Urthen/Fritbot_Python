@@ -5,10 +5,10 @@ import sys, datetime, random, os
 
 from twisted.internet import defer, reactor
 from twisted.words.protocols.jabber import jid
-from twisted.python import log
 
 from wokkel import muc, xmppim
 
+from fb.audit import log
 from fb.connectors.connector import Room, User
 from fb.db import db
 from fb.config import cfg
@@ -126,7 +126,7 @@ class FritBot(object):
         if nick is None:
             nick = user['nick']
         
-        log.msg("Group chat: <{0}/{1}>: {2}".format(room.uid, nick, body))
+        log.msg(u"Group chat: <{0}/{1}>: {2}".format(room.uid, nick, body))
         
         wasCommand = intent.service.parseMessage(body, room, user)
 
@@ -140,7 +140,7 @@ class FritBot(object):
 
         body = body.encode("utf-8")
 
-        log.msg("Private chat: <{0}>: {1}".format(user['nick'], body))
+        log.msg(u"Private chat: <{0}>: {1}".format(user['nick'], body))
 
         wasCommand = intent.service.parseMessage(body, None, user)
 
