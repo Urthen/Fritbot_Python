@@ -1,4 +1,5 @@
-import re, datetime, random, sys, hashlib
+import re, datetime, random, sys, traceback
+from twisted.python import log
 
 from fb.audit import log
 from fb.config import cfg
@@ -133,7 +134,11 @@ class IntentService(object):
 							else:   
 								#Anything left is added to the args
 								args.extend(words[i:])
-								handled = command['function'](self._bot, room, user, args)
+								try:
+									handled = command['function'](self._bot, room, user, args)
+								except:
+									log.msg("Error in command parser %s:\n %s" % (command["name"], traceback.format_exc()))
+									
 								if handled:
 									return True
 
@@ -156,6 +161,7 @@ class IntentService(object):
 			room.send('Huh?')
 
 		return False
+>>>>>>> 63841b564900c1ea70bb303e4240c30d83e4012d
 
 service = IntentService()
 

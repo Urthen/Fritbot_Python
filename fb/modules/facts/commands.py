@@ -111,7 +111,7 @@ class FactsCommandModule(Module):
 		if response is None:
 			return False
 
-		if room is not None and match.group() != body:
+		if room is not None and match is not None and match.group() != body:
 			if room["_id"] not in self.triggered:
 				self.triggered[room["_id"]] = {'count': 1, 'time': datetime.datetime.now()}
 			else:
@@ -128,11 +128,13 @@ class FactsCommandModule(Module):
 
 		factoid = random.choice(response['factoids'])
 
+
+		what = itemmodule.getSomething()
 		if match:
 			try:
 				what = match.group(1)
 			except IndexError:
-				what = itemmodule.getSomething()
+				pass
 
 		reply = factoid["reply"].replace('$who', user['nick']).replace('$what', what)
 
