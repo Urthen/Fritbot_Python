@@ -161,7 +161,6 @@ class IntentService(object):
 			room.send('Huh?')
 
 		return False
->>>>>>> 63841b564900c1ea70bb303e4240c30d83e4012d
 
 service = IntentService()
 
