@@ -161,7 +161,7 @@ class FactsCommandModule(Module):
 			room["factSpouted"] = {"fact": response, "trigger": triggered["original"], "factoid": factoid}
 			room.save()
 
-			if self.triggered[room["_id"]]['count'] > 3:
+			if room["_id"] in self.triggered and self.triggered[room["_id"]]['count'] > 3:
 				room.send("/me sparks and sputters. He's shorted out!", 5)
 				print "shorted out until " + str(self.triggered[room["_id"]]['time'] + min_repeat)
 		else:

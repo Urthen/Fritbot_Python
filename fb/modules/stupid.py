@@ -17,7 +17,9 @@ class StupidModule(Module):
 			"function": "sex",
 			"name": "Extra Sex",
 			"description": "Someone said something sexy."
-		}, 
+		}
+	}
+	commands = {
 		"poopmash": {
 			"keywords": "poopmash",
 			"function": "poopmash",
@@ -27,14 +29,14 @@ class StupidModule(Module):
 	}
 
 	@ratelimit(30)
-	@require_auth('stupid', "Stupidity isn't allowed here!", False)
+	@require_auth('stupid')
 	@response	
 	def sex(self, bot, room, user, args):
 		keyword = args.group(0)
 		return keyword.capitalize() +"? More like S"+keyword.upper()+"!"
 
 
-	@require_auth('stupid', "Stupidity isn't allowed here!", False)
+	@require_auth('stupid')
 	@response
 	def poopmash(self, bot, room, user, args):
 		nick, segment, min, max = parseQuoteArgs(args, room)

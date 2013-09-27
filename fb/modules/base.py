@@ -81,8 +81,11 @@ def require_auth(permission, message=None, passthrough=True):
 		def authrequired(self, bot, room, user, args):
 			if room is None or room.allowed(permission):
 				return f(self, bot, room, user, args)
-			elif message:
-				user.send(message.format(room['name']) + "\nRequired authorization: " + permission)			
+			elif not passthrough:
+				if message:
+					user.send(message.format(room['name']) + "\nRequired authorization: " + permission)	
+				else:
+					user.send("Can'd do that in %s\nRequired authorization: %s" % (room['name'], permission))
 			return not passthrough
 		return authrequired
 	return reqauthgen

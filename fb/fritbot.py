@@ -25,7 +25,6 @@ class FritBot(object):
     """Connection to an IM interface"""
 
     _instance = None
-    _initialized = False
 
     '''----------------------------------------------------------------------------------------------------------------------------------------
     The following functions relate to the initialization or shutdown of the bot.
@@ -33,9 +32,6 @@ class FritBot(object):
 
     def __init__(self):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''
-        if self._initialized:
-            raise Exception("Bot already initialized!")
-        self._initialized = True
         log.msg("Initializing bot...")
 
         # Configure internals

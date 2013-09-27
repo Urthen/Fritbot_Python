@@ -2,6 +2,7 @@ import sys, traceback, random
 
 from fb.config import cfg
 from fb.audit import log
+from fb.db import db
 import fb.modules
 
 class ModuleLoader(object):
@@ -9,6 +10,16 @@ class ModuleLoader(object):
 	def __init__(self):
 		self._modules = {}
 		self._available_modules = {}
+
+		for module in cfg.bot.modules:
+			# Force initial install of all core modules
+			self._modules[module] = True
+
+		previously_installed = db.db.modules.find({"installed": True})
+		for module in previously_installed:
+			self._modules[module['name']] = True
+
+		log.msg("Preloading modules: " + str(self._modules))
 
 	def refreshAvailableModules(self): 		
 		self._available_modules = {}
@@ -78,6 +89,8 @@ class ModuleLoader(object):
 		else:
 			raise KeyError(name + " not found in available modules!")
 
+		db.db.modules.update({"name": name}, {"name": name, "installed": True}, upsert=True)
+
 	def uninstallModule(self, name):
 		if name in cfg.bot.modules:
 			log.msg("Attempted to uninstall core module " + name)
@@ -86,6 +99,7 @@ class ModuleLoader(object):
 		log.msg("Uninstalling module: " + name)
 		self._modules[name].unregister()
 		del self._modules[name]
+		db.db.modules.update({"name": name}, {"name": name, "installed": False}, upsert=True)
 
 	def registerModule(self, module, name):
 		log.msg("Registering module: " + name)
@@ -116,7 +130,7 @@ class ModuleLoader(object):
 		errors = self.refreshAvailableModules()
 
 		# Register active modules.
-		for name in cfg.bot.modules:
+		for name in self._modules.keys():
 			if name in self._available_modules:
 				self.registerModule(self._available_modules[name], name)
 			else:
