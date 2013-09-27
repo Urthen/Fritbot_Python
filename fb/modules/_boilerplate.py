@@ -14,6 +14,15 @@ class MyModule(Module):
 
 	children = []
 
+	commands = {
+		"command": {
+			keywords: "keywords",
+			function: "function",
+			name: "Name",
+			description: "Description"
+		}
+	}
+	
 	listeners = {
 		"listener": {
 			keywords: "keywords",
@@ -23,14 +32,6 @@ class MyModule(Module):
 		}
 	}
 
-	commands = {
-		"command": {
-			keywords: "keywords",
-			function: "function",
-			name: "Name",
-			description: "Description"
-		}
-	}
 
 	apis = {
 		"path": SomeModule
