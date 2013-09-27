@@ -1,15 +1,15 @@
 // Let's kick off the application
 
 require([
-  'cookies',
-  'Navigation',
-  'underscore',
+  'navigation',
+  'login',
   'backbone.min',
   'jquery.loadTemplate.min',
   'bootstrap.min'
-], function(Cookies, Navigation, _, Backbone, jqueryLoadTemplate, bootstrap){
-	var router,
-		AppRouter = Backbone.Router.extend({
+], function(Navigation, Login, Backbone, jqueryLoadTemplate, bootstrap){
+	var router, AppRouter, navigation, login;
+
+	AppRouter = Backbone.Router.extend({
 		routes: {
 			// Default - catch all
 			'*action': 'defaultAction'
@@ -32,11 +32,17 @@ require([
 		}
 	});
 
-	var navigation = new Navigation();
+	navigation = new Navigation();
+	login = new Login;
 
 	navigation.onLoaded = function () {		
 		$('#nav_target').append(this.root);
 		router = new AppRouter();
 	}
+
+	$('#login-form').submit(function (event) {
+		login.authenticate($("#login-key").val(), $("#login-remember").val());
+		event.preventDefault();
+	})
 	
 });
