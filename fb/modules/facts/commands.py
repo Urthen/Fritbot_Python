@@ -1,4 +1,4 @@
-import re, random, datetime
+import re, random, datetime, urllib
 
 from twisted.python import log
 
@@ -6,7 +6,8 @@ import fb.intent as intent
 from fb.modules.base import Module, response, room_only
 from fb.db import db
 
-short_time = datetime.timedelta(minutes=3)
+short_time = datetime.timedelta(minutes=2)
+short_count = 3
 min_repeat = datetime.timedelta(minutes=5)
 max_repeat = datetime.timedelta(minutes=15)
 
@@ -85,8 +86,7 @@ class FactsCommandModule(Module):
 		response = None
 		count = None
 
-		if room is not None and room["_id"] in self.triggered and (self.triggered[room["_id"]]['count'] > 3 and datetime.datetime.now() - self.triggered[room["_id"]]['time'] < min_repeat):	
-			return
+		shorted = room is not None and room["_id"] in self.triggered and (self.triggered[room["_id"]]['count'] > short_count and datetime.datetime.now() - self.triggered[room["_id"]]['time'] < min_repeat)
 
 		for trigger in self.trigger_cache.values():
 			check = trigger['rex'].search(body)
@@ -95,6 +95,8 @@ class FactsCommandModule(Module):
 					fact = db.facts.find_one({'_id': factid})
 					match = trigger['rex'].match(body)
 					if trigger['triggered'] is not None and (match is None or match.group() != body):
+						if shorted:
+							continue
 						delta = datetime.datetime.now() - trigger['triggered']
 						if delta < min_repeat:
 							print "Would have spouted fact {0} but was too soon (absolute)".format(str(fact['triggers']))
@@ -136,7 +138,7 @@ class FactsCommandModule(Module):
 			except IndexError:
 				pass
 
-		reply = factoid["reply"].replace('$who', user['nick']).replace('$what', what)
+		reply = factoid["reply"].replace('$who', user['nick']).replace('$what', what).replace('$query', urllib.quote(what))
 
 		while '$something' in reply:
 			reply = reply.replace('$something', itemmodule.getSomething(), 1)

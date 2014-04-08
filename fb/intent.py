@@ -146,7 +146,7 @@ class IntentService(object):
 
 			for listener in self._listeners.values():
 				for rex in listener['patterns']:
-					match = rex.search(cleanString(body))
+					match = rex.search(body)
 
 					if match is not None:
 						handled = listener['function'](self._bot, room, user, match)
