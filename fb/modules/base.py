@@ -3,8 +3,6 @@ from datetime import datetime, timedelta
 from fb.audit import log
 from fb.api.core import api
 import fb.intent
-
-import zope.interface
  	
 def response(f):
 	def responder(self, bot, room, user, args):

@@ -8,7 +8,7 @@ from twisted.web.static import Data
 from fb import db
 from fb.api.util import returnjson, parseSortOptions, APIResponse, APIError
 
-import config
+import fb.config
 
 class HistoryObj(dict):
 	def __init__(self, row):

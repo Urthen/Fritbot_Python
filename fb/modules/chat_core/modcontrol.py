@@ -1,5 +1,6 @@
 import fb.intent as intent
 from fb.modules.base import Module, response
+import fb.modules.base as base
 from fb.modulecontrol import moduleLoader
 
 class ModuleCommandsModule(Module):
@@ -20,15 +21,32 @@ class ModuleCommandsModule(Module):
 			"keywords": "install module",
 			"function": "install",
 			"name": "Install Module",
-			"description": "Installs available module, by ID as returned by 'list modules'"
+			"description": "(admin) Installs available module, by ID as returned by 'list modules'"
 		},
 		"remove": {
 			"keywords": "(remove|uninstall) module",
 			"function": "remove",
 			"name": "Remove Module",
-			"description": "Removes available module, by ID as returned by 'list modules installed'"
+			"description": "(admin) Removes available module, by ID as returned by 'list modules installed'"
+		},
+		"reloadmodules": {
+			"keywords": "reload ?modules",
+			"function": "reloadModules",
+			"name": "Reload Modules",
+			"description": "(admin) Reload Installed Modules",
+			"core": True
 		}
 	}
+
+	@base.admin
+	def reloadModules(self, bot, room, user, args):
+		errors = moduleLoader.loadModules()
+		if (errors):
+			user.send("Modules did not reload successfully, check the error log.")
+		else:
+			user.send("Modules loaded successfully!")
+			
+		return True
 
 	@response
 	def list(self, bot, room, user, args):
@@ -39,6 +57,7 @@ class ModuleCommandsModule(Module):
 
 		return '\n'.join(available)
 
+	@base.admin
 	@response
 	def install(self, bot, room, user, args):
 		if len(args) < 1:
@@ -51,6 +70,7 @@ class ModuleCommandsModule(Module):
 
 		return "Module %s installed!" % args[0]
 
+	@base.admin
 	@response
 	def remove(self, bot, room, user, args):
 		if len(args) < 1:

@@ -18,13 +18,7 @@ class CoreCommandsModule(base.Module):
 	author="Michael Pratt (michael.pratt@bazaarvoice.com)"
 
 	commands = {
-		"reloadmodules": {
-			"keywords": "reload ?modules",
-			"function": "reloadModules",
-			"name": "Reload Modules",
-			"description": "(admin) Reload Installed Modules",
-			"core": True
-		},
+		
 		"allow": {
 			"keywords": "allow",
 			"function": "allow",
@@ -124,16 +118,6 @@ class CoreCommandsModule(base.Module):
 			
 		room.send("Bye!")
 		bot.leaveRoom(room)
-		return True
-	
-	@base.admin
-	def reloadModules(self, bot, room, user, args):
-		errors = moduleLoader.loadModules()
-		if (errors):
-			user.send("Modules did not reload successfully, check the error log.")
-		else:
-			user.send("Modules loaded successfully!")
-			
 		return True
 
 	@base.admin

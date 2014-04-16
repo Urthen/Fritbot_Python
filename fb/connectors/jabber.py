@@ -6,14 +6,13 @@ import sys, datetime
 from twisted.internet import defer, reactor, task
 from twisted.words.protocols.jabber import jid
 from twisted.python import log
-import zope.interface
 
 from wokkel import muc, xmppim, ping
 from wokkel.client import XMPPClient
 from wokkel.subprotocols import XMPPHandler
 
 import fb.fritbot as FritBot
-from connector import IConnector, User, Room
+from connector import User, Room
 from fb.db import db
 from fb.config import cfg
 import fb.intent as intent
@@ -62,8 +61,6 @@ class JUser(User):
 
 class JabberConnector(muc.MUCClient):
     '''Handles connection to a jabber (XMPP) server and the rooms within.'''
-
-    zope.interface.implements(IConnector)
 
     def __init__(self):
         '''Initialize the bot: Only called on when the bot is first launched, not subsequent reconnects.'''

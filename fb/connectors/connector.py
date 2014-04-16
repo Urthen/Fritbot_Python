@@ -1,7 +1,5 @@
 import datetime, random
 
-import zope.interface
-
 from twisted.internet import defer, reactor
 from twisted.python import log
 
@@ -221,16 +219,3 @@ class User(Route):
             self["nick"] = user.nick
 
         self.save()
-
-class IConnector(zope.interface.Interface):
-    """Defines a connection to a given chat service. Beyond simply defining the join and leave room functions, it must also accept inbound chat room or private messages and pass
-    pass them along to the bot."""
-
-    def joinRoom(self, room, nick):
-        """Tells the connector to join a given room/channel/etc."""
-
-    def leaveRoom(self, room, nick):
-        """Tells the connector to leave a given room/channel/etc."""
-
-    def getUser(self, uid):
-        """Retrieves a user from the connector as appropriate per the protocol in use"""
